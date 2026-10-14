@@ -5,7 +5,7 @@
 //   skipped: boolean,         // true = existing user, onboarding was skipped automatically
 //   adultConfirmed: boolean, privacyAckAt: ISO | null,   // screen 02
 //   before: { daysPerWeek: 0-7 | null, timesPerDay: 1-7 | null },  // 05, 06 (7 = "7+"); optional
-//   improve: ['calm', …] (up to 3),                       // 07 -> encouragement lines
+//   improve: ['calm', …], improveOwn: string,            // 07 -> encouragement lines (old ids map via LEGACY_IMPROVE)
 //   importance: 'critical' | 'very' | 'somewhat' | 'exploring' | null,   // 08 -> Home prominence
 //   identity: 'healthy' | 'daybyday' | 'done' | 'control' | 'loved' | 'waves' | null,  // 09 -> under the tagline
 //   support: 'private' | 'trusted' | 'community' | 'unsure' | null,    // 10
@@ -23,23 +23,37 @@ export const PROFILE_KEY = 'urgewalk.v1.profile'
 export const COMMUNITY_INVITE_URL = null
 export const communityAvailable = () => typeof COMMUNITY_INVITE_URL === 'string' && /^https:\/\//.test(COMMUNITY_INVITE_URL)
 
+// Grouped, searchable list for "What are you riding out?". Picks become tracker names.
+// Picking SELF_HARM opens the crisis resources (988) straight away.
+export const SELF_HARM = 'Self-harm urges'
 export const RIDING_GROUPS = [
-  { id: 'behaviors', label: 'Behaviors', items: ['Gambling', 'Sports betting', 'Shopping', 'Gaming', 'Scrolling', 'Porn', 'Overeating'] },
-  { id: 'substances', label: 'Substances', items: ['Alcohol', 'Nicotine / vaping', 'Cannabis', 'Caffeine', 'Opioids', 'Stimulants'] },
+  { id: 'substances', label: 'Substances', items: ['Alcohol', 'Nicotine / vaping', 'Cannabis', 'Opioids', 'Stimulants', 'Benzos', 'Kratom', 'Caffeine', 'Prescription meds'] },
+  { id: 'behaviors', label: 'Behaviors', items: ['Gambling', 'Sports betting', 'Porn', 'Gaming', 'Social media', 'Shopping', 'Overeating / binge', 'Doomscrolling', SELF_HARM] },
 ]
 export const MAX_TRACKER_NAME = 40
 
-export const IMPROVE = [
-  { id: 'calm', label: 'Calm mind' },
-  { id: 'sleep', label: 'Better sleep' },
-  { id: 'proud', label: 'Feeling proud' },
-  { id: 'relationships', label: 'Stronger relationships' },
-  { id: 'control', label: 'Taking control' },
-  { id: 'money', label: 'Money saved' },
-  { id: 'health', label: 'Health' },
-  { id: 'interests', label: 'New interests' },
+// "What do you want more of?", grouped Body / Mind / Life, plus one of your own (improveOwn).
+export const IMPROVE_GROUPS = [
+  { id: 'body', label: 'Body', items: [
+    { id: 'sleep', label: 'Sleep' }, { id: 'energy', label: 'Energy' }, { id: 'fitness', label: 'Fitness' },
+    { id: 'outdoors', label: 'Outdoors' }, { id: 'clearhead', label: 'Clear head' }] },
+  { id: 'mind', label: 'Mind', items: [
+    { id: 'calm', label: 'Calm' }, { id: 'focus', label: 'Focus' }, { id: 'selfrespect', label: 'Self-respect' },
+    { id: 'confidence', label: 'Confidence' }, { id: 'creativity', label: 'Creativity' }] },
+  { id: 'life', label: 'Life', items: [
+    { id: 'family', label: 'Time with family' }, { id: 'friendships', label: 'Friendships' }, { id: 'money', label: 'Money saved' },
+    { id: 'hobbies', label: 'Hobbies' }, { id: 'work', label: 'Work' }, { id: 'faith', label: 'Faith / prayer' }, { id: 'present', label: 'Being present' }] },
 ]
-export const MAX_IMPROVE = 3
+export const IMPROVE = IMPROVE_GROUPS.flatMap((g) => g.items)
+export const MAX_IMPROVE = IMPROVE.length
+export const MAX_IMPROVE_OWN = 40
+// Answers saved before the grouped list (backup format 1) map onto the new chips.
+export const LEGACY_IMPROVE = {
+  calm: 'calm', sleep: 'sleep', money: 'money', proud: 'confidence', relationships: 'family',
+  control: 'selfrespect', health: 'energy', interests: 'hobbies',
+}
+export const migrateImprove = (list) => (Array.isArray(list)
+  ? [...new Set(list.map((x) => (IMPROVE.some((o) => o.id === x) ? x : LEGACY_IMPROVE[x])).filter(Boolean))] : [])
 
 export const IMPORTANCE = [
   { id: 'critical', label: 'Critical', hint: 'I need help today', recap: 'Critical' },
@@ -114,8 +128,10 @@ export function sanitizeProfile(raw) {
   p.privacyAckAt = p.adultConfirmed && isISO(raw.privacyAckAt) ? new Date(raw.privacyAckAt).toISOString() : null
   const b = raw.before && typeof raw.before === 'object' ? raw.before : {}
   p.before = { daysPerWeek: intIn(b.daysPerWeek, 0, 7), timesPerDay: intIn(b.timesPerDay, 1, 7) }
-  p.improve = Array.isArray(raw.improve)
-    ? [...new Set(raw.improve.filter((x) => ids(IMPROVE).includes(x)))].slice(0, MAX_IMPROVE) : []
+  p.improve = migrateImprove(raw.improve)
+  // Only written when set, so a format-1 file without it round-trips unchanged.
+  const own = cleanText(raw.improveOwn, MAX_IMPROVE_OWN)
+  if (own) p.improveOwn = own
   p.importance = ids(IMPORTANCE).includes(raw.importance) ? raw.importance : null
   p.identity = ids(IDENTITY).includes(raw.identity) ? raw.identity : null
   // Community can't be chosen until there's a public invite.
@@ -187,6 +203,9 @@ export function trackersFromPicks(picks, startDate, existing = [], makeId) {
   }
   return out
 }
+
+// The "more of" answer as words: chips, then your own.
+export const improveLabels = (p) => [...(p?.improve || []).map((id) => IMPROVE.find((o) => o.id === id)?.label).filter(Boolean), ...(p?.improveOwn ? [p.improveOwn] : [])]
 
 export const labelFor = (list, id) => list.find((o) => o.id === id)?.label ?? ''
 

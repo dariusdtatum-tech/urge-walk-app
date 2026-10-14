@@ -138,7 +138,7 @@ describe('last and next milestone cards', () => {
 })
 
 describe('daily line', () => {
-  const profile = { improve: ['calm', 'control'], why: 'For my family' }
+  const profile = { improve: ['calm', 'selfrespect'], why: 'For my family' }
   it('same all day, deterministic', () => {
     expect(dailyLine(profile, TODAY)).toEqual(dailyLine({ ...profile }, TODAY))
   })

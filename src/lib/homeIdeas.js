@@ -195,14 +195,23 @@ export const DAILY_LINES = [
 
 // One line per "more of" pick, in the same voice.
 export const MORE_OF_LINES = {
-  calm: ['Calm is something you’re building, one walk at a time.', 'A calmer mind starts with one slow breath.', 'Quiet is coming back to you, a little more each day.'],
   sleep: ['Better sleep is being earned today.', 'Every clean evening is a better night.', 'Rest comes easier when there’s nothing to hide from.'],
-  proud: ['You’re giving yourself something to be proud of.', 'Pride grows from small, kept promises.', 'Today is another reason to be proud.'],
-  relationships: ['The people you love get more of you each clean day.', 'Showing up for yourself is showing up for them.', 'Closer to the people who matter, one day at a time.'],
-  control: ['You’re taking back control, one choice at a time.', 'Control isn’t loud. It’s the next good choice.', 'Today you decide, not the urge.'],
+  energy: ['Your body notices every clean day.', 'Energy you don’t spend on the urge is yours to keep.', 'Health is built in ordinary days like this one.'],
+  fitness: ['Every walk is a gift to your body.', 'Strength is built in ordinary days like this one.', 'Your body notices every clean day.'],
+  outdoors: ['There’s a sky out there today. Go see it.', 'Fresh air counts as care.', 'A few minutes outside is a good trade.'],
+  clearhead: ['A clear head is something you’re building.', 'Each clean day lifts the fog a little more.', 'Clearer mornings start with today.'],
+  calm: ['Calm is something you’re building, one walk at a time.', 'A calmer mind starts with one slow breath.', 'Quiet is coming back to you, a little more each day.'],
+  focus: ['Your attention is coming back to you.', 'Today, put your focus where you want it.', 'Less noise, more of what matters.'],
+  selfrespect: ['You’re taking back control, one choice at a time.', 'Control isn’t loud. It’s the next good choice.', 'Today you decide, not the urge.'],
+  confidence: ['You’re giving yourself something to be proud of.', 'Pride grows from small, kept promises.', 'Today is another reason to be proud.'],
+  creativity: ['There’s room now for something new.', 'Make one small thing today.', 'Curiosity is a good place to put your energy.'],
+  family: ['The people you love get more of you each clean day.', 'Showing up for yourself is showing up for them.', 'Closer to the people who matter, one day at a time.'],
+  friendships: ['Good friends are glad you’re doing this.', 'Reach out to one person today.', 'Being there for others starts with being here.'],
   money: ['What you don’t spend today stays yours.', 'Money saved is freedom saved.', 'Your wallet is getting a break today.'],
-  health: ['Your body notices every clean day.', 'Health is built in ordinary days like this one.', 'Every walk is a gift to your body.'],
-  interests: ['There’s room now for something new.', 'Curiosity is a good place to put your energy.', 'Try one small new thing today.'],
+  hobbies: ['There’s room now for something new.', 'Curiosity is a good place to put your energy.', 'Try one small new thing today.'],
+  work: ['Steady days build steady work.', 'A clean evening makes a better morning at work.', 'Small, kept promises add up at work too.'],
+  faith: ['You don’t have to carry this alone.', 'Gratitude for one more clean day.', 'Grace is in small choices like this one.'],
+  present: ['Be here for today. That’s enough.', 'Notice one good thing today.', 'Right now is the only day you need to win.'],
 }
 
 // Local day number (days since 1970-01-01 in the phone's calendar). Same all day.

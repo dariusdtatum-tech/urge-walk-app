@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { applyBackup, buildBackup, validateBackup } from './backup.js'
 import { LINES_BY_IMPROVE, encouragementLines } from './encouragement.js'
 import {
-  COMMUNITY_INVITE_URL, PROFILE_KEY, communityAvailable, emptyProfile, identityLine, loadProfile, resolveOnboarding,
+  COMMUNITY_INVITE_URL, IMPROVE, IMPROVE_GROUPS, LEGACY_IMPROVE, PROFILE_KEY, improveLabels, communityAvailable, emptyProfile, identityLine, loadProfile, resolveOnboarding,
   sanitizeProfile, saveProfile, smsHref, supportValid, trackersFromPicks, trustedContact, validatePhone,
 } from './profile.js'
 import { loadHabits, saveHabits } from './storage.js'
@@ -20,7 +20,7 @@ function memoryStorage(initial = {}) {
 const NOW = Date.parse('2026-10-10T12:00:00Z')
 const FULL = {
   version: 1, onboardedAt: '2026-10-10T12:00:00.000Z', skipped: false, adultConfirmed: true, privacyAckAt: '2026-10-10T11:58:00.000Z',
-  before: { daysPerWeek: 5, timesPerDay: 3 }, improve: ['calm', 'proud', 'control'], importance: 'very', identity: 'control',
+  before: { daysPerWeek: 5, timesPerDay: 3 }, improve: ['calm', 'confidence', 'selfrespect'], improveOwn: 'Early mornings', importance: 'very', identity: 'control',
   support: 'trusted', trustedName: 'Sam', trustedPhone: '+15551234567', why: 'To be there for my family',
   timeBack: { hoursPerTime: 1, moneyPerTime: null },
 }
@@ -41,7 +41,20 @@ describe('profile storage and validation', () => {
       onboardedAt: 'nope', adultConfirmed: 'yes', privacyAckAt: '2026-01-01', before: { daysPerWeek: 9, timesPerDay: 0 },
       improve: ['calm', 'calm', 'bogus', 'sleep', 'proud', 'health'], importance: 'urgent', identity: 'hero', support: 'everyone', why: 42,
     })
-    expect(p).toEqual({ ...emptyProfile(), improve: ['calm', 'sleep', 'proud'] })
+    expect(p).toEqual({ ...emptyProfile(), improve: ['calm', 'sleep', 'confidence', 'energy'] })
+  })
+  it('old "more of" answers (backup format 1) map onto the grouped chips', () => {
+    const old = ['calm', 'sleep', 'proud', 'relationships', 'control', 'money', 'health', 'interests']
+    const p = sanitizeProfile({ improve: old })
+    expect(p.improve).toEqual(['calm', 'sleep', 'confidence', 'family', 'selfrespect', 'money', 'energy', 'hobbies'])
+    for (const id of Object.values(LEGACY_IMPROVE)) expect(IMPROVE.some((o) => o.id === id)).toBe(true)
+    expect(sanitizeProfile({ improve: ['proud', 'confidence'] }).improve).toEqual(['confidence'])
+  })
+  it('chips are grouped Body / Mind / Life, and one of your own is kept and capped', () => {
+    expect(IMPROVE_GROUPS.map((g) => g.label)).toEqual(['Body', 'Mind', 'Life'])
+    const p = sanitizeProfile({ improve: ['calm'], improveOwn: '  Early   mornings ' + 'x'.repeat(60) })
+    expect(p.improveOwn).toHaveLength(40)
+    expect(improveLabels({ improve: ['calm', 'money'], improveOwn: 'Early mornings' })).toEqual(['Calm', 'Money saved', 'Early mornings'])
   })
   it('why is trimmed, whitespace-collapsed and capped at 140', () => {
     expect(sanitizeProfile({ why: '  a\n  b  ' }).why).toBe('a b')
@@ -146,7 +159,7 @@ describe('encouragement selection', () => {
     expect(lines.some((l) => LINES_BY_IMPROVE.sleep.includes(l))).toBe(false)
   })
   it('every improve option has lines', () => {
-    for (const id of ['calm', 'sleep', 'proud', 'relationships', 'control', 'money', 'health', 'interests']) expect(LINES_BY_IMPROVE[id].length).toBeGreaterThan(1)
+    for (const { id } of IMPROVE) expect(LINES_BY_IMPROVE[id].length).toBeGreaterThan(1)
   })
 })
 
