@@ -1,6 +1,9 @@
 // Native capabilities behind one small module, so screens stay simple and tests can stub them.
 import { Linking, Platform } from 'react-native'
 import * as Haptics from 'expo-haptics'
+import * as SMS from 'expo-sms'
+import { Contact } from 'expo-contacts'
+import { composeText, pickPhoneContact } from './reachOut.js'
 import * as Notifications from 'expo-notifications'
 import { pickBackupFile, shareBackup } from './backupFile.js'
 import { syncWalkAlert } from './walkAlert.js'
@@ -36,6 +39,9 @@ export const device = {
   },
   syncCheckinReminder(reminder) { return native ? syncCheckinReminder(Notifications, reminder) : Promise.resolve(false) },
   onCheckinReminder(cb) { return native ? listenCheckin(Notifications, cb) : () => {} },
+  // Opens the Messages composer filled in; the person presses Send. Never sends by itself.
+  textContact(phone, message) { return native ? composeText(SMS, Linking, phone, message) : Linking.openURL(`sms:${phone}`).then(() => 'link').catch(() => 'unavailable') },
+  pickContact() { return native ? pickPhoneContact(Contact) : Promise.resolve(null) },
   shareBackup,
   pickBackupFile,
   openURL(url) { Linking.openURL(url).catch(() => {}) },

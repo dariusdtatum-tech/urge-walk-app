@@ -14,8 +14,8 @@ export function fakeClock(start = T0) {
   clock.advance = (ms) => { t += ms }
   return clock
 }
-export function stubDevice({ share = 'shared', file = null } = {}) {
-  const calls = { reminders: [], followUps: [], followUpCancels: 0, tap: 0, press: 0, breathTurn: 0, done: 0, alerts: [], shared: [], urls: [], picks: 0 }
+export function stubDevice({ share = 'shared', file = null, picked = null } = {}) {
+  const calls = { texts: [], reminders: [], followUps: [], followUpCancels: 0, tap: 0, press: 0, breathTurn: 0, done: 0, alerts: [], shared: [], urls: [], picks: 0 }
   let followUpCb = null
   let checkinCb = null
   return {
@@ -24,6 +24,8 @@ export function stubDevice({ share = 'shared', file = null } = {}) {
     cancelFollowUp() { calls.followUpCancels += 1; return Promise.resolve() },
     onFollowUp(cb) { followUpCb = cb; return () => { followUpCb = null } },
     emitFollowUp(r) { followUpCb?.(r) },
+    textContact(phone, message) { calls.texts.push({ phone, message }); return Promise.resolve('composer') },
+    pickContact() { return Promise.resolve(picked) },
     syncCheckinReminder(r) { calls.reminders.push(r); return Promise.resolve(true) },
     onCheckinReminder(cb) { checkinCb = cb; return () => { checkinCb = null } },
     emitCheckinReminder() { checkinCb?.() },
