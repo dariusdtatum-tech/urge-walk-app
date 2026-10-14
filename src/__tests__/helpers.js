@@ -15,13 +15,13 @@ export function fakeClock(start = T0) {
   return clock
 }
 export function stubDevice({ share = 'shared', file = null } = {}) {
-  const calls = { tap: 0, breathTurn: 0, done: 0, alerts: [], shared: [], urls: [], picks: 0 }
+  const calls = { tap: 0, press: 0, breathTurn: 0, done: 0, alerts: [], shared: [], urls: [], picks: 0 }
   return {
     calls,
     shareBackup(text, filename) { calls.shared.push({ text, filename }); return share instanceof Error ? Promise.reject(share) : Promise.resolve(share) },
     pickBackupFile() { calls.picks += 1; return Promise.resolve(file) },
     openURL(url) { calls.urls.push(url) },
-    tap() { calls.tap += 1 }, breathTurn() { calls.breathTurn += 1 }, done() { calls.done += 1 },
+    tap() { calls.tap += 1 }, press() { calls.press += 1 }, breathTurn() { calls.breathTurn += 1 }, done() { calls.done += 1 },
     syncWalkAlert(walk, now) { calls.alerts.push({ walk, now }); return Promise.resolve(null) },
   }
 }

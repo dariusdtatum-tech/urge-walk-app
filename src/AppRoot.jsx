@@ -15,13 +15,13 @@ import { isEnded } from './lib/walkTimer.js'
 import { BreatheScreen } from './screens/BreatheScreen.jsx'
 import { BackupScreen } from './screens/BackupScreen.jsx'
 import { HomeScreen } from './screens/HomeScreen.jsx'
-import { JournalScreen } from './screens/JournalScreen.jsx'
-import { LogScreen } from './screens/LogScreen.jsx'
+import { CommunityScreen } from './screens/CommunityScreen.jsx'
+import { TrackScreen } from './screens/TrackScreen.jsx'
 import { Onboarding } from './screens/onboarding/Onboarding.jsx'
 import { RideSheet } from './screens/RideSheet.jsx'
 import { WalkScreen } from './screens/WalkScreen.jsx'
 import { YouScreen } from './screens/YouScreen.jsx'
-import { DeviceContext, noopDevice } from './ui/DeviceContext.js'
+import { DeviceContext, noopDevice, useDevice } from './ui/DeviceContext.js'
 import { StorageContext } from './ui/StorageContext.js'
 import { RideCoachmark, TabBar } from './ui/TabBar.jsx'
 import { T } from './ui/Text.jsx'
@@ -34,7 +34,9 @@ function Shell({ clock, theme, onTheme }) {
   const { c, scheme } = useTheme()
   const insets = useSafeAreaInsets()
   const storage = useStorageFromContext()
+  const device = useDevice()
   const [tab, setTab] = useState('home')
+  const [trackView, setTrackView] = useState('log') // Track: 'log' | 'journal'
   const [screen, setScreen] = useState(() => (loadActiveWalk(storage) ? 'walk' : 'tabs'))
   const [showRide, setShowRide] = useState(false)
   const [toast, setToast] = useState(null) // { text, undoId? }
@@ -68,10 +70,12 @@ function Shell({ clock, theme, onTheme }) {
   function onRideHold() {
     const live = loadActiveWalk(storage)
     if (live && !isEnded(live)) { setScreen('walk'); return }
+    device.press()
     if (!readObject(LP_TIP_KEY, storage)) { writeObject(LP_TIP_KEY, { at: clock() }, storage); setLpTip(true) }
     startWalk()
   }
   function onRide() {
+    device.tap()
     if (loadActiveWalk(storage)) { setScreen('walk'); return }
     markStress(clock(), storage)
     setShowRide(true)
@@ -81,11 +85,13 @@ function Shell({ clock, theme, onTheme }) {
     appendWalk(record, storage)
     markSaved(record.id, clock(), storage)
     setShowRide(false)
+    device.done()
     setToast({ text: result === 'yes' ? LOGGED_SAVED_MESSAGE : 'Saved. An honest log still counts.', undoId: record.id })
     setDataVer((v) => v + 1)
   }
   function onWalkSaved(text) {
     markSaved(null, clock(), storage)
+    device.done()
     setToast({ text })
     if (lpTip) { setLpTip(false); const seen = readObject(LP_TIP_KEY, storage); if (seen && !seen.coachmarkDone) setCoachmark(true) }
     backHome()
@@ -93,6 +99,7 @@ function Shell({ clock, theme, onTheme }) {
   function onBreatheSaved({ startedAt, endedAt, result, note }) {
     appendWalk(buildBreatheRecord({ startedAt, endedAt, result, note }), storage)
     markSaved(null, clock(), storage)
+    device.done()
     setToast({ text: BREATHE_SAVED_MESSAGES[result || 'skip'] })
     backHome()
   }
@@ -122,7 +129,12 @@ function Shell({ clock, theme, onTheme }) {
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
         <Onboarding key={onboarding} mode={onboarding} now={clock()} onRestore={() => setObBackup(true)}
           onCancel={() => { setOnboarding(null); goTo('you') }}
-          onDone={() => { setOnboarding(null); goTo('home') }} />
+          onDone={() => {
+            // The Ride it out tip, once, right after first setup.
+            const seen = readObject(LP_TIP_KEY, storage)
+            if (onboarding === 'new' && !seen?.coachmarkDone) setCoachmark(true)
+            setOnboarding(null); goTo('home')
+          }} />
       </View>
     )
   }
@@ -132,8 +144,13 @@ function Shell({ clock, theme, onTheme }) {
   else if (screen === 'breathe') body = <BreatheScreen clock={clock} onSave={onBreatheSaved} onCancel={backHome} />
   else if (backup) body = <BackupScreen key={dataVer} clock={clock} backLabel={tab === 'you' ? 'You' : 'Home'} onBack={() => { setBackup(false); setDataVer((v) => v + 1) }} />
   else if (tab === 'home') body = <HomeScreen key={dataVer} now={now} clock={clock} onRide={onRide} liveWalk={!!loadActiveWalk(storage)} onResume={() => setScreen('walk')} onOpenBackup={openBackup} />
-  else if (tab === 'log') body = <LogScreen key={dataVer} now={now} onRide={onRide} initialSelectedId={focusWalkId} />
-  else if (tab === 'journal') body = <JournalScreen key={dataVer} now={now} clock={clock} onEditingChange={setJournalEditing} onOpenWalk={(id) => { setTab('log'); setFocusWalkId(id); setDataVer((v) => v + 1) }} />
+  else if (tab === 'track') {
+    body = (
+      <TrackScreen key={dataVer} view={trackView} onView={(v) => { setTrackView(v); setFocusWalkId(null) }} now={now} clock={clock} onRide={onRide}
+        focusWalkId={focusWalkId} onEditingChange={setJournalEditing}
+        onOpenWalk={(id) => { setTrackView('log'); setFocusWalkId(id); setDataVer((v) => v + 1) }} />
+    )
+  } else if (tab === 'community') body = <CommunityScreen key={dataVer} now={now} clock={clock} />
   else {
     body = (
       <YouScreen key={dataVer} now={now} clock={clock} theme={theme} onTheme={onTheme} onOpenBackup={openBackup}
@@ -141,7 +158,7 @@ function Shell({ clock, theme, onTheme }) {
         onErased={() => { onTheme('system'); setToast(null); setScreen('tabs'); setTab('home'); setBackup(false); setOnboarding('new') }} />
     )
   }
-  const showTabs = screen === 'tabs' && !(tab === 'journal' && journalEditing && !backup)
+  const showTabs = screen === 'tabs' && !(tab === 'track' && trackView === 'journal' && journalEditing && !backup)
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
@@ -158,6 +175,9 @@ function Shell({ clock, theme, onTheme }) {
           )}
         </View>
       )}
+      {showTabs && coachmark ? (
+        <Pressable testID="coachmark-scrim" onPress={dismissCoachmark} accessible={false} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }} />
+      ) : null}
       {showTabs && (
         <View>
           {coachmark && <View style={{ position: 'absolute', left: 0, right: 0, bottom: '100%', marginBottom: 30 }}><RideCoachmark onDismiss={dismissCoachmark} /></View>}

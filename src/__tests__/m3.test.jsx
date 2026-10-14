@@ -14,7 +14,14 @@ const renderApp = async (opts = {}) => {
   await render(<AppRoot storage={storage} device={device} clock={clock} scheme={opts.scheme ?? 'system'} />)
   return { storage, device, clock }
 }
-const tab = (name) => fireEvent.press(screen.getByRole('tab', { name }))
+// Log and Journal live in the Track tab behind a Log | Journal switch.
+async function tab(name) {
+  if (name === 'Log' || name === 'Journal') {
+    await fireEvent.press(screen.getByRole('tab', { name: 'Track' }))
+    return fireEvent.press(screen.getByTestId(`track-${name.toLowerCase()}`))
+  }
+  return fireEvent.press(screen.getByRole('tab', { name }))
+}
 const walksSeed = (list) => ({ 'urgewalk.v1.walks': JSON.stringify({ version: 1, walks: list }) })
 const logged = (daysAgo, result, note = '', id = `w${daysAgo}${result}`) => buildLoggedRecord({ id, at: T0 - daysAgo * DAY, note, result })
 
@@ -67,17 +74,17 @@ describe('Home extras', () => {
   })
 })
 
-describe('Your walks card (Week / Month / All time) and the day-run bracket', () => {
-  it('Week shows a bracket over 3 days in a row with an urge passed; Month and All time switch the card only', async () => {
+describe('Your walks card (Week / Month / All time) with the calm Week total', () => {
+  it('Week shows one total of days with an urge passed, no run brackets; Month and All time switch the card only', async () => {
     const seed = { ...habitsSeed(), ...walksSeed([logged(0, 'yes'), logged(1, 'yes'), logged(2, 'yes'), logged(4, 'no')]) }
     const { storage } = await renderApp({ storage: memoryStorage(seed) })
-    const runs = screen.getAllByTestId('day-run')
-    expect(runs).toHaveLength(1)
-    expect(runs[0].props.accessibilityLabel).toMatch(/^3 days in a row with an urge passed/)
+    expect(screen.queryByTestId('day-run')).toBeNull()
+    expect(screen.getByTestId('week-passed-days')).toHaveTextContent('3days with an urge passed')
+    expect(screen.getByTestId('week-passed-days').props.accessibilityLabel).toBe('3 days with an urge passed this week')
     expect(screen.getByTestId('chip-passed')).toHaveTextContent(/^3/)
     expect(screen.getByTestId('chip-streak')).toHaveTextContent(/163/)
     await fireEvent.press(screen.getByTestId('range-month'))
-    expect(screen.queryByTestId('day-runs')).toBeNull()
+    expect(screen.queryByTestId('week-passed-days')).toBeNull()
     expect(screen.getByText('3-day avg · urges ridden out')).toBeTruthy()
     expect(JSON.parse(storage.getItem('urgewalk.v1.homePrefs')).walksRange).toBe('month')
     await fireEvent.press(screen.getByTestId('range-all'))

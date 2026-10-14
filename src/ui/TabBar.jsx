@@ -1,18 +1,19 @@
-import { Pressable, View } from 'react-native'
-import { HomeIcon, JournalIcon, LogIcon, WaveIcon, YouIcon } from './Icons.jsx'
+import { useEffect } from 'react'
+import { AccessibilityInfo, Pressable, View } from 'react-native'
+import { CommunityIcon, HomeIcon, LogIcon, WaveIcon, YouIcon } from './Icons.jsx'
 import { T } from './Text.jsx'
 import { MAX_SCALE, useTheme } from './theme.js'
 
 export const LONG_PRESS_MS = 550
 const TABS = [
   { id: 'home', label: 'Home', Icon: HomeIcon },
-  { id: 'log', label: 'Log', Icon: LogIcon },
+  { id: 'track', label: 'Track', Icon: LogIcon },
   { id: 'ride' },
-  { id: 'journal', label: 'Journal', Icon: JournalIcon },
+  { id: 'community', label: 'Community', Icon: CommunityIcon },
   { id: 'you', label: 'You', Icon: YouIcon },
 ]
 
-// Four tabs and the centre "Ride it out" button: tap = choose Walk / Breathe / Just log it,
+// Home · Track · Ride it out · Community · You. Four tabs and the centre "Ride it out" button: tap = choose Walk / Breathe / Just log it,
 // hold = start a walk right away.
 export function TabBar({ active, onTab, onRide, onRideHold, bottomInset = 0 }) {
   const { c } = useTheme()
@@ -45,33 +46,33 @@ export function TabBar({ active, onTab, onRide, onRideHold, bottomInset = 0 }) {
           style={{ flex: 1, alignItems: 'center', minHeight: 48, justifyContent: 'center', gap: 2 }}>
           <View style={{ height: 3, width: 22, borderRadius: 2, backgroundColor: active === t.id ? c.tabActive : 'transparent', marginBottom: 2 }} />
           <t.Icon color={active === t.id ? c.tabActive : c.muted} />
-          <T font={active === t.id ? 'bold' : 'medium'} size={12} max={MAX_SCALE.tab} color={active === t.id ? c.tabActive : c.muted}>{t.label}</T>
+          <T numberOfLines={1} font={active === t.id ? 'bold' : 'medium'} size={12} max={MAX_SCALE.tab} color={active === t.id ? c.tabActive : c.muted}>{t.label}</T>
         </Pressable>
       ))}
     </View>
   )
 }
 
-// One-time hint after the first walk started by holding: a bubble that points down at the button.
+// One-time tip after setup (and after the first walk started by holding): a small callout above
+// the tab bar, its arrow pointing down at the centre button. Tapping anywhere dismisses it.
+// VoiceOver reads it once.
+export const RIDE_TIP = 'Tap for Walk, Breathe or Just log it. Hold to start a walk.'
 export function RideCoachmark({ onDismiss }) {
   const { c } = useTheme()
+  useEffect(() => { AccessibilityInfo.announceForAccessibility?.(`Tip. ${RIDE_TIP}`) }, [])
   return (
-    <View testID="ride-coachmark" accessibilityRole="alert" style={{ position: 'absolute', left: 16, right: 16, bottom: 0, alignItems: 'center' }}>
-      <View style={{ backgroundColor: c.action, borderRadius: 16, padding: 14, gap: 8, maxWidth: 360 }}>
-        <T size={15} color={c.onAction}>
-          <T font="bold" size={15} color={c.onAction}>Tip: the Ride it out button. </T>
-          Tap it to choose Walk, Breathe or Just log it. Hold it to start a walk right away.
-        </T>
-        <Pressable onPress={onDismiss} accessibilityRole="button" testID="coachmark-ok"
-          style={{ alignSelf: 'flex-end', minHeight: 44, minWidth: 64, paddingHorizontal: 14, borderRadius: 12, backgroundColor: c.onAction, alignItems: 'center', justifyContent: 'center' }}>
-          <T font="bold" size={15} color={c.action}>Got it</T>
-        </Pressable>
+    <Pressable testID="ride-coachmark" onPress={onDismiss} accessibilityRole="button" accessibilityLabel={`Tip: ${RIDE_TIP} Dismiss`}
+      style={{ position: 'absolute', left: 16, right: 16, bottom: 0, alignItems: 'center' }}>
+      <View style={{ backgroundColor: c.action, borderRadius: 16, paddingVertical: 12, paddingHorizontal: 14, maxWidth: 320, flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+        <T size={15} color={c.onAction} style={{ flexShrink: 1 }}>{RIDE_TIP}</T>
+        <View testID="coachmark-ok" style={{ minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' }}>
+          <T font="bold" size={15} color={c.onAction}>OK</T>
+        </View>
       </View>
-      {/* the pointer: a small triangle aimed at the centre button below */}
       <View accessibilityElementsHidden importantForAccessibility="no" style={{
         width: 0, height: 0, borderLeftWidth: 10, borderRightWidth: 10, borderTopWidth: 12,
         borderLeftColor: 'transparent', borderRightColor: 'transparent', borderTopColor: c.action,
       }} />
-    </View>
+    </Pressable>
   )
 }

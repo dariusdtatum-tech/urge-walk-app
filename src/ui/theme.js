@@ -18,7 +18,7 @@ export const fonts = {
 
 // Dynamic Type: text follows the phone's text size. Text inside the fixed-size rings is capped so it
 // never spills out of the circle; everything else may grow up to 2x.
-export const MAX_SCALE = { body: 2, ring: 1.25, ringSmall: 1.3, tab: 1.4 }
+export const MAX_SCALE = { body: 2, display: 1.6, ring: 1.25, ringSmall: 1.3, tab: 1.4 }
 
 // 'system' follows the phone; tests and previews can force 'light' / 'dark'.
 export const SchemeContext = createContext('system')

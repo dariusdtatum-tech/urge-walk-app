@@ -1,5 +1,7 @@
 import { useState } from 'react'
-import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, View } from 'react-native'
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, useWindowDimensions, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { STACK_FONT_SCALE, useReducedMotion } from '../ui/motion.js'
 import { loadProfile, trustedContact } from '../lib/profile.js'
 import { lengthLabel, loadWalkPrefs } from '../lib/walkStorage.js'
 import { useDevice } from '../ui/DeviceContext.js'
@@ -17,6 +19,9 @@ import { useTheme } from '../ui/theme.js'
 export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
   const storage = useStorage()
   const { c } = useTheme()
+  const reduced = useReducedMotion()
+  const insets = useSafeAreaInsets()
+  const stack = useWindowDimensions().fontScale > STACK_FONT_SCALE
   const [logging, setLogging] = useState(false)
   const [note, setNote] = useState('')
   const [result, setResult] = useState('yes')
@@ -32,19 +37,19 @@ export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
   const back = () => { if (note.trim()) setAskDiscard('back'); else setLogging(false) }
 
   return (
-    <Modal visible={visible} transparent animationType="slide" onRequestClose={close}>
+    <Modal visible={visible} transparent animationType={reduced ? 'fade' : 'slide'} onRequestClose={close}>
       <View style={{ flex: 1, justifyContent: 'flex-end' }}>
         <Pressable style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.overlay }}
           onPress={close} accessibilityLabel="Close" accessibilityRole="button" testID="ride-backdrop" />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View testID="ride-sheet" accessibilityViewIsModal style={{ backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%' }}>
-            <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 34, gap: 14 }} keyboardShouldPersistTaps="handled">
+            <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 34 + insets.bottom, gap: 14 }} keyboardShouldPersistTaps="handled">
               <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: c.grab }} />
               <T accessibilityRole="header" font="serif" size={30} color={c.title}>Ride it out</T>
               {why && !logging ? <T font="serifItalic" size={19} color={c.title} testID="ride-why">“{why}”</T> : null}
               {!logging ? (
                 <>
-                  <View style={{ flexDirection: 'row', gap: 12 }}>
+                  <View style={{ flexDirection: stack ? 'column' : 'row', gap: 12 }} testID="ride-tiles">
                     <Pressable onPress={onWalk} testID="ride-walk" accessibilityRole="button" accessibilityLabel={`Walk, ${walkLabel}. Starts now`}
                       style={{ flex: 1, minHeight: 120, borderRadius: 18, backgroundColor: c.action, padding: 16, justifyContent: 'space-between' }}>
                       <PathIcon color={c.onAction} />
