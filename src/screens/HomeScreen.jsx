@@ -19,6 +19,7 @@ import { MilestoneSheet } from './home/Milestones.jsx'
 import { NeverZero } from './home/NeverZero.jsx'
 import { WalksCard } from './home/WalksCard.jsx'
 import { CheckInCard } from './CheckInSheet.jsx'
+import { MoneyCard } from './home/MoneyCard.jsx'
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 
 // Home (the PWA's HomeTab): date + Edit, identity line, undo-reset banners, the Ride it out bar, the
@@ -108,6 +109,7 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
       )}
 
       <CheckInCard today={today} onOpen={onCheckIn} />
+      {hero || walks.length ? <MoneyCard profile={profile} hero={hero} walks={walks} today={today} since={hero ? shortDate(hero.startDate, today) : ''} /> : null}
       {hero ? <NeverZero hero={hero} walks={walks} today={today} highlight={highlight} /> : null}
       {hero || walks.length > 0 ? (
         <WalksCard walks={walks} range={range} onRange={(id) => { setRange(id); saveRange(id, storage) }} streak={hero ? days : null} now={now} since={allSince} />

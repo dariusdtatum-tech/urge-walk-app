@@ -31,6 +31,8 @@ import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 import { CRISIS, CrisisSheet } from './Crisis.jsx'
 import { ContactsSheet, ReachOut } from './ReachOut.jsx'
 import { ReasonsSheet } from './Reasons.jsx'
+import { MoneySheet } from './MoneySheet.jsx'
+import { fmtMoney, loadGoal, moneyOn, moneyPerTime } from '../lib/money.js'
 import { loadReasons } from '../lib/reasons.js'
 import { MAX_CONTACTS, loadContacts } from '../lib/contacts.js'
 
@@ -75,6 +77,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [showCrisis, setShowCrisis] = useState(false)
   const [showContacts, setShowContacts] = useState(false)
   const [showReasons, setShowReasons] = useState(false)
+  const [showMoney, setShowMoney] = useState(false)
   const reasonCount = loadReasons(storage).length
   const [contactsVer, setContactsVer] = useState(0)
   const people = loadContacts(storage)
@@ -163,6 +166,9 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
             <Button kind="secondary" label="+" accessibilityLabel="15 minutes later" onPress={() => changeReminder(stepReminder(reminder, 1))} testID="checkin-time-more" />
           </View>
         ) : null}
+        <ToggleRow title="Money kept" sub={moneyOn(profile) ? `${fmtMoney(moneyPerTime(profile))} each time${loadGoal(storage)?.name ? ` · toward ${loadGoal(storage).name}` : ''}` : 'Off. A private running total, if it helps.'}
+          value={moneyOn(profile)} testID="money-toggle" onChange={(on) => (on ? setShowMoney(true) : changeProfile({ timeBack: { ...(profile.timeBack || { hoursPerTime: 1 }), moneyPerTime: null } }))} />
+        {moneyOn(profile) ? <Row title="Money kept settings" sub="Amount and goal" testID="money-row" onPress={() => setShowMoney(true)} /> : null}
         <TimeBackCard profile={profile} hero={hero} today={today} onChange={changeProfile} />
 
         <GroupTitle>About you</GroupTitle>
@@ -194,6 +200,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
 
       {sheet?.mode === 'milestones' && hero ? <MilestonesList data={milestones} habit={hero} today={today} onClose={() => setSheet(null)} /> : null}
       {editor.sheets}
+      {showMoney ? <MoneySheet profile={profile} onClose={() => setShowMoney(false)} onSave={(v) => { changeProfile({ timeBack: { ...(profile.timeBack || { hoursPerTime: 1 }), moneyPerTime: v } }); setShowMoney(false) }} /> : null}
       {showReasons ? <ReasonsSheet onClose={() => setShowReasons(false)} /> : null}
       {showContacts ? <ContactsSheet onClose={() => { setShowContacts(false); setContactsVer((v) => v + 1) }} /> : null}
       {showCrisis ? <CrisisSheet onClose={() => setShowCrisis(false)} /> : null}

@@ -9,6 +9,7 @@ import { Button } from '../ui/Button.jsx'
 import { CheckIn } from '../ui/CheckIn.jsx'
 import { useDevice } from '../ui/DeviceContext.js'
 import { ReasonCard } from './Reasons.jsx'
+import { useGoalLine } from './home/MoneyCard.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
 import { MAX_SCALE, useTheme } from '../ui/theme.js'
@@ -26,6 +27,7 @@ function KeepAwake() {
 // (in / out), never on the hold. Its own breath-only lines. Then the same check-in as a walk.
 export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
   const storage = useStorage()
+  const goalLine = useGoalLine()
   const device = useDevice()
   const { c } = useTheme()
   const [startedAt] = useState(clock)
@@ -77,7 +79,7 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
   return (
     <View style={{ flex: 1, padding: 20, alignItems: 'center' }} testID="breathe">
       {endedAt == null && <KeepAwake />}
-      <ReasonCard testID="breathe-reason" />
+      <ReasonCard testID="breathe-reason" extra={goalLine} />
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 }}>
         <View style={{ width: ORB, height: ORB, alignItems: 'center', justifyContent: 'center' }}
           accessibilityElementsHidden importantForAccessibility="no-hide-descendants">

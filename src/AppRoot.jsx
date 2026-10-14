@@ -14,6 +14,8 @@ import { startWalkNow } from './lib/walkStart.js'
 import { makeId } from './lib/storage.js'
 import { appendWalk, buildBreatheRecord, buildLoggedRecord, loadActiveWalk, removeWalk } from './lib/walkStorage.js'
 import { isEnded } from './lib/walkTimer.js'
+import { withKept } from './lib/money.js'
+import { loadProfile } from './lib/profile.js'
 import { BreatheScreen } from './screens/BreatheScreen.jsx'
 import { BackupScreen } from './screens/BackupScreen.jsx'
 import { HomeScreen } from './screens/HomeScreen.jsx'
@@ -118,14 +120,14 @@ function Shell({ clock, theme, onTheme }) {
     setShowRide(false)
     device.done()
     followUp(record.id)
-    setToast({ text: result === 'yes' ? LOGGED_SAVED_MESSAGE : 'Saved. An honest log still counts.', undoId: record.id })
+    setToast({ text: withKept(result === 'yes' ? LOGGED_SAVED_MESSAGE : 'Saved. An honest log still counts.', loadProfile(storage), result), undoId: record.id })
     setDataVer((v) => v + 1)
   }
   function onWalkSaved(text, record) {
     markSaved(null, clock(), storage)
     device.done()
     if (record) followUp(record.id)
-    setToast({ text })
+    setToast({ text: withKept(text, loadProfile(storage), record?.result) })
     if (lpTip) { setLpTip(false); const seen = readObject(LP_TIP_KEY, storage); if (seen && !seen.coachmarkDone) setCoachmark(true) }
     backHome()
   }
@@ -136,7 +138,7 @@ function Shell({ clock, theme, onTheme }) {
     markSaved(null, clock(), storage)
     device.done()
     followUp(record.id)
-    setToast({ text: BREATHE_SAVED_MESSAGES[result || 'skip'] })
+    setToast({ text: withKept(BREATHE_SAVED_MESSAGES[result || 'skip'], loadProfile(storage), result) })
     backHome()
   }
   function dismissCoachmark() {
