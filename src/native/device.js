@@ -1,7 +1,8 @@
 // Native capabilities behind one small module, so screens stay simple and tests can stub them.
-import { Platform } from 'react-native'
+import { Linking, Platform } from 'react-native'
 import * as Haptics from 'expo-haptics'
 import * as Notifications from 'expo-notifications'
+import { pickBackupFile, shareBackup } from './backupFile.js'
 import { syncWalkAlert } from './walkAlert.js'
 
 const native = Platform.OS === 'ios' || Platform.OS === 'android'
@@ -17,4 +18,7 @@ export const device = {
   breathTurn() { if (native) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft).catch(() => {}) },
   done() { if (native) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}) },
   syncWalkAlert(walk, now) { return native ? syncWalkAlert(Notifications, walk, now) : Promise.resolve(null) },
+  shareBackup,
+  pickBackupFile,
+  openURL(url) { Linking.openURL(url).catch(() => {}) },
 }
