@@ -3,6 +3,11 @@ import { Linking, Platform } from 'react-native'
 import * as Haptics from 'expo-haptics'
 import * as SMS from 'expo-sms'
 import { Contact } from 'expo-contacts'
+import * as ImagePicker from 'expo-image-picker'
+import * as Audio from 'expo-audio'
+import * as LocalAuthentication from 'expo-local-authentication'
+import * as FS from 'expo-file-system'
+import { deleteAllFiles, deleteFile, makeVoice, pickPhoto, unlock } from './reasonsMedia.js'
 import { composeText, pickPhoneContact } from './reachOut.js'
 import * as Notifications from 'expo-notifications'
 import { pickBackupFile, shareBackup } from './backupFile.js'
@@ -11,6 +16,7 @@ import { listenCheckin, syncCheckinReminder } from './checkinReminder.js'
 import { cancelFollowUp, listenFollowUp, scheduleFollowUp } from './followUpNotify.js'
 
 const native = Platform.OS === 'ios' || Platform.OS === 'android'
+const voice = makeVoice(Audio, native ? FS : null, Platform)
 
 if (native) {
   Notifications.setNotificationHandler({
@@ -42,6 +48,15 @@ export const device = {
   // Opens the Messages composer filled in; the person presses Send. Never sends by itself.
   textContact(phone, message) { return native ? composeText(SMS, Linking, phone, message) : Linking.openURL(`sms:${phone}`).then(() => 'link').catch(() => 'unavailable') },
   pickContact() { return native ? pickPhoneContact(Contact) : Promise.resolve(null) },
+  // Your reasons: photo / voice note files stay in the app's own folder. unlock() → true when shown.
+  pickReasonPhoto() { return pickPhoto(ImagePicker, native ? FS : null, !native) },
+  startVoice() { return voice.start().catch(() => false) },
+  stopVoice() { return voice.stop().catch(() => null) },
+  playVoice(uri) { try { voice.play(uri) } catch { /* nothing to play */ } },
+  stopPlaying() { voice.stopPlaying() },
+  deleteReasonFile(uri) { if (native) deleteFile(FS, uri) },
+  deleteAllReasonFiles() { if (native) deleteAllFiles(FS) },
+  unlockReasons() { return native ? unlock(LocalAuthentication) : Promise.resolve(true) },
   shareBackup,
   pickBackupFile,
   openURL(url) { Linking.openURL(url).catch(() => {}) },

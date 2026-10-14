@@ -14,8 +14,8 @@ export function fakeClock(start = T0) {
   clock.advance = (ms) => { t += ms }
   return clock
 }
-export function stubDevice({ share = 'shared', file = null, picked = null } = {}) {
-  const calls = { texts: [], reminders: [], followUps: [], followUpCancels: 0, tap: 0, press: 0, breathTurn: 0, done: 0, alerts: [], shared: [], urls: [], picks: 0 }
+export function stubDevice({ share = 'shared', file = null, picked = null, photo = null, voice = null, unlocked = true } = {}) {
+  const calls = { texts: [], reminders: [], followUps: [], followUpCancels: 0, tap: 0, press: 0, breathTurn: 0, done: 0, alerts: [], shared: [], urls: [], picks: 0, played: [], deleted: [], unlocks: 0, wiped: 0 }
   let followUpCb = null
   let checkinCb = null
   return {
@@ -26,6 +26,14 @@ export function stubDevice({ share = 'shared', file = null, picked = null } = {}
     emitFollowUp(r) { followUpCb?.(r) },
     textContact(phone, message) { calls.texts.push({ phone, message }); return Promise.resolve('composer') },
     pickContact() { return Promise.resolve(picked) },
+    pickReasonPhoto() { return Promise.resolve({ uri: photo }) },
+    startVoice() { return Promise.resolve(Boolean(voice)) },
+    stopVoice() { return Promise.resolve(voice) },
+    playVoice(uri) { calls.played.push(uri) },
+    stopPlaying() {},
+    deleteReasonFile(uri) { calls.deleted.push(uri) },
+    deleteAllReasonFiles() { calls.wiped++ },
+    unlockReasons() { calls.unlocks++; return Promise.resolve(unlocked) },
     syncCheckinReminder(r) { calls.reminders.push(r); return Promise.resolve(true) },
     onCheckinReminder(cb) { checkinCb = cb; return () => { checkinCb = null } },
     emitCheckinReminder() { checkinCb?.() },

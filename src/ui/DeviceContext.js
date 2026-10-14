@@ -21,6 +21,15 @@ export const noopDevice = {
   // Trusted contacts: textContact opens the Messages composer (never sends); pickContact -> { name, phone } | null
   textContact: (_phone, _message) => Promise.resolve(/** @type {string} */ ('composer')),
   pickContact: () => Promise.resolve(/** @type {{ name: string, phone: string } | null} */ (null)),
+  // Your reasons
+  pickReasonPhoto: () => Promise.resolve(/** @type {{ uri: string | null, denied?: boolean }} */ ({ uri: null })),
+  startVoice: () => Promise.resolve(false),
+  stopVoice: () => Promise.resolve(/** @type {{ uri: string, durationMs: number } | null} */ (null)),
+  playVoice: (_uri) => {},
+  stopPlaying: () => {},
+  deleteReasonFile: (_uri) => {},
+  deleteAllReasonFiles: () => {},
+  unlockReasons: () => Promise.resolve(true),
 }
 export const DeviceContext = createContext(noopDevice)
 export const useDevice = () => useContext(DeviceContext)
