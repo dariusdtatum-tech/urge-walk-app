@@ -14,6 +14,7 @@ export const RESULTS = ['yes', 'kinda', 'no']
 export const KINDS = ['walk', 'breathe', 'logged']
 export const BREATHE_SECONDS = 60
 export const MAX_NOTE_LENGTH = 280
+export const FOLLOWUP_VALUES = ['passed', 'tough', 'skip']
 
 const isNum = (n) => typeof n === 'number' && Number.isFinite(n)
 const isTime = (s) => typeof s === 'string' && !Number.isNaN(Date.parse(s))
@@ -43,6 +44,8 @@ export function sanitizeWalks(list) {
         endedEarly: open ? false : Boolean(w.endedEarly),
         result: RESULTS.includes(w.result) ? w.result : null,
         note: typeof w.note === 'string' ? w.note.slice(0, MAX_NOTE_LENGTH) : '',
+        // The "how did it go?" answer, only when there is one (older records and files stay unchanged).
+        ...(FOLLOWUP_VALUES.includes(w.followUp) ? { followUp: w.followUp } : {}),
       }
     })
 }
