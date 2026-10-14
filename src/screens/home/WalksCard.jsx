@@ -1,7 +1,7 @@
 import { View } from 'react-native'
 import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg'
 import { todayISO } from '../../lib/cleanTime.js'
-import { passedDayKeys, passedRuns } from '../../lib/dayRuns.js'
+import { passedDayKeys, passedDaysIn } from '../../lib/dayRuns.js'
 import { RANGES, RANGE_IDS, bucketCounts, chartPoints, rangeBuckets, rangeStats, smoothPath, threeDayAverage } from '../../lib/homeStats.js'
 import { Card } from '../../ui/Row.jsx'
 import { Seg } from '../../ui/Seg.jsx'
@@ -22,7 +22,7 @@ export function WalksCard({ walks, range, onRange, streak, now, since }) {
   const counts = bucketCounts(walks, buckets)
   const values = range === 'month' ? threeDayAverage(counts) : counts
   const mixed = walks.some((w) => w.kind && w.kind !== 'walk')
-  const runs = range === 'week' ? passedRuns(buckets.map((b) => todayISO(b.first)), passedDayKeys(walks)) : []
+  const passedDays = range === 'week' ? passedDaysIn(buckets.map((b) => todayISO(b.first)), passedDayKeys(walks)) : null
   const caption = mixed ? RANGES[range].captionAll : RANGES[range].caption
   const chips = [
     { id: 'walked', n: stats.walked, label: 'Walked', sub: stats.riddenOut > stats.walked ? `${stats.riddenOut} ridden out` : null },
@@ -43,14 +43,21 @@ export function WalksCard({ walks, range, onRange, streak, now, since }) {
           </View>
         ))}
       </View>
-      <Chart buckets={buckets} counts={values} dots={range === 'week'} runs={runs} />
+      {passedDays != null ? (
+        <View testID="week-passed-days" accessible accessibilityLabel={`${passedDays} ${passedDays === 1 ? 'day' : 'days'} with an urge passed this week`}
+          style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
+          <T font="serif" size={30} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{passedDays}</T>
+          <T font="bold" size={15} color={c.title}>{passedDays === 1 ? 'day' : 'days'} with an urge passed</T>
+        </View>
+      ) : null}
+      <Chart buckets={buckets} counts={values} dots={range === 'week'} />
       {caption ? <T size={13} color={c.muted}>{caption}</T> : null}
     </Card>
   )
 }
 
-// The line chart, plus soft brackets over runs of 2+ days with an urge passed (Week only).
-function Chart({ buckets, counts, dots, runs }) {
+// The line chart. No run brackets: an empty day is just a low point, never a gap.
+function Chart({ buckets, counts, dots }) {
   const { c } = useTheme()
   const n = buckets.length
   const padX = W / (2 * n)
@@ -61,18 +68,6 @@ function Chart({ buckets, counts, dots, runs }) {
   const total = Math.round(counts.reduce((a, b) => a + b, 0))
   return (
     <View testID="walks-chart">
-      {runs.length > 0 ? (
-        <View testID="day-runs" style={{ height: 28, position: 'relative' }}>
-          {runs.map((r) => (
-            <View key={r.start} testID="day-run" accessible
-              accessibilityLabel={`${r.length} days in a row with an urge passed, ${buckets[r.start].label} to ${buckets[r.end].label}`}
-              style={{ position: 'absolute', left: `${(r.start / n) * 100}%`, width: `${((r.end - r.start + 1) / n) * 100}%`, top: 0, height: 28, paddingHorizontal: 6, alignItems: 'center' }}>
-              <T font="semibold" size={12} max={1.3} color={c.accent}>{r.length} days</T>
-              <View style={{ alignSelf: 'stretch', height: 8, borderWidth: 1.5, borderBottomWidth: 0, borderColor: c.ringA, borderTopLeftRadius: 6, borderTopRightRadius: 6 }} />
-            </View>
-          ))}
-        </View>
-      ) : null}
       <View accessible accessibilityRole="image" accessibilityLabel={`Urges walked, ${total} in this range`}>
         <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
           <Defs>
