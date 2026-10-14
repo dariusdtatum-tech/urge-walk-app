@@ -6,6 +6,7 @@ import {
   OUTCOME_LABELS, deleteWalk, dayLabel, finishedLabel, formatDuration, formatTimeOfDay, groupByDay, kindOf, localDayKey,
   outcomeKey, plannedLabel, summarize, updateWalk, walkSummaryLabel, weekDays,
 } from '../lib/logStats.js'
+import { tagLabel } from '../lib/urgeMap.js'
 import { loadWalks, MAX_NOTE_LENGTH, saveWalks } from '../lib/walkStorage.js'
 import { Button } from '../ui/Button.jsx'
 import { OutcomePicker } from '../ui/CheckIn.jsx'
@@ -143,6 +144,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
                   </View>
                   {w.endedEarly ? <T size={12} color={c.mutedSand} style={{ alignSelf: 'flex-start', backgroundColor: c.sand, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 }}>Ended early</T> : null}
                   {w.note ? <T size={14} color={c.textSoft} numberOfLines={3}>{w.note}</T> : null}
+                  {w.tags?.length ? <T size={13} color={c.textSoft} testID="log-entry-tags" accessibilityLabel={`Context: ${w.tags.map(tagLabel).join(', ')}`}>{w.tags.map(tagLabel).join(' · ')}</T> : null}
                 </View>
               </Pressable>
             ))}

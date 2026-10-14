@@ -343,3 +343,40 @@ describe('idea 1: Urge Map', () => {
     expect(loadWalks(storage).walks.at(-1)).not.toHaveProperty('tags')
   })
 })
+
+describe('phase 1 follow-ups', () => {
+  test('follow-up is off for a new install', async () => {
+    const storage = memoryStorage()
+    await renderApp({ storage })
+    expect(JSON.parse(storage.getItem('urgewalk.v1.followUpPrefs'))).toEqual({ enabled: false })
+  })
+
+  test('existing users keep the follow-up on; a saved choice is kept', async () => {
+    const existing = memoryStorage({ ...habitsSeed(), ...onboardedProfile() })
+    await renderApp({ storage: existing })
+    await tab('You')
+    expect(screen.getByTestId('followup-toggle').props.value).toBe(true)
+  })
+
+  test('a saved "off" stays off for existing users', async () => {
+    const chose = memoryStorage({ ...habitsSeed(), ...onboardedProfile(), 'urgewalk.v1.followUpPrefs': JSON.stringify({ enabled: false }) })
+    await renderApp({ storage: chose })
+    await tab('You')
+    expect(screen.getByTestId('followup-toggle').props.value).toBe(false)
+  })
+
+  test('tags show quietly on urge entries in Track and survive editing the entry', async () => {
+    const { storage } = await renderApp()
+    await press('ride-button'); await press('ride-log')
+    await press('log-tags-open'); await press('log-tags-home'); await press('log-tags-stressed')
+    await press('log-save')
+    await logUrge()
+    await tab('Track')
+    const tags = screen.getAllByTestId('log-entry-tags')
+    expect(tags).toHaveLength(1)
+    expect(tags[0]).toHaveTextContent('Home · Stressed')
+    await fireEvent.press(screen.getAllByTestId('log-entry')[1])
+    await press('detail-save')
+    expect(loadWalks(storage).walks.find((w) => w.tags)?.tags).toEqual(['home', 'stressed'])
+  })
+})
