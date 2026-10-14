@@ -29,3 +29,7 @@ export function useTheme() {
   const scheme = forced === 'light' || forced === 'dark' ? forced : system === 'dark' ? 'dark' : 'light'
   return { scheme, c: palettes[scheme], fonts }
 }
+
+
+// Type / space / size / radius scale lives in tokens.js (plain values, testable without React Native).
+export { radius, size, space, type } from './tokens.js'
