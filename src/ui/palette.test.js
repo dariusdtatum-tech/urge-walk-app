@@ -11,6 +11,11 @@ const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p);
 const TEXT_PAIRS = [
   ['text', 'bg'], ['text', 'surface'], ['title', 'bg'], ['muted', 'bg'], ['muted', 'surface'], ['accent', 'bg'], ['accent', 'surface'],
   ['text', 'sand'], ['title', 'sand'], ['mutedSand', 'sand'], ['onAction', 'action'], ['onTileAlt', 'tileAlt'], ['onDanger', 'danger'],
+  // Milestone 3: Log outcome words, delete / error text, cards, toasts, segmented controls
+  ['resYes', 'card'], ['resKinda', 'card'], ['resNoText', 'card'], ['resYes', 'surface'], ['resKinda', 'surface'], ['resNoText', 'surface'],
+  ['danger', 'surface'], ['danger', 'card'], ['danger', 'bg'], ['error', 'surface'], ['error', 'bg'],
+  ['text', 'card'], ['textSoft', 'card'], ['muted', 'card'], ['title', 'card'], ['accent', 'card'],
+  ['toastText', 'toastBg'], ['toastAct', 'toastBg'], ['mutedSand', 'seg'], ['onActionSoft', 'action'],
 ]
 describe.each(['light', 'dark'])('%s palette meets WCAG AA', (s) => {
   it.each(TEXT_PAIRS)('%s on %s ≥ 4.5', (fg, bg) => {
