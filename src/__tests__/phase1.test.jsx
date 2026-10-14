@@ -190,3 +190,56 @@ describe('idea 18: trusted contacts', () => {
     expect(screen.queryByTestId('contact-0')).toBeNull()
   })
 })
+
+describe('idea 5: your reasons', () => {
+  const withReasons = (reasons, lock = false) => memoryStorage({ ...habitsSeed(), ...onboardedProfile(), 'urgewalk.v1.reasons': JSON.stringify({ version: 1, reasons, next: 0, lock }) })
+  const r = (id, text) => ({ id, kind: 'text', text, at: '2030-01-01T00:00:00.000Z' })
+
+  test('nothing shows on Breathe when there are no reasons', async () => {
+    await renderApp()
+    await press('ride-button'); await press('ride-breathe')
+    expect(screen.queryByTestId('breathe-reason')).toBeNull()
+  })
+
+  test('one reason shows on Breathe, a different one next time; Hide skips it', async () => {
+    const storage = withReasons([r('a', 'First reason'), r('b', 'Second reason')])
+    await renderApp({ storage })
+    await press('ride-button'); await press('ride-breathe')
+    expect(screen.getByTestId('breathe-reason-text')).toHaveTextContent(/First reason/)
+    await press('breathe-reason-hide')
+    expect(screen.queryByTestId('breathe-reason')).toBeNull()
+    expect(JSON.parse(storage.getItem('urgewalk.v1.reasons')).next).toBe(1)
+  })
+
+  test('locked: covered until unlocked', async () => {
+    const device = stubDevice()
+    await renderApp({ storage: withReasons([r('a', 'Hidden reason')], true), device })
+    await press('ride-button'); await press('ride-walk')
+    expect(screen.queryByTestId('walk-reason-text')).toBeNull()
+    await press('walk-reason-unlock')
+    expect(device.calls.unlocks).toBe(1)
+    expect(screen.getByTestId('walk-reason-text')).toHaveTextContent(/Hidden reason/)
+  })
+
+  test('add words, a photo and a voice note in You; remove deletes the file', async () => {
+    const device = stubDevice({ photo: 'file:///docs/reasons/p.jpg', voice: { uri: 'file:///docs/reasons/v.m4a', durationMs: 12000 } })
+    const { storage } = await renderApp({ device })
+    await tab('You')
+    await press('reasons-row')
+    await press('reason-write')
+    await press('reason-save')
+    expect(screen.getByTestId('reason-note')).toHaveTextContent(/few words/)
+    await fireEvent.changeText(screen.getByTestId('reason-text'), 'Mornings with a clear head')
+    await press('reason-save')
+    await press('reason-photo')
+    await press('reason-record')
+    await press('reason-stop')
+    expect(screen.getByTestId('reason-1-photo')).toBeTruthy()
+    await press('reason-2-play')
+    expect(device.calls.played).toEqual(['file:///docs/reasons/v.m4a'])
+    await press('reason-remove-1')
+    expect(device.calls.deleted).toEqual(['file:///docs/reasons/p.jpg'])
+    await fireEvent(screen.getByTestId('reasons-lock'), 'valueChange', true)
+    expect(JSON.parse(storage.getItem('urgewalk.v1.reasons'))).toMatchObject({ lock: true, reasons: [{ kind: 'text' }, { kind: 'voice' }] })
+  })
+})

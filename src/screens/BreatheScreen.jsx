@@ -8,6 +8,7 @@ import { BREATHE_SECONDS } from '../lib/walkStorage.js'
 import { Button } from '../ui/Button.jsx'
 import { CheckIn } from '../ui/CheckIn.jsx'
 import { useDevice } from '../ui/DeviceContext.js'
+import { ReasonCard } from './Reasons.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
 import { MAX_SCALE, useTheme } from '../ui/theme.js'
@@ -76,6 +77,7 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
   return (
     <View style={{ flex: 1, padding: 20, alignItems: 'center' }} testID="breathe">
       {endedAt == null && <KeepAwake />}
+      <ReasonCard testID="breathe-reason" />
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 }}>
         <View style={{ width: ORB, height: ORB, alignItems: 'center', justifyContent: 'center' }}
           accessibilityElementsHidden importantForAccessibility="no-hide-descendants">

@@ -14,7 +14,7 @@ import { T } from '../ui/Text.jsx'
 import { useTheme } from '../ui/theme.js'
 import { Check } from './onboarding/Steps.jsx'
 
-function SmallButton({ label, onPress, testID, accessibilityLabel, primary = false }) {
+export function SmallButton({ label, onPress, testID, accessibilityLabel, primary = false }) {
   const { c } = useTheme()
   return (
     <Pressable onPress={onPress} testID={testID} accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? label}

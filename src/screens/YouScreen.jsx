@@ -30,6 +30,8 @@ import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 
 import { CRISIS, CrisisSheet } from './Crisis.jsx'
 import { ContactsSheet, ReachOut } from './ReachOut.jsx'
+import { ReasonsSheet } from './Reasons.jsx'
+import { loadReasons } from '../lib/reasons.js'
 import { MAX_CONTACTS, loadContacts } from '../lib/contacts.js'
 
 export { CRISIS }
@@ -72,6 +74,8 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [showAnswers, setShowAnswers] = useState(false)
   const [showCrisis, setShowCrisis] = useState(false)
   const [showContacts, setShowContacts] = useState(false)
+  const [showReasons, setShowReasons] = useState(false)
+  const reasonCount = loadReasons(storage).length
   const [contactsVer, setContactsVer] = useState(0)
   const people = loadContacts(storage)
   const [followUpOn, setFollowUpOn] = useState(() => loadFollowUpEnabled(storage))
@@ -104,6 +108,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   function eraseAll() {
     setReset(null)
     clearAllData(storage)
+    device.deleteAllReasonFiles()
     onErased()
   }
 
@@ -142,6 +147,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
 
         <GroupTitle>Your recovery</GroupTitle>
         <Row title="Trackers" sub={habits.length === 0 ? 'Add the date you started' : habits.map((h) => h.name).join(' · ')} testID="trackers-row" onPress={() => setSheet({ mode: 'manage' })} />
+        <Row title="Your reasons" sub={reasonCount ? `${reasonCount} saved · one shows when you ride it out` : 'A photo, a voice note, or a few words'} testID="reasons-row" onPress={() => setShowReasons(true)} />
         {hero ? <Row title="Milestones" sub={`${earned === 1 ? '1 earned' : `${earned} earned`} · ${hero.name}`} testID="milestones-row" onPress={() => setSheet({ mode: 'milestones' })} /> : null}
         <Row title="Walk length" sub={`${lengthLabel(prefs)} · for Walk`} testID="walk-length" chevron={showLengths ? '⌃' : '›'} onPress={() => setShowLengths(!showLengths)} />
         {showLengths ? <WalkLengthPicker prefs={prefs} onChange={changePrefs} /> : null}
@@ -188,6 +194,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
 
       {sheet?.mode === 'milestones' && hero ? <MilestonesList data={milestones} habit={hero} today={today} onClose={() => setSheet(null)} /> : null}
       {editor.sheets}
+      {showReasons ? <ReasonsSheet onClose={() => setShowReasons(false)} /> : null}
       {showContacts ? <ContactsSheet onClose={() => { setShowContacts(false); setContactsVer((v) => v + 1) }} /> : null}
       {showCrisis ? <CrisisSheet onClose={() => setShowCrisis(false)} /> : null}
       {answer ? (

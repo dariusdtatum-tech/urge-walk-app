@@ -6,6 +6,7 @@ import { loadContacts } from '../lib/contacts.js'
 import { loadProfile } from '../lib/profile.js'
 import { Sheet } from '../ui/Sheet.jsx'
 import { ReachOut } from './ReachOut.jsx'
+import { ReasonCard } from './Reasons.jsx'
 import { SAVED_MESSAGES } from '../lib/walkMessages.js'
 import { appendWalk, loadActiveWalk, saveActiveWalk } from '../lib/walkStorage.js'
 import {
@@ -95,6 +96,7 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
     <View style={{ flex: 1 }} testID="walk-live">
       {walking && <KeepAwake />}
       <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 28, alignItems: 'center', gap: 18, flexGrow: 1 }}>
+        <ReasonCard testID="walk-reason" />
         {tip && (
           <View testID="longpress-tip" accessibilityRole="alert" style={{ alignSelf: 'stretch', backgroundColor: c.sand, borderRadius: 16, padding: 14, gap: 10 }}>
             <View style={{ flexDirection: 'row', gap: 12, alignItems: 'center' }}>
