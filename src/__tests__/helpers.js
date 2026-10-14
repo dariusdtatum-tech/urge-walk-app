@@ -15,14 +15,18 @@ export function fakeClock(start = T0) {
   return clock
 }
 export function stubDevice({ share = 'shared', file = null } = {}) {
-  const calls = { followUps: [], followUpCancels: 0, tap: 0, press: 0, breathTurn: 0, done: 0, alerts: [], shared: [], urls: [], picks: 0 }
+  const calls = { reminders: [], followUps: [], followUpCancels: 0, tap: 0, press: 0, breathTurn: 0, done: 0, alerts: [], shared: [], urls: [], picks: 0 }
   let followUpCb = null
+  let checkinCb = null
   return {
     calls,
     scheduleFollowUp(urgeId) { calls.followUps.push(urgeId); return Promise.resolve(true) },
     cancelFollowUp() { calls.followUpCancels += 1; return Promise.resolve() },
     onFollowUp(cb) { followUpCb = cb; return () => { followUpCb = null } },
     emitFollowUp(r) { followUpCb?.(r) },
+    syncCheckinReminder(r) { calls.reminders.push(r); return Promise.resolve(true) },
+    onCheckinReminder(cb) { checkinCb = cb; return () => { checkinCb = null } },
+    emitCheckinReminder() { checkinCb?.() },
     shareBackup(text, filename) { calls.shared.push({ text, filename }); return share instanceof Error ? Promise.reject(share) : Promise.resolve(share) },
     pickBackupFile() { calls.picks += 1; return Promise.resolve(file) },
     openURL(url) { calls.urls.push(url) },

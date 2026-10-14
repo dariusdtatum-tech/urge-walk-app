@@ -9,6 +9,7 @@ import { earnedList, loadMilestones, saveMilestones } from '../lib/milestones.js
 import {
   emptyProfile, identityLine, IMPORTANCE, improveLabels, labelFor, loadProfile, saveProfile, SUPPORT, supportValid, trustedContact,
 } from '../lib/profile.js'
+import { DEFAULT_REMINDER, loadReminder, reminderLabel, saveReminder, stepReminder } from '../lib/checkin.js'
 import { clearPendingFollowUp, loadFollowUpEnabled, saveFollowUpEnabled } from '../lib/followUp.js'
 import { CUSTOM_MAX, CUSTOM_MIN, WALK_OPTIONS, clampCustomMinutes } from '../lib/walkTimer.js'
 import { lengthLabel, loadWalkPrefs, saveWalkPrefs } from '../lib/walkStorage.js'
@@ -69,6 +70,8 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [showAnswers, setShowAnswers] = useState(false)
   const [showCrisis, setShowCrisis] = useState(false)
   const [followUpOn, setFollowUpOn] = useState(() => loadFollowUpEnabled(storage))
+  const [reminder, setReminder] = useState(() => loadReminder(storage))
+  const changeReminder = (r) => { saveReminder(r, storage); setReminder(r); device.syncCheckinReminder(r) }
   const [reset, setReset] = useState(null) // null | 'confirm' | 'saved?' | 'notSaved'
   const hero = heroHabit(habits)
   const earned = hero ? earnedList(milestones, hero.id).length : 0
@@ -139,6 +142,15 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
         <ToggleRow title="Check in after an urge" sub="One quiet notification about 30 minutes later. Never more than one per urge."
           value={followUpOn} testID="followup-toggle"
           onChange={(on) => { saveFollowUpEnabled(on, storage); setFollowUpOn(on); if (!on) { clearPendingFollowUp(storage); device.cancelFollowUp() } }} />
+        <ToggleRow title="Daily check-in reminder" sub={reminder ? `Every day at ${reminderLabel(reminder)}` : 'Off. You can still check in from Home.'}
+          value={!!reminder} testID="checkin-reminder" onChange={(on) => changeReminder(on ? DEFAULT_REMINDER : null)} />
+        {reminder ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 }} testID="checkin-time">
+            <Button kind="secondary" label="−" accessibilityLabel="15 minutes earlier" onPress={() => changeReminder(stepReminder(reminder, -1))} testID="checkin-time-less" />
+            <T font="semibold" size={18} color={c.title} style={{ minWidth: 96, textAlign: 'center' }} accessibilityLiveRegion="polite">{reminderLabel(reminder)}</T>
+            <Button kind="secondary" label="+" accessibilityLabel="15 minutes later" onPress={() => changeReminder(stepReminder(reminder, 1))} testID="checkin-time-more" />
+          </View>
+        ) : null}
         <TimeBackCard profile={profile} hero={hero} today={today} onChange={changeProfile} />
 
         <GroupTitle>About you</GroupTitle>

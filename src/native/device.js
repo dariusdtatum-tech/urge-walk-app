@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics'
 import * as Notifications from 'expo-notifications'
 import { pickBackupFile, shareBackup } from './backupFile.js'
 import { syncWalkAlert } from './walkAlert.js'
+import { listenCheckin, syncCheckinReminder } from './checkinReminder.js'
 import { cancelFollowUp, listenFollowUp, scheduleFollowUp } from './followUpNotify.js'
 
 const native = Platform.OS === 'ios' || Platform.OS === 'android'
@@ -33,6 +34,8 @@ export const device = {
     window.addEventListener('urgewalk-followup', f)
     return () => window.removeEventListener('urgewalk-followup', f)
   },
+  syncCheckinReminder(reminder) { return native ? syncCheckinReminder(Notifications, reminder) : Promise.resolve(false) },
+  onCheckinReminder(cb) { return native ? listenCheckin(Notifications, cb) : () => {} },
   shareBackup,
   pickBackupFile,
   openURL(url) { Linking.openURL(url).catch(() => {}) },

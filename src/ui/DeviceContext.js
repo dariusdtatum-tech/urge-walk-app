@@ -15,6 +15,9 @@ export const noopDevice = {
   scheduleFollowUp: (_urgeId) => Promise.resolve(false),
   cancelFollowUp: () => Promise.resolve(),
   onFollowUp: (_cb) => () => {},
+  // The optional daily check-in reminder. syncCheckinReminder(null) turns it off.
+  syncCheckinReminder: (_reminder) => Promise.resolve(false),
+  onCheckinReminder: (_cb) => () => {},
 }
 export const DeviceContext = createContext(noopDevice)
 export const useDevice = () => useContext(DeviceContext)

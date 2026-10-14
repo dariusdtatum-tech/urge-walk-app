@@ -20,6 +20,7 @@ import { HomeScreen } from './screens/HomeScreen.jsx'
 import { CommunityScreen } from './screens/CommunityScreen.jsx'
 import { TrackScreen } from './screens/TrackScreen.jsx'
 import { Onboarding } from './screens/onboarding/Onboarding.jsx'
+import { CheckInSheet } from './screens/CheckInSheet.jsx'
 import { FollowUpSheet } from './screens/FollowUpSheet.jsx'
 import { RideSheet } from './screens/RideSheet.jsx'
 import { WalkScreen } from './screens/WalkScreen.jsx'
@@ -53,6 +54,7 @@ function Shell({ clock, theme, onTheme }) {
   const [backup, setBackup] = useState(false) // the Backup screen, opened from Home or You
   const [journalEditing, setJournalEditing] = useState(false)
   const [focusWalkId, setFocusWalkId] = useState(null)
+  const [checkIn, setCheckIn] = useState(false)
   const [followUpFor, setFollowUpFor] = useState(null) // urge id when the follow-up sheet is open
   const breatheId = useRef(null) // the urge id for the Breathe minute in progress
   const screenRef = useRef(screen)
@@ -84,6 +86,7 @@ function Shell({ clock, theme, onTheme }) {
     if (action === 'tough') { setScreen((sc) => (sc === 'walk' || sc === 'breathe' ? sc : 'tabs')); if (!loadActiveWalk(storage)) setShowRide(true) }
     else if (action === 'passed') setToast({ text: 'Glad it passed. Saved to that entry.' })
   }, [storage])
+  useEffect(() => device.onCheckinReminder(() => { if (screenRef.current === 'tabs') setCheckIn(true) }), [device])
   useEffect(() => device.onFollowUp(({ urgeId, action }) => applyFollowUp(urgeId, action)), [device, applyFollowUp])
 
   const goTo = useCallback((t) => { setFocusWalkId(null); setBackup(false); setTab(t); setNow(clock()); setDataVer((v) => v + 1) }, [clock])
@@ -176,7 +179,7 @@ function Shell({ clock, theme, onTheme }) {
   if (screen === 'walk') body = <WalkScreen clock={clock} longPressTip={lpTip} onSaved={onWalkSaved} onExit={exitWalk} />
   else if (screen === 'breathe') body = <BreatheScreen clock={clock} onSave={onBreatheSaved} onCancel={backHome} />
   else if (backup) body = <BackupScreen key={dataVer} clock={clock} backLabel={tab === 'you' ? 'You' : 'Home'} onBack={() => { setBackup(false); setDataVer((v) => v + 1) }} />
-  else if (tab === 'home') body = <HomeScreen key={dataVer} now={now} clock={clock} onRide={onRide} liveWalk={!!loadActiveWalk(storage)} onResume={() => setScreen('walk')} onOpenBackup={openBackup} />
+  else if (tab === 'home') body = <HomeScreen key={dataVer} now={now} clock={clock} onRide={onRide} liveWalk={!!loadActiveWalk(storage)} onResume={() => setScreen('walk')} onOpenBackup={openBackup} onCheckIn={() => setCheckIn(true)} />
   else if (tab === 'track') {
     body = (
       <TrackScreen key={dataVer} view={trackView} onView={(v) => { setTrackView(v); setFocusWalkId(null) }} now={now} clock={clock} onRide={onRide}
@@ -219,6 +222,10 @@ function Shell({ clock, theme, onTheme }) {
       )}
       <RideSheet visible={showRide} onWalk={startWalk} onBreathe={() => { markStress(clock(), storage); breatheId.current = makeId(); setToast(null); setShowRide(false); setScreen('breathe') }}
         onLog={onLog} onClose={() => setShowRide(false)} />
+      {checkIn && screen === 'tabs' ? (
+        <CheckInSheet now={now} clock={clock} onClose={() => { setCheckIn(false); setDataVer((v) => v + 1) }}
+          onRide={() => { setCheckIn(false); setDataVer((v) => v + 1); onRide() }} />
+      ) : null}
       {followUpFor ? <FollowUpSheet onAnswer={(a) => applyFollowUp(followUpFor, a)} onClose={() => setFollowUpFor(null)} /> : null}
     </View>
   )

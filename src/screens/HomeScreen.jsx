@@ -18,12 +18,13 @@ import { HeroPager } from './home/HeroPager.jsx'
 import { MilestoneSheet } from './home/Milestones.jsx'
 import { NeverZero } from './home/NeverZero.jsx'
 import { WalksCard } from './home/WalksCard.jsx'
+import { CheckInCard } from './CheckInSheet.jsx'
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 
 // Home (the PWA's HomeTab): date + Edit, identity line, undo-reset banners, the Ride it out bar, the
 // two-page hero (ring + daily line / clean time + milestone cards), Never zero, Your walks, the calm
 // backup nudge, and one milestone sheet per new milestone.
-export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, onOpenBackup }) {
+export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, onOpenBackup, onCheckIn = () => {} }) {
   const storage = useStorage()
   const { c } = useTheme()
   const today = todayISO(new Date(now))
@@ -106,6 +107,7 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
         </View>
       )}
 
+      <CheckInCard today={today} onOpen={onCheckIn} />
       {hero ? <NeverZero hero={hero} walks={walks} today={today} highlight={highlight} /> : null}
       {hero || walks.length > 0 ? (
         <WalksCard walks={walks} range={range} onRange={(id) => { setRange(id); saveRange(id, storage) }} streak={hero ? days : null} now={now} since={allSince} />
