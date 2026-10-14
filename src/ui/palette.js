@@ -20,6 +20,7 @@ export const light = {
   accent: '#3f7a6b',
   ringA: '#5d9384',
   ringB: '#a9cbc0',
+  holdFill: '#a9cbc0', // the hold button's wave fill; title text sits on it
   action: '#24395c',
   onAction: '#faf7f1',
   onActionSoft: '#d6dbe5',
@@ -64,6 +65,7 @@ export const dark = {
   accent: '#a9cbc0',
   ringA: '#a9cbc0',
   ringB: '#d3e6df',
+  holdFill: '#2e5e53',
   action: '#a9cbc0',
   onAction: '#0f1d33',
   onActionSoft: '#1b3152',

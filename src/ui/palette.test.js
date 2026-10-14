@@ -16,6 +16,8 @@ const TEXT_PAIRS = [
   ['danger', 'surface'], ['danger', 'card'], ['danger', 'bg'], ['error', 'surface'], ['error', 'bg'],
   ['text', 'card'], ['textSoft', 'card'], ['muted', 'card'], ['title', 'card'], ['accent', 'card'],
   ['toastText', 'toastBg'], ['toastAct', 'toastBg'], ['mutedSand', 'seg'], ['onActionSoft', 'action'],
+  // Phase 1: text on the hold button's sea-glass fill
+  ['title', 'holdFill'],
 ]
 describe.each(['light', 'dark'])('%s palette meets WCAG AA', (s) => {
   it.each(TEXT_PAIRS)('%s on %s ≥ 4.5', (fg, bg) => {
