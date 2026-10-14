@@ -23,7 +23,7 @@ import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { Stepper } from '../ui/Stepper.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { useTheme } from '../ui/theme.js'
+import { space, type, useTheme } from '../ui/theme.js'
 import { MilestonesList } from './home/Milestones.jsx'
 import { BeforeSteppers, IdentityStep, ImportanceStep, ImproveStep, SupportStep, WhyStep } from './onboarding/Steps.jsx'
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
@@ -138,8 +138,8 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 140, gap: 10 }} testID="you">
-        <T accessibilityRole="header" font="serif" size={34} color={c.title}>You</T>
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: 10 }} testID="you">
+        <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>You</T>
         <Notice text={notice} onDismiss={() => setNotice('')} />
         <ResetToast editor={editor} />
 
@@ -257,8 +257,8 @@ function TimeBackCard({ profile, hero, today, onChange }) {
         <T accessibilityRole="header" font="semibold" size={17} color={c.title} style={{ flex: 1 }}>Time back</T>
         <T font="semibold" size={12} color={c.mutedSand} style={{ backgroundColor: c.sand, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 }}>Estimate</T>
       </View>
-      <T size={16} color={c.muted}>about <T font="serif" size={34} color={c.title} testID="tb-hours">{tb.hours.toLocaleString()}</T> <T size={16} color={c.text}>hours</T></T>
-      {tb.money != null ? <T size={16} color={c.muted}>and about <T font="serif" size={30} color={c.title} testID="tb-money">${tb.money.toLocaleString()}</T> <T size={16} color={c.text}>kept</T></T> : null}
+      <T size={type.body} color={c.muted}>about <T font="serif" size={type.screenTitle} color={c.title} testID="tb-hours">{tb.hours.toLocaleString()}</T> <T size={type.body} color={c.text}>hours</T></T>
+      {tb.money != null ? <T size={type.body} color={c.muted}>and about <T font="serif" size={type.rideSheetTitle} color={c.title} testID="tb-money">${tb.money.toLocaleString()}</T> <T size={type.body} color={c.text}>kept</T></T> : null}
       <T size={13} color={c.muted} testID="tb-formula">
         Since {shortDate(hero.startDate, '0000-01-01')}, based on what you told us: {plural(tb.daysPerWeek, 'day', 'days')} a week,{' '}
         {tb.timesPerDay === 7 ? '7+ times' : plural(tb.timesPerDay, 'time', 'times')} a day, about {fmtHours(tb.hoursPerTime)} each

@@ -11,7 +11,7 @@ import { DatePicker } from '../../ui/DatePicker.jsx'
 import { Field } from '../../ui/Field.jsx'
 import { Stepper } from '../../ui/Stepper.jsx'
 import { T } from '../../ui/Text.jsx'
-import { useTheme } from '../../ui/theme.js'
+import { size as sz, type, useTheme } from '../../ui/theme.js'
 
 export function Check({ color, size = 14 }) {
   return <Svg width={size} height={size} viewBox="0 0 24 24"><Path d="M5 12.5 10 17 19 7" stroke={color} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" /></Svg>
@@ -40,10 +40,10 @@ function Option({ selected, onSelect, title, hint, icon, testID }) {
   const { c } = useTheme()
   return (
     <Pressable onPress={onSelect} accessibilityRole="radio" accessibilityState={{ checked: selected }} testID={testID}
-      style={{ minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, borderWidth: selected ? 2 : 1, borderColor: selected ? c.title : c.border, backgroundColor: c.card }}>
+      style={{ minHeight: sz.row, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, borderWidth: selected ? 2 : 1, borderColor: selected ? c.title : c.border, backgroundColor: c.card }}>
       {icon ? <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: c.sand, alignItems: 'center', justifyContent: 'center' }}><LineIcon id={icon} color={c.title} /></View> : null}
       <View style={{ flex: 1, gap: 2 }}>
-        <T font="semibold" size={16} color={c.title}>{title}</T>
+        <T font="semibold" size={type.body} color={c.title}>{title}</T>
         {hint ? <T size={14} color={c.muted}>{hint}</T> : null}
       </View>
       <View style={{ width: 24, height: 24, borderRadius: 12, borderWidth: selected ? 0 : 1.5, borderColor: c.fieldBorder, backgroundColor: selected ? c.action : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
@@ -97,7 +97,7 @@ export function RidingStep({ picks, onChange, onSelfHarm }) {
         style={{ minHeight: 48, borderWidth: 1, borderColor: c.fieldBorder, borderRadius: 24, paddingHorizontal: 16, color: c.text, fontFamily: fonts.body, fontSize: 16, backgroundColor: c.card }} />
       {q && !exact ? (
         <Pressable onPress={add} accessibilityRole="button" testID="riding-add" style={{ minHeight: 48, justifyContent: 'center', paddingHorizontal: 14, borderRadius: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: c.title }}>
-          <T font="semibold" size={16} color={c.title}>+ Add “{q}”</T>
+          <T font="semibold" size={type.body} color={c.title}>+ Add “{q}”</T>
         </Pressable>
       ) : null}
       {groups.map((g) => (

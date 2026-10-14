@@ -9,7 +9,7 @@ import { useDevice } from '../ui/DeviceContext.js'
 import { Card } from '../ui/Row.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { useTheme } from '../ui/theme.js'
+import { space, type, useTheme } from '../ui/theme.js'
 
 const formatWhen = (iso) => new Date(iso).toLocaleString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' })
 const formatDay = (iso) => new Date(iso).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
@@ -76,9 +76,9 @@ export function BackupScreen({ onBack, backLabel = 'Home', onRestored, clock = D
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 140, gap: 16 }} testID="backup">
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="backup">
         <Button kind="quiet" label={`‹ ${backLabel}`} onPress={onBack} testID="backup-back" style={{ alignSelf: 'flex-start', paddingHorizontal: 4 }} />
-        <T accessibilityRole="header" font="serif" size={34} color={c.title}>Backup</T>
+        <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Backup</T>
         <T size={15} color={c.text}>🔒 Your backup file holds everything in the app, including your private journal. Keep it somewhere safe, like iCloud Drive or the Files app, and don’t share it.</T>
         {message ? (
           <T size={15} color={message.kind === 'ok' ? c.accent : c.error} accessibilityRole={message.kind === 'ok' ? undefined : 'alert'}

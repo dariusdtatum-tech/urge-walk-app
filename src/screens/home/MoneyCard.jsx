@@ -10,7 +10,7 @@ import { fmtMoney, goalProgress, loadGoal, moneyKept } from '../../lib/money.js'
 import { Card } from '../../ui/Row.jsx'
 import { useStorage } from '../../ui/StorageContext.js'
 import { T } from '../../ui/Text.jsx'
-import { useTheme } from '../../ui/theme.js'
+import { type, useTheme } from '../../ui/theme.js'
 
 export function MoneyCard({ profile, hero, walks, today, since }) {
   const storage = useStorage()
@@ -22,8 +22,8 @@ export function MoneyCard({ profile, hero, walks, today, since }) {
   return (
     <Card testID="money-card" style={{ gap: 6 }}>
       <T accessibilityRole="header" font="semibold" size={17} color={c.title}>Money kept</T>
-      <T size={16} color={c.text} testID="money-total">
-        <T font="serif" size={30} color={c.title}>{fmtMoney(kept.total)}</T> kept{since ? ` since ${since}` : ''}
+      <T size={type.body} color={c.text} testID="money-total">
+        <T font="serif" size={type.rideSheetTitle} color={c.title}>{fmtMoney(kept.total)}</T> kept{since ? ` since ${since}` : ''}
       </T>
       <T size={13} color={c.muted}>
         {kept.basis === 'estimate' ? `An estimate at ${fmtMoney(kept.perTime)} each time.` : `${kept.passed} ${kept.passed === 1 ? 'urge' : 'urges'} that passed × ${fmtMoney(kept.perTime)}.`}

@@ -2,7 +2,7 @@
 import { View } from 'react-native'
 import { Seg } from '../ui/Seg.jsx'
 import { T } from '../ui/Text.jsx'
-import { useTheme } from '../ui/theme.js'
+import { type, useTheme } from '../ui/theme.js'
 import { JournalScreen } from './JournalScreen.jsx'
 import { LogScreen } from './LogScreen.jsx'
 
@@ -12,7 +12,7 @@ export function TrackScreen({ view, onView, now, clock, onRide, focusWalkId, onE
   const { c } = useTheme()
   const header = (
     <View style={{ gap: 12 }}>
-      <T accessibilityRole="header" font="serif" size={34} color={c.title}>Track</T>
+      <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Track</T>
       <Seg items={TRACK_VIEWS} value={view} onChange={onView} label="Track view" testID="track" />
     </View>
   )

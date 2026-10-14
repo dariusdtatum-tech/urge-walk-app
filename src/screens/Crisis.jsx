@@ -4,7 +4,7 @@ import { Button } from '../ui/Button.jsx'
 import { useDevice } from '../ui/DeviceContext.js'
 import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { T } from '../ui/Text.jsx'
-import { useTheme } from '../ui/theme.js'
+import { type, useTheme } from '../ui/theme.js'
 
 // US crisis lines (public numbers). Each opens the phone's own dialer / messages.
 export const CRISIS = [
@@ -17,10 +17,10 @@ export function CrisisSheet({ onClose }) {
   const device = useDevice()
   return (
     <Sheet title="Crisis resources" onClose={onClose} testID="crisis-sheet" right={<HeaderButton label="✕" accessibilityLabel="Close" onPress={onClose} />}>
-      <T size={16} color={c.text}>If you’re struggling, you don’t have to ride it out alone. Reach out now.</T>
+      <T size={type.body} color={c.text}>If you’re struggling, you don’t have to ride it out alone. Reach out now.</T>
       {CRISIS.map((r) => (
         <View key={r.id} testID={`crisis-${r.id}`} style={{ gap: 6, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: c.border }}>
-          <T font="semibold" size={16} color={c.title}>{r.name}</T>
+          <T font="semibold" size={type.body} color={c.title}>{r.name}</T>
           <T size={14} color={c.muted}>{r.note}</T>
           <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
             {r.links.map((l) => <Button key={l.url} kind="secondary" label={l.label} onPress={() => device.openURL(l.url)} testID={`crisis-link-${l.url}`} />)}

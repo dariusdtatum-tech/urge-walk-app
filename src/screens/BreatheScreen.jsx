@@ -12,7 +12,7 @@ import { ReasonCard } from './Reasons.jsx'
 import { useGoalLine } from './home/MoneyCard.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { MAX_SCALE, useTheme } from '../ui/theme.js'
+import { MAX_SCALE, space, type, useTheme } from '../ui/theme.js'
 
 export const PHASE_WORDS = { in: 'Breathe in', hold: 'Hold', out: 'Breathe out' }
 const ORB = 220
@@ -68,7 +68,7 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
   if (endedAt != null) {
     const secs = Math.round((endedAt - startedAt) / 1000)
     return (
-      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 32 }} testID="breathe-done">
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 32 }} testID="breathe-done">
         <CheckIn heading="Nice. That one passed a little." sub={`You breathed for ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}.`}
           onSave={({ result, note, tags }) => onSave({ startedAt, endedAt, result, note, tags })}
           onSkip={() => onSave({ startedAt, endedAt, result: null, note: '' })} />
@@ -77,10 +77,10 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
   }
 
   return (
-    <View style={{ flex: 1, padding: 20, alignItems: 'center' }} testID="breathe">
+    <View style={{ flex: 1, padding: space.screen, alignItems: 'center' }} testID="breathe">
       {endedAt == null && <KeepAwake />}
       <ReasonCard testID="breathe-reason" extra={goalLine} />
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 16 }}>
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.section }}>
         <View style={{ width: ORB, height: ORB, alignItems: 'center', justifyContent: 'center' }}
           accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
           <View style={{ position: 'absolute', width: ORB, height: ORB, borderRadius: ORB / 2, borderWidth: 1.5, borderColor: c.breatheLine }} />
@@ -95,7 +95,7 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
           {Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')}
         </T>
       </View>
-      <T size={16} color={c.text} style={{ textAlign: 'center', marginBottom: 12 }} testID="breathe-line">
+      <T size={type.body} color={c.text} style={{ textAlign: 'center', marginBottom: 12 }} testID="breathe-line">
         {BREATHE_LINES[(offset + Math.floor(elapsed / 20000)) % BREATHE_LINES.length]}
       </T>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 12 }}>

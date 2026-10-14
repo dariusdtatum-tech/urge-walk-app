@@ -14,7 +14,7 @@ import { Confirm } from '../ui/Confirm.jsx'
 import { Notice } from '../ui/Row.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { useTheme } from '../ui/theme.js'
+import { size as sz, space, type, useTheme } from '../ui/theme.js'
 import { ResultWord } from './LogScreen.jsx'
 
 const NOTE_TAGS = { walk: '🚶 Walk note', breathe: '🌬️ Breathe note', logged: '🌊 Urge note' }
@@ -57,13 +57,13 @@ export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChan
   const groups = groupByDay(shown, today, (item) => item.time)
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 140, gap: 14 }} testID="journal" keyboardShouldPersistTaps="handled">
-      {header ?? <T accessibilityRole="header" font="serif" size={34} color={c.title}>Journal</T>}
+    <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: 14 }} testID="journal" keyboardShouldPersistTaps="handled">
+      {header ?? <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Journal</T>}
       <Notice text={notice} onDismiss={() => setNotice('')} />
       {feed.length === 0 ? (
         <View style={{ alignItems: 'center', gap: 12, paddingVertical: 32 }} testID="journal-empty">
           <T accessibilityRole="header" font="serif" size={26} color={c.title}>Your journal</T>
-          <T size={16} color={c.text}>A few honest lines can help.</T>
+          <T size={type.body} color={c.text}>A few honest lines can help.</T>
           <Button label="Write your first entry" onPress={() => openEditor(newDraft(clock()))} testID="journal-new" style={{ alignSelf: 'stretch' }} />
         </View>
       ) : (
@@ -79,12 +79,12 @@ export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChan
               {g.walks.map((item) => (
                 <Pressable key={item.id} testID="journal-item" accessibilityRole="button"
                   onPress={() => (item.kind === 'entry' ? openEditor(draftFromEntry(item.entry)) : onOpenWalk(item.walk.id))}
-                  style={({ pressed }) => ({ minHeight: 56, backgroundColor: c.card, borderRadius: 14, borderWidth: 1, borderColor: c.border, padding: 12, gap: 4, opacity: pressed ? 0.85 : 1 })}>
+                  style={({ pressed }) => ({ minHeight: sz.row, backgroundColor: c.card, borderRadius: 14, borderWidth: 1, borderColor: c.border, padding: 12, gap: 4, opacity: pressed ? 0.85 : 1 })}>
                   {item.kind === 'entry' ? (
                     <>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                         <T font="semibold" size={14} color={c.muted}>{formatTimeOfDay(item.time)}</T>
-                        <T font="semibold" size={16} color={c.title} style={{ flex: 1 }} numberOfLines={1}>{item.entry.title}</T>
+                        <T font="semibold" size={type.body} color={c.title} style={{ flex: 1 }} numberOfLines={1}>{item.entry.title}</T>
                         {item.entry.mood ? <T size={18} accessibilityLabel={`Mood: ${moodInfo(item.entry.mood).label}`}>{moodInfo(item.entry.mood).emoji}</T> : null}
                       </View>
                       {item.entry.body ? <T size={15} color={c.textSoft} numberOfLines={3}>{item.entry.body}</T> : null}
@@ -129,10 +129,10 @@ function JournalEditor({ draft, entries, restored, onChange, onDone, onDiscard, 
       <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: 12, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: c.border }}>
           <Button kind="quiet" label={isEdit ? 'Close' : 'Discard'} onPress={() => (hasChanges(draft, entries) ? setConfirm('discard') : onDiscard())} testID="editor-close" />
-          <T accessibilityRole="header" font="semibold" size={16} color={c.title} style={{ flex: 1, textAlign: 'center' }}>{isEdit ? 'Edit entry' : 'New entry'}</T>
+          <T accessibilityRole="header" font="semibold" size={type.body} color={c.title} style={{ flex: 1, textAlign: 'center' }}>{isEdit ? 'Edit entry' : 'New entry'}</T>
           <Button label="Done" onPress={onDone} testID="editor-done" />
         </View>
-        <ScrollView contentContainerStyle={{ padding: 20, gap: 14, paddingBottom: 40 + insets.bottom }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ padding: space.screen, gap: 14, paddingBottom: 40 + insets.bottom }} keyboardShouldPersistTaps="handled">
           <T size={13} color={c.muted} testID="draft-status" accessibilityLiveRegion="polite">{status}</T>
           <TextInput value={draft.title} onChangeText={(title) => change({ title })} maxLength={MAX_TITLE_LENGTH} placeholder="Title (optional)"
             placeholderTextColor={c.muted} accessibilityLabel="Title" testID="editor-title" maxFontSizeMultiplier={2}
@@ -147,7 +147,7 @@ function JournalEditor({ draft, entries, restored, onChange, onDone, onDiscard, 
               <Pressable onPress={() => setPromptIndex((i) => (i + 1) % PROMPTS.length)} accessibilityRole="button" accessibilityLabel="Another prompt" testID="prompt-next"
                 style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><T size={18} color={c.mutedSand}>↻</T></Pressable>
               <Pressable onPress={() => setShowPrompt(false)} accessibilityRole="button" accessibilityLabel="Hide prompt"
-                style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><T size={16} color={c.mutedSand}>✕</T></Pressable>
+                style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><T size={type.body} color={c.mutedSand}>✕</T></Pressable>
             </View>
           ) : null}
           <View style={{ flexDirection: 'row', gap: 6 }} accessibilityLabel="Mood (optional)">

@@ -3,7 +3,7 @@ import { Pressable, ScrollView, View } from 'react-native'
 import { cleanTime, cleanTimeLabel, dailyLine, milestoneCards, sinceLabel } from '../../lib/homeIdeas.js'
 import { Ring } from '../../ui/Ring.jsx'
 import { T } from '../../ui/Text.jsx'
-import { MAX_SCALE, useTheme } from '../../ui/theme.js'
+import { MAX_SCALE, size as sz, type, useTheme } from '../../ui/theme.js'
 import { Badge } from './Milestones.jsx'
 
 // Home hero, two swipeable pages: 1 = the milestone ring + label + daily line,
@@ -21,7 +21,7 @@ export function HeroPager({ hero, days, since, segment, label, milestones, today
     setPage(i)
     track.current?.scrollTo?.({ x: i * width, animated: true })
   }
-  const pageStyle = { width: width || undefined, alignItems: 'center', justifyContent: 'center', minHeight: 230 }
+  const pageStyle = { width: width || undefined, alignItems: 'center', justifyContent: 'center', minHeight: sz.ring + 20 }
 
   return (
     <View style={{ gap: 10 }} testID="hero">
@@ -30,19 +30,19 @@ export function HeroPager({ hero, days, since, segment, label, milestones, today
           onMomentumScrollEnd={(e) => { const i = Math.round(e.nativeEvent.contentOffset.x / Math.max(1, width)); if (i !== page) setPage(i) }}>
           <View style={pageStyle} importantForAccessibility={page === 0 ? 'auto' : 'no-hide-descendants'} accessibilityElementsHidden={page !== 0}>
             <Ring value={segment.progress} testID="hero-ring">
-              <T font="bold" size={13} max={MAX_SCALE.ringSmall} color={c.accent} numberOfLines={1}
+              <T font="bold" size={type.ringName} max={MAX_SCALE.ringSmall} color={c.accent} numberOfLines={1}
                 style={{ letterSpacing: 2, textTransform: 'uppercase' }}>{hero.name}</T>
-              <T font="serif" size={days > 99999 ? 44 : days > 999 ? 56 : 72} max={MAX_SCALE.ring} color={c.title} testID="hero-days"
-                accessibilityLabel={`${days} ${days === 1 ? 'day' : 'days'} clean`} style={{ lineHeight: 76, fontVariant: ['lining-nums', 'tabular-nums'] }}>{days.toLocaleString()}</T>
-              <T font="serif" size={20} max={MAX_SCALE.ringSmall} color={c.title}>{days === 1 ? 'day clean' : 'days clean'}</T>
+              <T font="serif" size={days > 99999 ? type.ringDaysSm : days > 999 ? type.ringDaysMd : type.ringDays} max={MAX_SCALE.ring} color={c.title} testID="hero-days"
+                accessibilityLabel={`${days} ${days === 1 ? 'day' : 'days'} clean`} style={{ lineHeight: type.ringDays + 4, fontVariant: ['lining-nums', 'tabular-nums'] }}>{days.toLocaleString()}</T>
+              <T font="serif" size={type.ringLabel} max={MAX_SCALE.ringSmall} color={c.title}>{days === 1 ? 'day clean' : 'days clean'}</T>
               <T size={12} max={MAX_SCALE.ringSmall} color={c.muted}>{since}</T>
             </Ring>
           </View>
           <View style={pageStyle} testID="clean-time" importantForAccessibility={page === 1 ? 'auto' : 'no-hide-descendants'} accessibilityElementsHidden={page !== 1}>
             <T font="bold" size={13} color={c.accent} style={{ letterSpacing: 1.5, textTransform: 'uppercase' }}>{hero.name} · clean for</T>
             <View accessible accessibilityLabel={cleanTimeLabel(ct)} testID="clean-time-value" style={{ alignItems: 'center' }}>
-              <T font="serif" size={56} max={MAX_SCALE.ring} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{ct.days.toLocaleString()} <T font="serif" size={24} max={MAX_SCALE.ring} color={c.title}>{ct.days === 1 ? 'day' : 'days'}</T></T>
-              <T font="serif" size={40} max={MAX_SCALE.ring} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{ct.hours} <T font="serif" size={22} max={MAX_SCALE.ring} color={c.title}>{ct.hours === 1 ? 'hour' : 'hours'}</T></T>
+              <T font="serif" size={46} max={MAX_SCALE.ring} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{ct.days.toLocaleString()} <T font="serif" size={24} max={MAX_SCALE.ring} color={c.title}>{ct.days === 1 ? 'day' : 'days'}</T></T>
+              <T font="serif" size={type.screenTitle} max={MAX_SCALE.ring} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{ct.hours} <T font="serif" size={22} max={MAX_SCALE.ring} color={c.title}>{ct.hours === 1 ? 'hour' : 'hours'}</T></T>
             </View>
             <T size={14} color={c.muted}>since {sinceLabel(hero)}</T>
           </View>
@@ -89,7 +89,7 @@ function MsCard({ k, badge, earned = false, name, date, progress, testID }) {
         <T font="semibold" size={13} color={c.muted} style={{ flex: 1 }}>{k}</T>
         {badge ? <Badge label={badge} earned={earned} /> : null}
       </View>
-      <T font="semibold" size={16} color={c.title}>{name}</T>
+      <T font="semibold" size={type.body} color={c.title}>{name}</T>
       <T size={13} color={c.muted}>{date}</T>
       {progress != null ? (
         <View accessibilityRole="progressbar" accessibilityLabel={`Progress to ${name}`} accessibilityValue={{ min: 0, max: 100, now: Math.round(progress * 100) }}

@@ -13,7 +13,7 @@ import { WaveIcon } from '../ui/Icons.jsx'
 import { Notice } from '../ui/Row.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { useTheme } from '../ui/theme.js'
+import { radius, size as sz, space, type, useTheme } from '../ui/theme.js'
 import { HeroPager } from './home/HeroPager.jsx'
 import { MilestoneSheet } from './home/Milestones.jsx'
 import { NeverZero } from './home/NeverZero.jsx'
@@ -64,15 +64,15 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
   const identity = identityLine(profile)
 
   return (
-    <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 140, gap: 16 }} testID="home">
+    <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="home">
       <View style={{ flexDirection: 'row', alignItems: 'center' }}>
         <T font="medium" size={15} color={c.muted} style={{ flex: 1 }}>{dateLine}</T>
         <Pressable onPress={() => setSheet({ mode: 'manage' })} accessibilityRole="button" accessibilityLabel="Edit trackers" testID="home-edit"
           style={{ minHeight: 44, minWidth: 44, alignItems: 'flex-end', justifyContent: 'center' }}>
-          <T font="semibold" size={16} color={c.accent}>Edit</T>
+          <T font="semibold" size={type.body} color={c.accent}>Edit</T>
         </Pressable>
       </View>
-      {identity ? <T font="serifItalic" size={19} color={c.title} testID="identity-line">{identity}</T> : null}
+      {identity ? <T font="serifItalic" size={type.identity} color={c.title} testID="identity-line">{identity}</T> : null}
 
       {habits.map((h) => {
         const u = undoableReset(h, now)
@@ -87,13 +87,13 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
 
       <Pressable onPress={liveWalk ? onResume : onRide} accessibilityRole="button" testID="ride-bar"
         accessibilityLabel={liveWalk ? 'Back to your walk. Your walk is still going.' : 'Ride it out. Walk, breathe, or just log it.'}
-        style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 14, minHeight: 64, paddingHorizontal: 16, paddingVertical: 12, borderRadius: 18, backgroundColor: c.action, opacity: pressed ? 0.9 : 1 })}>
-        <View style={{ width: 40, height: 40, borderRadius: 20, borderWidth: 1.5, borderColor: c.onActionSoft, alignItems: 'center', justifyContent: 'center' }}>
-          <WaveIcon color={c.onAction} size={22} />
+        style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: sz.rideBar, paddingHorizontal: space.rowX, paddingVertical: space.rowY, borderRadius: radius.card, backgroundColor: c.action, opacity: pressed ? 0.9 : 1 })}>
+        <View style={{ width: sz.rideBarIcon, height: sz.rideBarIcon, borderRadius: sz.rideBarIcon / 2, borderWidth: 1.5, borderColor: c.onActionSoft, alignItems: 'center', justifyContent: 'center' }}>
+          <WaveIcon color={c.onAction} size={18} />
         </View>
         <View style={{ flex: 1 }}>
-          <T font="bold" size={17} color={c.onAction}>{liveWalk ? 'Back to your walk' : 'Ride it out'}</T>
-          <T size={14} color={c.onActionSoft}>{liveWalk ? 'Your walk is still going.' : 'Walk, breathe, or just log it.'}</T>
+          <T font="bold" size={type.rideBar} color={c.onAction}>{liveWalk ? 'Back to your walk' : 'Ride it out'}</T>
+          <T size={type.rideBarSub} color={c.onActionSoft}>{liveWalk ? 'Your walk is still going.' : 'Walk, breathe, or just log it.'}</T>
         </View>
         <T size={22} color={c.onAction} accessibilityElementsHidden importantForAccessibility="no">›</T>
       </Pressable>
@@ -103,7 +103,7 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
       ) : (
         <View style={{ alignItems: 'center', gap: 12, paddingVertical: 24 }} testID="home-empty">
           <T accessibilityRole="header" font="serif" size={28} color={c.title}>Every day counts</T>
-          <T size={16} color={c.text} style={{ textAlign: 'center' }}>Add your start date to begin counting.</T>
+          <T size={type.body} color={c.text} style={{ textAlign: 'center' }}>Add your start date to begin counting.</T>
           <Button label="Add your start date" onPress={() => setSheet({ mode: 'add' })} testID="add-start-date" style={{ alignSelf: 'stretch' }} />
           <Button kind="quiet" label="Restore from a backup" onPress={onOpenBackup} testID="empty-restore" />
         </View>
@@ -125,7 +125,7 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
           </Pressable>
           <Pressable onPress={() => { dismissNudge(now, storage); setShowNudge(false) }} accessibilityRole="button" accessibilityLabel="Dismiss backup reminder"
             style={{ minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' }}>
-            <T size={16} color={c.mutedSand}>✕</T>
+            <T size={type.body} color={c.mutedSand}>✕</T>
           </Pressable>
         </View>
       ) : null}
@@ -146,7 +146,7 @@ function UndoBanner({ habit, until, now, today, showName, onUndo, onDismiss }) {
   const day = todayISO(new Date(until)) === todayISO(new Date(now)) ? 'today' : 'tomorrow'
   return (
     <View testID="undo-banner" accessibilityLiveRegion="polite" style={{ backgroundColor: c.card, borderWidth: 1, borderColor: c.border, borderRadius: 16, padding: 14, gap: 6 }}>
-      <T font="semibold" size={16} color={c.title}>New count started{showName ? ` · ${habit.name}` : ''}</T>
+      <T font="semibold" size={type.body} color={c.title}>New count started{showName ? ` · ${habit.name}` : ''}</T>
       <T size={14} color={c.text}>Changed your mind? Undo puts back your start date ({shortDate(prev, today)}). Free, until {time} {day}.</T>
       <View style={{ flexDirection: 'row', gap: 10 }}>
         <Button kind="secondary" label="Undo reset" onPress={onUndo} testID="undo-banner-undo" style={{ flex: 1 }} />

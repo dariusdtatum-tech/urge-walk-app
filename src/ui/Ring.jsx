@@ -1,9 +1,9 @@
 import { View } from 'react-native'
 import Svg, { Circle } from 'react-native-svg'
-import { useTheme } from './theme.js'
+import { size as sz, useTheme } from './theme.js'
 
 // A progress ring (0..1) with content in the middle. Decorative: the content carries the meaning.
-export function Ring({ size = 206, stroke = 10, value = 0, children, testID }) {
+export function Ring({ size = sz.ring, stroke = sz.ringStroke, value = 0, children, testID }) {
   const { c } = useTheme()
   const r = (size - stroke) / 2
   const len = 2 * Math.PI * r

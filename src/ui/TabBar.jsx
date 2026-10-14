@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { AccessibilityInfo, Pressable, View } from 'react-native'
 import { CommunityIcon, HomeIcon, LogIcon, WaveIcon, YouIcon } from './Icons.jsx'
 import { T } from './Text.jsx'
-import { MAX_SCALE, useTheme } from './theme.js'
+import { MAX_SCALE, size as sz, useTheme } from './theme.js'
 
 export const LONG_PRESS_MS = 550
 const TABS = [
@@ -34,8 +34,8 @@ export function TabBar({ active, onTab, onRide, onRideHold, bottomInset = 0 }) {
             accessibilityHint="Tap to choose Walk, Breathe or Just log it. Hold to start a walk right away."
             style={({ pressed }) => ({ alignItems: 'center', marginTop: -26, opacity: pressed ? 0.9 : 1 })}
           >
-            <View style={{ width: 62, height: 62, borderRadius: 31, backgroundColor: c.action, alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: c.surface }}>
-              <WaveIcon color={c.onAction} size={28} />
+            <View style={{ width: sz.tabCenter, height: sz.tabCenter, borderRadius: sz.tabCenter / 2, backgroundColor: c.action, alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: c.surface }}>
+              <WaveIcon color={c.onAction} size={sz.tabWave} />
             </View>
             <T font="semibold" size={12} max={MAX_SCALE.tab} color={c.title}>Ride it out</T>
           </Pressable>

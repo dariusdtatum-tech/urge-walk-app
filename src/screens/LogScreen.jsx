@@ -16,7 +16,7 @@ import { Card, Notice } from '../ui/Row.jsx'
 import { Sheet } from '../ui/Sheet.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { useTheme } from '../ui/theme.js'
+import { radius, size as sz, space, type, useTheme } from '../ui/theme.js'
 
 export function useOutcomeColors() {
   const { c } = useTheme()
@@ -79,12 +79,12 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
 
   if (walks.length === 0) {
     return (
-      <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }} testID="log">
-        {header ?? <T accessibilityRole="header" font="serif" size={34} color={c.title}>Log</T>}
+      <ScrollView contentContainerStyle={{ padding: space.screen, gap: space.section }} testID="log">
+        {header ?? <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Log</T>}
         <Notice text={notice} onDismiss={() => setNotice('')} />
         <View style={{ alignItems: 'center', gap: 12, paddingVertical: 32 }} testID="log-empty">
           <T accessibilityRole="header" font="serif" size={26} color={c.title}>No urges logged yet</T>
-          <T size={16} color={c.text}>Urges you ride out will show up here.</T>
+          <T size={type.body} color={c.text}>Urges you ride out will show up here.</T>
           <Button label="Ride it out" onPress={onRide} testID="log-ride" style={{ alignSelf: 'stretch' }} />
         </View>
       </ScrollView>
@@ -98,12 +98,12 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 140, gap: 16 }} testID="log">
-        {header ?? <T accessibilityRole="header" font="serif" size={34} color={c.title}>Log</T>}
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="log">
+        {header ?? <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Log</T>}
         <Notice text={notice} onDismiss={() => setNotice('')} />
         <Card testID="summary">
           <T size={18} color={c.text} testID="summary-total">
-            <T font="serif" size={40} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{s.total}</T>
+            <T font="serif" size={type.statBig} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{s.total}</T>
             {s.onlyWalks ? (s.total === 1 ? ' urge walked off' : ' urges walked off') : (s.total === 1 ? ' urge ridden out' : ' urges ridden out')}
           </T>
           <T size={14} color={c.muted} testID="summary-passed">{s.yes} passed · {s.totalMinutes} {s.totalMinutes === 1 ? 'minute' : 'minutes'} walked</T>
@@ -116,7 +116,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
             {cells.map(([key, n, label]) => (
               <View key={key} testID="outcome-cell" accessible accessibilityLabel={`${n} ${OUTCOME_LABELS[key]}`}
                 style={{ flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 12, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border }}>
-                <T font="serif" size={24} color={colors[key]} style={{ fontVariant: ['lining-nums'] }}>{n}</T>
+                <T font="serif" size={type.statCell} color={colors[key]} style={{ fontVariant: ['lining-nums'] }}>{n}</T>
                 <T size={12} max={1.4} color={c.muted} numberOfLines={1}>{label}</T>
               </View>
             ))}
@@ -125,7 +125,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
         </Card>
 
         <Card>
-          <T accessibilityRole="header" font="semibold" size={16} color={c.title}>This week</T>
+          <T accessibilityRole="header" font="semibold" size={type.body} color={c.title}>This week</T>
           <View style={{ flexDirection: 'row' }}>{week.map((d) => <DayRing key={d.key} d={d} />)}</View>
         </Card>
 
@@ -134,7 +134,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
             <T accessibilityRole="header" font="bold" size={13} color={c.muted} style={{ letterSpacing: 1, textTransform: 'uppercase' }}>{g.label}</T>
             {g.walks.map((w) => (
               <Pressable key={w.id} onPress={() => setSelectedId(w.id)} testID="log-entry" accessibilityRole="button"
-                style={({ pressed }) => ({ minHeight: 56, backgroundColor: c.card, borderRadius: 14, borderWidth: 1, borderColor: c.border, padding: 12, gap: 4, flexDirection: 'row', opacity: pressed ? 0.85 : 1 })}>
+                style={({ pressed }) => ({ minHeight: sz.row, backgroundColor: c.card, borderRadius: radius.row, borderWidth: 1, borderColor: c.border, padding: space.cardDense, gap: 4, flexDirection: 'row', opacity: pressed ? 0.85 : 1 })}>
                 <View style={{ width: 12, height: 12, borderRadius: 6, borderWidth: 2.5, borderColor: colors[outcomeKey(w.result)], marginTop: 4, marginRight: 10 }} />
                 <View style={{ flex: 1, gap: 4 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -187,7 +187,7 @@ function WalkDetailSheet({ walk, today, onSave, onDelete, onClose }) {
           </View>
         ))}
       </View>
-      <T font="semibold" size={16} color={c.title}>Did the urge pass?</T>
+      <T font="semibold" size={type.body} color={c.title}>Did the urge pass?</T>
       <OutcomePicker value={result} onChange={setResult} testID="detail-outcome" />
       <Field label="Note" value={note} onChangeText={setNote} multiline maxLength={MAX_NOTE_LENGTH} placeholder="What helped, what you noticed…" testID="detail-note" />
       <View style={{ flexDirection: 'row', gap: 12 }}>

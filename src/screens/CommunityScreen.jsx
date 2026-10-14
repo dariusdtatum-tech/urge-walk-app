@@ -9,7 +9,7 @@ import { loadProfile } from '../lib/profile.js'
 import { Card } from '../ui/Row.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { useTheme } from '../ui/theme.js'
+import { space, type, useTheme } from '../ui/theme.js'
 import { Check } from './onboarding/Steps.jsx'
 
 export function CommunityScreen({ now, clock = Date.now }) {
@@ -19,8 +19,8 @@ export function CommunityScreen({ now, clock = Date.now }) {
   const [line] = useState(() => dailyLine(loadProfile(storage), todayISO(new Date(now))))
   const toggle = (on) => { saveCommunityNotify(on, storage, clock()); setNotify(on) }
   return (
-    <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 140, gap: 16 }} testID="community">
-      <T accessibilityRole="header" font="serif" size={34} color={c.title}>Community</T>
+    <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="community">
+      <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Community</T>
       <Card testID="community-soon">
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <T accessibilityRole="header" font="serif" size={26} color={c.title} style={{ flex: 1 }}>Coming soon</T>
@@ -28,7 +28,7 @@ export function CommunityScreen({ now, clock = Date.now }) {
             <T font="bold" size={13} color={c.onAction}>18+ only</T>
           </View>
         </View>
-        <T size={16} color={c.text}>A quiet space for adults riding out urges. No feed, no likes, no pressure to post. Clean, safe and sobriety-focused.</T>
+        <T size={type.body} color={c.text}>A quiet space for adults riding out urges. No feed, no likes, no pressure to post. Clean, safe and sobriety-focused.</T>
         <T font="bold" size={13} color={c.muted} style={{ letterSpacing: 1, textTransform: 'uppercase', marginTop: 4 }}>House rules</T>
         <View style={{ gap: 8 }} testID="community-rules">
           {COMMUNITY_RULES.map((r) => (
@@ -42,7 +42,7 @@ export function CommunityScreen({ now, clock = Date.now }) {
       <Card>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 44 }}>
           <View style={{ flex: 1, gap: 2 }}>
-            <T font="semibold" size={16} color={c.title} nativeID="notify-label">Tell me when it opens</T>
+            <T font="semibold" size={type.body} color={c.title} nativeID="notify-label">Tell me when it opens</T>
             <T size={14} color={c.muted}>Saved on this phone only. We’ll tell you once, here in the app.</T>
           </View>
           <Switch value={notify} onValueChange={toggle} testID="community-notify" accessibilityLabel="Tell me when it opens"

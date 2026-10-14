@@ -5,7 +5,7 @@ import { Pressable, View } from 'react-native'
 import Svg, { Path } from 'react-native-svg'
 import { useDevice } from './DeviceContext.js'
 import { T } from './Text.jsx'
-import { useTheme } from './theme.js'
+import { size as sz, type, useTheme } from './theme.js'
 
 const TICK = 50
 
@@ -35,7 +35,7 @@ export function HoldButton({ label, doneLabel, holdMs = 3000, done = false, onDo
     <Pressable onPressIn={pressIn} onPressOut={pressOut} testID={testID} disabled={done}
       accessibilityRole="button" accessibilityLabel={filled ? doneLabel : `${label}. Hold for 3 seconds.`} accessibilityState={{ disabled: done }}
       accessibilityActions={[{ name: 'activate' }]} onAccessibilityAction={() => { if (!done) finish() }}
-      style={{ minHeight: 56, borderRadius: 16, overflow: 'hidden', backgroundColor: c.card, borderWidth: 1.5, borderColor: c.title, justifyContent: 'center' }}>
+      style={{ minHeight: sz.row, borderRadius: 16, overflow: 'hidden', backgroundColor: c.card, borderWidth: 1.5, borderColor: c.title, justifyContent: 'center' }}>
       {/* The wave fill sits under the label; holdFill keeps the title colour AA in light and dark. */}
       <View testID={testID ? `${testID}-fill` : undefined} style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${Math.round((filled ? 1 : progress) * 100)}%`, backgroundColor: c.holdFill }} />
       {!filled && progress > 0 ? (
@@ -43,7 +43,7 @@ export function HoldButton({ label, doneLabel, holdMs = 3000, done = false, onDo
           <Path d="M0 0 C 7 9, 7 19, 0 28 C 7 37, 7 47, 0 56 Z" fill={c.holdFill} />
         </Svg>
       ) : null}
-      <T font="semibold" size={16} color={c.title} style={{ textAlign: 'center', paddingHorizontal: 16 }}>{filled ? doneLabel : label}</T>
+      <T font="semibold" size={type.body} color={c.title} style={{ textAlign: 'center', paddingHorizontal: 16 }}>{filled ? doneLabel : label}</T>
     </Pressable>
   )
 }

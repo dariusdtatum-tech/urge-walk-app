@@ -12,7 +12,7 @@ import { PathIcon, WaveIcon } from '../ui/Icons.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { ReachOut } from './ReachOut.jsx'
 import { T } from '../ui/Text.jsx'
-import { useTheme } from '../ui/theme.js'
+import { radius, size as sz, space, type, useTheme } from '../ui/theme.js'
 
 // "Ride it out": Walk (remembered length) or Breathe (1 min), plus a full-width "Just log it".
 // A typed note is never thrown away without asking: Back → Discard returns to the choices,
@@ -44,34 +44,34 @@ export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
           onPress={close} accessibilityLabel="Close" accessibilityRole="button" testID="ride-backdrop" />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View testID="ride-sheet" accessibilityViewIsModal style={{ backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%' }}>
-            <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 34 + insets.bottom, gap: 14 }} keyboardShouldPersistTaps="handled">
+            <ScrollView contentContainerStyle={{ padding: space.sheet, paddingBottom: 34 + insets.bottom, gap: space.section }} keyboardShouldPersistTaps="handled">
               <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: c.grab }} />
-              <T accessibilityRole="header" font="serif" size={30} color={c.title}>Ride it out</T>
-              {why && !logging ? <T font="serifItalic" size={19} color={c.title} testID="ride-why">“{why}”</T> : null}
+              <T accessibilityRole="header" font="serif" size={type.rideSheetTitle} color={c.title}>Ride it out</T>
+              {why && !logging ? <T font="serifItalic" size={type.why} color={c.title} testID="ride-why">“{why}”</T> : null}
               {!logging ? (
                 <>
                   <View style={{ flexDirection: stack ? 'column' : 'row', gap: 12 }} testID="ride-tiles">
                     <Pressable onPress={onWalk} testID="ride-walk" accessibilityRole="button" accessibilityLabel={`Walk, ${walkLabel}. Starts now`}
-                      style={{ flex: 1, minHeight: 120, borderRadius: 18, backgroundColor: c.action, padding: 16, justifyContent: 'space-between' }}>
+                      style={{ flex: 1, minHeight: sz.rideTile, borderRadius: radius.card, backgroundColor: c.action, padding: space.card, justifyContent: 'space-between' }}>
                       <PathIcon color={c.onAction} />
                       <View>
-                        <T font="bold" size={20} color={c.onAction}>Walk</T>
+                        <T font="bold" size={type.rideTile} color={c.onAction}>Walk</T>
                         <T size={14} color={c.onActionSoft}>{walkLabel}</T>
                       </View>
                     </Pressable>
                     <Pressable onPress={onBreathe} testID="ride-breathe" accessibilityRole="button" accessibilityLabel="Breathe for 1 minute"
-                      style={{ flex: 1, minHeight: 120, borderRadius: 18, backgroundColor: c.tileAlt, padding: 16, justifyContent: 'space-between' }}>
-                      <WaveIcon color={c.onTileAlt} size={30} />
+                      style={{ flex: 1, minHeight: sz.rideTile, borderRadius: radius.card, backgroundColor: c.tileAlt, padding: space.card, justifyContent: 'space-between' }}>
+                      <WaveIcon color={c.onTileAlt} size={type.rideTileIcon} />
                       <View>
-                        <T font="bold" size={20} color={c.onTileAlt}>Breathe</T>
+                        <T font="bold" size={type.rideTile} color={c.onTileAlt}>Breathe</T>
                         <T size={14} color={c.onTileAlt}>1 min</T>
                       </View>
                     </Pressable>
                   </View>
                   <Pressable onPress={() => setLogging(true)} testID="ride-log" accessibilityRole="button"
                     accessibilityLabel="Just log it. I already rode it out"
-                    style={{ minHeight: 56, borderRadius: 16, backgroundColor: c.sand, paddingHorizontal: 16, paddingVertical: 10, justifyContent: 'center' }}>
-                    <T font="bold" size={17} color={c.title}>Just log it</T>
+                    style={{ minHeight: sz.logIt, borderRadius: radius.row, backgroundColor: c.sand, paddingHorizontal: space.rowX, paddingVertical: space.rowY, justifyContent: 'center' }}>
+                    <T font="bold" size={type.bodyLg} color={c.title}>Just log it</T>
                     <T size={14} color={c.text}>I already rode it out</T>
                   </Pressable>
                   <ReachOut testID="ride-reach" />
@@ -79,8 +79,8 @@ export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
                 </>
               ) : (
                 <View style={{ gap: 14 }} testID="ride-log-form">
-                  <T size={16} color={c.text}>An urge from just now, logged as it went.</T>
-                  <T font="semibold" size={16} color={c.title}>Did the urge pass?</T>
+                  <T size={type.body} color={c.text}>An urge from just now, logged as it went.</T>
+                  <T font="semibold" size={type.body} color={c.title}>Did the urge pass?</T>
                   <OutcomePicker value={result} onChange={(v) => setResult(v ?? 'yes')} testID="log-result" />
                   <NoteField value={note} onChange={setNote} />
                   <TagPicker value={tags} onChange={setTags} testID="log-tags" />

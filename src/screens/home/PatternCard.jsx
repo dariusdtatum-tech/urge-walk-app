@@ -9,7 +9,7 @@ import { useDevice } from '../../ui/DeviceContext.js'
 import { Card } from '../../ui/Row.jsx'
 import { useStorage } from '../../ui/StorageContext.js'
 import { T } from '../../ui/Text.jsx'
-import { useTheme } from '../../ui/theme.js'
+import { type, useTheme } from '../../ui/theme.js'
 
 const AXIS = ['12a', '6a', '12p', '6p']
 
@@ -25,7 +25,7 @@ export function PatternCard({ walks, now }) {
   return (
     <Card testID="pattern-card" style={{ gap: 10 }}>
       <T accessibilityRole="header" font="semibold" size={17} color={c.title}>Your pattern this week</T>
-      <T size={16} color={c.text} testID="pattern-sentence">{pattern.sentence}</T>
+      <T size={type.body} color={c.text} testID="pattern-sentence">{pattern.sentence}</T>
       <View accessible accessibilityLabel={`Urges by time of day: ${pattern.slots.map((n, i) => (n ? `${n} around ${i * 2}:00` : null)).filter(Boolean).join(', ')}`} testID="pattern-strip">
         <View style={{ flexDirection: 'row', gap: 3 }}>
           {pattern.slots.map((n, i) => (

@@ -4,7 +4,7 @@ import { MAX_NOTE_LENGTH } from '../lib/walkStorage.js'
 import { MAX_TAGS, TAG_GROUPS } from '../lib/urgeMap.js'
 import { Button } from './Button.jsx'
 import { T } from './Text.jsx'
-import { useTheme } from './theme.js'
+import { space, type, useTheme } from './theme.js'
 
 export const OUTCOMES = [{ id: 'yes', label: 'Passed' }, { id: 'kinda', label: 'Kinda' }, { id: 'no', label: 'Didn’t' }]
 
@@ -80,10 +80,10 @@ export function CheckIn({ heading, sub, onSave, onSkip }) {
   const [note, setNote] = useState('')
   const [tags, setTags] = useState([])
   return (
-    <View style={{ gap: 16 }} testID="check-in">
-      <T accessibilityRole="header" font="serif" size={30} color={c.title}>{heading}</T>
-      <T size={16} color={c.text}>{sub}</T>
-      <T font="semibold" size={16} color={c.title}>Did the urge pass?</T>
+    <View style={{ gap: space.section }} testID="check-in">
+      <T accessibilityRole="header" font="serif" size={type.rideSheetTitle} color={c.title}>{heading}</T>
+      <T size={type.body} color={c.text}>{sub}</T>
+      <T font="semibold" size={type.body} color={c.title}>Did the urge pass?</T>
       <OutcomePicker value={result} onChange={setResult} />
       <NoteField value={note} onChange={setNote} label="Anything you want to remember? (optional)" placeholder="What helped, what you noticed…" />
       <TagPicker value={tags} onChange={setTags} />

@@ -2,7 +2,7 @@ import { View } from 'react-native'
 import { cleanCount, last30, lifetimeRidden } from '../../lib/homeIdeas.js'
 import { Card } from '../../ui/Row.jsx'
 import { T } from '../../ui/Text.jsx'
-import { useTheme } from '../../ui/theme.js'
+import { type, useTheme } from '../../ui/theme.js'
 
 // Never zero: lifetime urges ridden out (never resets) and the last 30 days as dots.
 // Clean days are filled sea-glass dots; other days a hollow outline. No red, no X.
@@ -14,7 +14,7 @@ export function NeverZero({ hero, walks, today, highlight = false }) {
   const col = (k, n, small, sub, testID, hl) => (
     <View style={{ flex: 1, gap: 2 }}>
       <T font="semibold" size={13} color={c.muted}>{k}</T>
-      <T font="serif" size={34} color={hl ? c.accent : c.title} testID={testID} style={{ fontVariant: ['lining-nums'] }}>
+      <T font="serif" size={type.screenTitle} color={hl ? c.accent : c.title} testID={testID} style={{ fontVariant: ['lining-nums'] }}>
         {n}{small ? <T size={15} color={c.muted}>{small}</T> : null}
       </T>
       <T size={13} color={c.muted}>{sub}</T>

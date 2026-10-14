@@ -12,7 +12,7 @@ import { loadHabits, makeId, saveHabits } from '../../lib/storage.js'
 import { Button } from '../../ui/Button.jsx'
 import { useStorage } from '../../ui/StorageContext.js'
 import { T } from '../../ui/Text.jsx'
-import { useTheme } from '../../ui/theme.js'
+import { size as sz, type, useTheme } from '../../ui/theme.js'
 import { CrisisSheet } from '../Crisis.jsx'
 import { addContact } from '../../lib/contacts.js'
 import { BeforeSteppers, Check, DateStep, IdentityStep, ImportanceStep, ImproveStep, RidingStep, SupportStep, WhyStep } from './Steps.jsx'
@@ -161,17 +161,17 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
           <View key={r.id} style={{ flexDirection: 'row', gap: 12 }}>
             <View style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: c.sand, alignItems: 'center', justifyContent: 'center' }}><Check color={c.title} /></View>
             <View style={{ flex: 1 }}>
-              <T font="semibold" size={16} color={c.title}>{r.title}</T>
+              <T font="semibold" size={type.body} color={c.title}>{r.title}</T>
               <T size={15} color={c.text}>{r.text}</T>
             </View>
           </View>
         ))}
         <Pressable onPress={() => set({ adult: !draft.adult })} accessibilityRole="checkbox" accessibilityState={{ checked: draft.adult }} testID="ob-adult"
-          style={{ minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, borderWidth: draft.adult ? 2 : 1, borderColor: draft.adult ? c.title : c.fieldBorder, backgroundColor: c.card }}>
+          style={{ minHeight: sz.row, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, borderWidth: draft.adult ? 2 : 1, borderColor: draft.adult ? c.title : c.fieldBorder, backgroundColor: c.card }}>
           <View style={{ width: 26, height: 26, borderRadius: 7, borderWidth: draft.adult ? 0 : 1.5, borderColor: c.fieldBorder, backgroundColor: draft.adult ? c.action : 'transparent', alignItems: 'center', justifyContent: 'center' }}>
             {draft.adult ? <Check color={c.onAction} /> : null}
           </View>
-          <T font="semibold" size={16} color={c.title}>I’m 18 or older</T>
+          <T font="semibold" size={type.body} color={c.title}>I’m 18 or older</T>
         </Pressable>
         <T size={14} color={c.muted} testID="ob-disclaimer">Urge Walk is a habit tool, not medical treatment.</T>
       </View>
@@ -206,20 +206,20 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
         </View>
         {step >= 4 && step <= 11 ? (
           <Pressable onPress={skip} accessibilityRole="button" testID="ob-skip" style={{ minHeight: 44, minWidth: 56, alignItems: 'center', justifyContent: 'center' }}>
-            <T font="semibold" size={16} color={c.accent}>Skip</T>
+            <T font="semibold" size={type.body} color={c.accent}>Skip</T>
           </Pressable>
         ) : <View style={{ width: 56 }} />}
       </View>
       <ScrollView contentContainerStyle={{ padding: 24, gap: 18 }} keyboardShouldPersistTaps="handled" testID={`ob-step-${step}`}>
         <View style={{ gap: 8 }}>
-          <T accessibilityRole="header" font="serif" size={34} color={c.title}>{step === 12 ? 'Look at what you just did.' : sc.title}</T>
-          {step === 12 ? <T size={16} color={c.text}>Every answer is yours to change in You.</T> : sc.sub ? <T size={16} color={c.text}>{sc.sub}</T> : null}
+          <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>{step === 12 ? 'Look at what you just did.' : sc.title}</T>
+          {step === 12 ? <T size={type.body} color={c.text}>Every answer is yours to change in You.</T> : sc.sub ? <T size={type.body} color={c.text}>{sc.sub}</T> : null}
         </View>
         {step === 12 ? (
           <View style={{ gap: 8 }}>
             {recap.map((r) => (
               <Pressable key={r.k} onPress={() => edit(r.step)} accessibilityRole="button" accessibilityLabel={`${r.k}: ${r.v || 'Not set'}. Edit`} testID={`recap-${r.step}`}
-                style={{ minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, backgroundColor: c.card, borderWidth: 1, borderColor: c.border }}>
+                style={{ minHeight: sz.row, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 12, borderRadius: 14, backgroundColor: c.card, borderWidth: 1, borderColor: c.border }}>
                 <View style={{ width: 24, height: 24, borderRadius: 12, backgroundColor: r.v ? c.action : 'transparent', borderWidth: r.v ? 0 : 1.5, borderColor: c.fieldBorder, alignItems: 'center', justifyContent: 'center' }}>
                   {r.v ? <Check color={c.onAction} size={12} /> : null}
                 </View>

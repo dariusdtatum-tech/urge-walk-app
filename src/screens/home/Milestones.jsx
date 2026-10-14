@@ -4,7 +4,7 @@ import { milestoneName, milestoneRows, milestoneShort } from '../../lib/mileston
 import { Button } from '../../ui/Button.jsx'
 import { HeaderButton, Sheet } from '../../ui/Sheet.jsx'
 import { T } from '../../ui/Text.jsx'
-import { useTheme } from '../../ui/theme.js'
+import { type, useTheme } from '../../ui/theme.js'
 
 export function Badge({ label, earned, big = false }) {
   const { c } = useTheme()
@@ -26,8 +26,8 @@ export function MilestoneSheet({ milestone, habitName, showName, onDone }) {
       <View style={{ alignItems: 'center', gap: 8, paddingVertical: 8 }}>
         <Badge label={milestoneShort(milestone)} earned big />
         {showName ? <T font="bold" size={13} color={c.accent} style={{ letterSpacing: 1.5, textTransform: 'uppercase' }}>{habitName}</T> : null}
-        <T accessibilityRole="header" font="serif" size={34} color={c.title} style={{ textAlign: 'center' }}>{milestoneName(milestone)}</T>
-        <T size={16} color={c.text}>{milestone.toLocaleString()} days clean</T>
+        <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title} style={{ textAlign: 'center' }}>{milestoneName(milestone)}</T>
+        <T size={type.body} color={c.text}>{milestone.toLocaleString()} days clean</T>
         <T font="serifItalic" size={20} color={c.title}>That’s yours.</T>
       </View>
       <Button label="Done" onPress={onDone} testID="milestone-done" />
@@ -46,7 +46,7 @@ export function MilestonesList({ data, habit, today, onClose }) {
         <View key={r.milestone} testID="milestone-item" style={{ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 48 }}
           accessible accessibilityLabel={`${r.name}: ${r.date ? `earned ${shortDate(r.date, today)}` : r.inDays ? `in ${r.inDays} days` : 'not yet'}`}>
           <Badge label={milestoneShort(r.milestone)} earned={Boolean(r.date)} />
-          <T font="semibold" size={16} color={c.title} style={{ flex: 1 }}>{r.name}</T>
+          <T font="semibold" size={type.body} color={c.title} style={{ flex: 1 }}>{r.name}</T>
           <T size={14} color={r.date ? c.accent : c.muted}>
             {r.date ? `Earned ${shortDate(r.date, today)}` : r.inDays ? `In ${r.inDays} ${r.inDays === 1 ? 'day' : 'days'}` : 'Not yet'}
           </T>

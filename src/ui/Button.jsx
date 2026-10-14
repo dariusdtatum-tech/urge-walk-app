@@ -1,6 +1,6 @@
 import { Pressable } from 'react-native'
 import { T } from './Text.jsx'
-import { useTheme } from './theme.js'
+import { radius, size as sz, type, useTheme } from './theme.js'
 
 // Buttons are at least 48pt tall (44pt minimum target). kinds: primary (navy), secondary (outline), quiet (text), sand.
 export function Button({ label, onPress, kind = 'primary', style, testID, accessibilityLabel, textColor, disabled = false }) {
@@ -16,11 +16,11 @@ export function Button({ label, onPress, kind = 'primary', style, testID, access
       accessibilityLabel={accessibilityLabel ?? label}
       accessibilityState={{ disabled }}
       style={({ pressed }) => [{
-        minHeight: 48, minWidth: 44, paddingHorizontal: 18, borderRadius: 14, alignItems: 'center', justifyContent: 'center',
+        minHeight: sz.button, minWidth: sz.minTap, paddingHorizontal: 18, borderRadius: radius.button, alignItems: 'center', justifyContent: 'center',
         backgroundColor: bg, borderWidth: kind === 'secondary' ? 1.5 : 0, borderColor: c.title, opacity: disabled ? 0.45 : pressed ? 0.85 : 1,
       }, style]}
     >
-      <T font="semibold" size={16} color={fg}>{label}</T>
+      <T font="semibold" size={type.button} color={fg}>{label}</T>
     </Pressable>
   )
 }

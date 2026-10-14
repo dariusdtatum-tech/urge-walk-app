@@ -13,7 +13,7 @@ import { Card } from '../ui/Row.jsx'
 import { Sheet } from '../ui/Sheet.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { useTheme } from '../ui/theme.js'
+import { size as sz, type, useTheme } from '../ui/theme.js'
 
 export function CheckInSheet({ now, clock = Date.now, onClose, onRide, extra = null }) {
   const storage = useStorage()
@@ -51,8 +51,8 @@ export function CheckInSheet({ now, clock = Date.now, onClose, onRide, extra = n
           const on = mood === m.id
           return (
             <Pressable key={m.id} onPress={() => setMood(m.id)} accessibilityRole="radio" accessibilityState={{ checked: on }} testID={`mood-${m.id}`}
-              style={{ flex: 1, minHeight: 56, borderRadius: 16, alignItems: 'center', justifyContent: 'center', borderWidth: on ? 0 : 1, borderColor: c.fieldBorder, backgroundColor: on ? c.action : c.card }}>
-              <T font="semibold" size={16} color={on ? c.onAction : c.title}>{m.label}</T>
+              style={{ flex: 1, minHeight: sz.row, borderRadius: 16, alignItems: 'center', justifyContent: 'center', borderWidth: on ? 0 : 1, borderColor: c.fieldBorder, backgroundColor: on ? c.action : c.card }}>
+              <T font="semibold" size={type.body} color={on ? c.onAction : c.title}>{m.label}</T>
             </Pressable>
           )
         })}
@@ -86,9 +86,9 @@ export function CheckInCard({ today, onOpen }) {
   }
   return (
     <Pressable onPress={onOpen} accessibilityRole="button" testID="checkin-card"
-      style={{ minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: c.card, borderWidth: 1, borderColor: c.border }}>
+      style={{ minHeight: sz.row, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: c.card, borderWidth: 1, borderColor: c.border }}>
       <View style={{ flex: 1, gap: 2 }}>
-        <T font="semibold" size={16} color={c.title}>Daily check-in</T>
+        <T font="semibold" size={type.body} color={c.title}>Daily check-in</T>
         <T size={14} color={c.textSoft}>How are you today? About 30 seconds.</T>
       </View>
       <T size={20} color={c.muted} accessibilityElementsHidden importantForAccessibility="no">›</T>

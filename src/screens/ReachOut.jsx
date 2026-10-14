@@ -11,7 +11,7 @@ import { Card } from '../ui/Row.jsx'
 import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { useTheme } from '../ui/theme.js'
+import { type, useTheme } from '../ui/theme.js'
 import { Check } from './onboarding/Steps.jsx'
 
 export function SmallButton({ label, onPress, testID, accessibilityLabel, primary = false }) {
@@ -35,14 +35,14 @@ export function ReachOut({ testID = 'reach', onSetup = null, title = 'Reach out'
       {title ? <T accessibilityRole="header" font="bold" size={13} color={c.muted} style={{ letterSpacing: 1, textTransform: 'uppercase' }}>{title}</T> : null}
       {contacts.map((p, i) => (
         <View key={p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }} testID={`${testID}-person-${i}`}>
-          <T font="semibold" size={16} color={c.title} style={{ flex: 1 }} numberOfLines={1}>{p.name}</T>
+          <T font="semibold" size={type.body} color={c.title} style={{ flex: 1 }} numberOfLines={1}>{p.name}</T>
           <SmallButton primary label="Text" accessibilityLabel={`Text ${p.name}. Opens Messages with your note filled in.`} onPress={() => device.textContact(p.phone, message)} testID={`${testID}-text-${i}`} />
           <SmallButton label="Call" accessibilityLabel={`Call ${p.name}`} onPress={() => device.openURL(telHref(p.phone))} testID={`${testID}-call-${i}`} />
         </View>
       ))}
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }} testID={`${testID}-988`}>
         <View style={{ flex: 1 }}>
-          <T font="semibold" size={16} color={c.title}>988 Lifeline</T>
+          <T font="semibold" size={type.body} color={c.title}>988 Lifeline</T>
           <T size={13} color={c.muted}>{CRISIS_LINE.note}</T>
         </View>
         <SmallButton label="Text" accessibilityLabel="Text 988" onPress={() => device.openURL('sms:988')} testID={`${testID}-988-text`} />
@@ -89,7 +89,7 @@ export function ContactsSheet({ onClose }) {
       {data.contacts.map((p, i) => (
         <Card key={p.id} testID={`contact-${i}`} style={{ flexDirection: 'row', alignItems: 'center' }}>
           <View style={{ flex: 1 }}>
-            <T font="semibold" size={16} color={c.title}>{p.name}</T>
+            <T font="semibold" size={type.body} color={c.title}>{p.name}</T>
             <T size={14} color={c.textSoft}>{p.phone}</T>
           </View>
           <SmallButton label="Remove" accessibilityLabel={`Remove ${p.name}`} onPress={() => { removeContact(storage, p.id); refresh() }} testID={`contact-remove-${i}`} />

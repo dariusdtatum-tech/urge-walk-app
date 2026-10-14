@@ -15,7 +15,7 @@ import { Row } from '../ui/Row.jsx'
 import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { useTheme } from '../ui/theme.js'
+import { type, useTheme } from '../ui/theme.js'
 
 const untilLabel = (until, today) =>
   `${new Date(until).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })} ${todayISO(new Date(until)) === today ? 'today' : 'tomorrow'}`
@@ -195,7 +195,7 @@ function ResetSheet({ habit, milestones, lifetime, today, onConfirm, onClose }) 
   const kept = ['All walks, breaths and journal entries', `Milestones you earned (${range})`, `Urges ridden out · ${lifetime.toLocaleString()}`]
   return (
     <Sheet title="Start a new count" onClose={onClose} testID="reset-sheet">
-      <T size={16} color={c.text}>Your {habit.name} day count goes back to 0 from the date below. Walks, journal and milestones stay. You can undo this free for 24 hours.</T>
+      <T size={type.body} color={c.text}>Your {habit.name} day count goes back to 0 from the date below. Walks, journal and milestones stay. You can undo this free for 24 hours.</T>
       {kept.map((k) => (
         <View key={k} style={{ flexDirection: 'row', gap: 10, alignItems: 'center' }}>
           <View style={{ width: 22, height: 22, borderRadius: 11, backgroundColor: c.tileAlt, alignItems: 'center', justifyContent: 'center' }}>

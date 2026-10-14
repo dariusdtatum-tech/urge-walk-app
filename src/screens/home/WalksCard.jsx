@@ -6,7 +6,7 @@ import { RANGES, RANGE_IDS, bucketCounts, chartPoints, rangeBuckets, rangeStats,
 import { Card } from '../../ui/Row.jsx'
 import { Seg } from '../../ui/Seg.jsx'
 import { T } from '../../ui/Text.jsx'
-import { useTheme } from '../../ui/theme.js'
+import { type, useTheme } from '../../ui/theme.js'
 
 const W = 320
 const H = 74
@@ -46,7 +46,7 @@ export function WalksCard({ walks, range, onRange, streak, now, since }) {
       {passedDays != null ? (
         <View testID="week-passed-days" accessible accessibilityLabel={`${passedDays} ${passedDays === 1 ? 'day' : 'days'} with an urge passed this week`}
           style={{ flexDirection: 'row', alignItems: 'baseline', gap: 6 }}>
-          <T font="serif" size={30} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{passedDays}</T>
+          <T font="serif" size={type.rideSheetTitle} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{passedDays}</T>
           <T font="bold" size={15} color={c.title}>{passedDays === 1 ? 'day' : 'days'} with an urge passed</T>
         </View>
       ) : null}
@@ -85,7 +85,7 @@ function Chart({ buckets, counts, dots }) {
       </View>
       <View style={{ flexDirection: 'row' }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
         {buckets.map((b, i) => (
-          <T key={i} size={11} max={1.3} numberOfLines={1} color={b.current && n <= 7 ? c.title : c.muted}
+          <T key={i} size={type.caption} max={1.3} numberOfLines={1} color={b.current && n <= 7 ? c.title : c.muted}
             style={{ flex: 1, textAlign: n > 7 && i === 0 ? 'left' : n > 7 && i === n - 1 ? 'right' : 'center', overflow: 'visible' }}>
             {b.showLabel ? b.label : ''}
           </T>

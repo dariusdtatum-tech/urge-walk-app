@@ -22,7 +22,7 @@ import { WaveIcon } from '../ui/Icons.jsx'
 import { Ring } from '../ui/Ring.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { MAX_SCALE, useTheme } from '../ui/theme.js'
+import { MAX_SCALE, size as sz, space, type, useTheme } from '../ui/theme.js'
 
 function KeepAwake() {
   useKeepAwake('urgewalk-walk')
@@ -84,7 +84,7 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
       onSaved(SAVED_MESSAGES[skipped || !result ? 'skip' : result], record)
     }
     return (
-      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 32 }} testID="walk-finish">
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 32 }} testID="walk-finish">
         <CheckIn heading={heading} sub={`You walked for ${walked}.`} onSave={(v) => save(v)} onSkip={() => save({}, true)} />
       </ScrollView>
     )
@@ -97,7 +97,7 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
   return (
     <View style={{ flex: 1 }} testID="walk-live">
       {walking && <KeepAwake />}
-      <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 28, alignItems: 'center', gap: 18, flexGrow: 1 }}>
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 28, alignItems: 'center', gap: 18, flexGrow: 1 }}>
         <ReasonCard testID="walk-reason" extra={goalLine} />
         {tip && (
           <View testID="longpress-tip" accessibilityRole="alert" style={{ alignSelf: 'stretch', backgroundColor: c.sand, borderRadius: 16, padding: 14, gap: 10 }}>
@@ -116,13 +116,13 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
         )}
         <Ring size={252} stroke={12} value={progress(walk, now)} testID="walk-ring">
           <T font="serif" size={70} max={MAX_SCALE.ring} color={c.title} testID="countdown" style={{ fontVariant: ["lining-nums", "tabular-nums"] }}>{time}</T>
-          <T size={16} max={MAX_SCALE.ringSmall} color={c.muted}>{label}</T>
+          <T size={type.body} max={MAX_SCALE.ringSmall} color={c.muted}>{label}</T>
           <T font="bold" size={12} max={MAX_SCALE.ringSmall} color={c.accent} style={{ letterSpacing: 2 }}>{open ? 'OPEN' : `${walk.plannedMinutes} MIN`}</T>
         </Ring>
         {why ? <T font="serifItalic" size={20} color={c.title} style={{ textAlign: 'center' }}>“{why}”</T> : null}
         <T font="serifItalic" size={18} color={c.text} style={{ textAlign: 'center' }} accessibilityLiveRegion="polite">{lines[messageIndex(walk, now, lines.length)]}</T>
         <View style={{ flex: 1 }} />
-        <Button label="Finish walk" onPress={() => setConfirmFinish(true)} style={{ alignSelf: 'stretch', minHeight: 56 }} testID="finish" />
+        <Button label="Finish walk" onPress={() => setConfirmFinish(true)} style={{ alignSelf: 'stretch', minHeight: sz.row }} testID="finish" />
         <View style={{ flexDirection: 'row', gap: 24, alignItems: 'center' }}>
           {paused
             ? <Button kind="quiet" label="Resume" onPress={() => { const t = clock(); setNow(t); commit(resumeWalk(walk, t)) }} testID="resume" />

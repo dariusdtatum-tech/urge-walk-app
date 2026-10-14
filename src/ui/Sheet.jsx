@@ -2,7 +2,7 @@ import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, View } fr
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useReducedMotion } from './motion.js'
 import { T } from './Text.jsx'
-import { useTheme } from './theme.js'
+import { space, type, useTheme } from './theme.js'
 
 // A bottom sheet: dimmed backdrop (tap to close), grab handle, title, scrolling body.
 // `overlay` (e.g. a Confirm) is drawn above the sheet, inside the same modal.
@@ -17,11 +17,11 @@ export function Sheet({ onClose, title, testID, children, overlay = null, right 
           onPress={onClose} accessibilityLabel="Close" accessibilityRole="button" testID={testID ? `${testID}-backdrop` : undefined} />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View testID={testID} accessibilityViewIsModal style={{ backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%' }}>
-            <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 36 + insets.bottom, gap: 14 }} keyboardShouldPersistTaps="handled">
+            <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 36 + insets.bottom, gap: 14 }} keyboardShouldPersistTaps="handled">
               <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: c.grab }} />
               {title ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
-                  <T accessibilityRole="header" font="serif" size={28} color={c.title} style={{ flex: 1 }}>{title}</T>
+                  <T accessibilityRole="header" font="serif" size={type.sheetTitle} color={c.title} style={{ flex: 1 }}>{title}</T>
                   {right}
                 </View>
               ) : null}
@@ -41,7 +41,7 @@ export function HeaderButton({ label, onPress, testID, accessibilityLabel }) {
   return (
     <Pressable onPress={onPress} testID={testID} accessibilityRole="button" accessibilityLabel={accessibilityLabel ?? label}
       style={{ minHeight: 44, minWidth: 44, paddingHorizontal: 8, alignItems: 'center', justifyContent: 'center' }}>
-      <T font="semibold" size={16} color={c.accent}>{label}</T>
+      <T font="semibold" size={type.button} color={c.accent}>{label}</T>
     </Pressable>
   )
 }
