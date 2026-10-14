@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar'
 import { loadTheme, saveTheme } from './lib/appearance.js'
 import { hasAnyData } from './lib/backup.js'
 import { markSaved, markStress } from './lib/calm.js'
-import { answerFollowUp, claimFollowUp } from './lib/followUp.js'
+import { answerFollowUp, claimFollowUp, settleFollowUpDefault } from './lib/followUp.js'
 import { resolveOnboarding } from './lib/profile.js'
 import { readObject, writeObject } from './lib/storage.js'
 import { BREATHE_SAVED_MESSAGES, LOGGED_SAVED_MESSAGE } from './lib/walkMessages.js'
@@ -43,6 +43,7 @@ function Shell({ clock, theme, onTheme }) {
   const device = useDevice()
   const [tab, setTab] = useState('home')
   const [trackView, setTrackView] = useState('log') // Track: 'log' | 'journal'
+  useState(() => settleFollowUpDefault(storage, hasAnyData(storage)))
   const [screen, setScreen] = useState(() => (loadActiveWalk(storage) ? 'walk' : 'tabs'))
   const [showRide, setShowRide] = useState(false)
   const [toast, setToast] = useState(null) // { text, undoId? }

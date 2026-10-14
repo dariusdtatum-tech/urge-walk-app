@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildBackup, validateBackup } from './backup.js'
-import { FOLLOWUP_ANSWERS, answerFollowUp, claimFollowUp, clearPendingFollowUp, loadFollowUpEnabled, pendingFollowUp, saveFollowUpEnabled } from './followUp.js'
+import { FOLLOWUP_ANSWERS, answerFollowUp, claimFollowUp, clearPendingFollowUp, loadFollowUpEnabled, pendingFollowUp, saveFollowUpEnabled, settleFollowUpDefault } from './followUp.js'
 import { FOLLOWUP_VALUES, appendWalk, buildLoggedRecord, loadWalks } from './walkStorage.js'
 
 function mem() {
@@ -9,9 +9,26 @@ function mem() {
 }
 
 describe('how did it go? follow-up', () => {
-  it('on by default; one per urge; a new urge replaces the pending one', () => {
+  it('off for new installs; existing users keep it on; a saved choice is never changed', () => {
+    const fresh = mem()
+    expect(loadFollowUpEnabled(fresh)).toBe(false)
+    settleFollowUpDefault(fresh, false)
+    expect(loadFollowUpEnabled(fresh)).toBe(false)
+    const existing = mem()
+    settleFollowUpDefault(existing, true)
+    expect(loadFollowUpEnabled(existing)).toBe(true)
+    const chose = mem()
+    saveFollowUpEnabled(false, chose)
+    settleFollowUpDefault(chose, true)
+    expect(loadFollowUpEnabled(chose)).toBe(false)
+    saveFollowUpEnabled(true, fresh)
+    settleFollowUpDefault(fresh, false)
+    expect(loadFollowUpEnabled(fresh)).toBe(true)
+  })
+
+  it('one per urge; a new urge replaces the pending one', () => {
     const s = mem()
-    expect(loadFollowUpEnabled(s)).toBe(true)
+    saveFollowUpEnabled(true, s)
     expect(claimFollowUp('a', s, 1)).toBe(true)
     expect(claimFollowUp('a', s, 2)).toBe(false) // max one per urge
     expect(pendingFollowUp(s)).toEqual({ urgeId: 'a', at: 1 })

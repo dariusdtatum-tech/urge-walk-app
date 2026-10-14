@@ -1,5 +1,5 @@
 // "How did it go?": one quiet local notification about 30 minutes after an urge, at most one per urge.
-// urgewalk.v1.followUpPrefs  { enabled }                 (on by default; switch in You)
+// urgewalk.v1.followUpPrefs  { enabled }                 (off for new installs; switch in You)
 // urgewalk.v1.followUp       { asked: [urgeId…], pending: { urgeId, at } | null }
 // The urge id is the saved record's id (walk, breathe or log), so the answer lands on that entry.
 import { readObject, writeObject } from './storage.js'
@@ -14,7 +14,13 @@ export const FOLLOWUP_LABELS = { passed: 'It passed', tough: 'Still tough', skip
 export const FOLLOWUP_CONTENT = { title: 'Checking in', body: 'How’s it going? Tap to answer, or skip.' }
 const MAX_ASKED = 200
 
-export const loadFollowUpEnabled = (storage) => readObject(FOLLOWUP_PREFS_KEY, storage)?.enabled !== false
+export const loadFollowUpEnabled = (storage) => readObject(FOLLOWUP_PREFS_KEY, storage)?.enabled === true
+// Run once at app start, before setup can create data. Off for new installs; people who already
+// had data before this setting existed had it on, so they keep it on. Never changes a saved choice.
+export function settleFollowUpDefault(storage, hadData) {
+  if (readObject(FOLLOWUP_PREFS_KEY, storage)) return
+  writeObject(FOLLOWUP_PREFS_KEY, { enabled: Boolean(hadData) }, storage)
+}
 export const saveFollowUpEnabled = (enabled, storage) => writeObject(FOLLOWUP_PREFS_KEY, { enabled: Boolean(enabled) }, storage)
 
 function loadState(storage) {
