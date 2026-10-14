@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, View } from 'react-native'
+import { loadProfile, trustedContact } from '../lib/profile.js'
 import { lengthLabel, loadWalkPrefs } from '../lib/walkStorage.js'
+import { useDevice } from '../ui/DeviceContext.js'
 import { Button } from '../ui/Button.jsx'
 import { NoteField, OutcomePicker } from '../ui/CheckIn.jsx'
 import { Confirm } from '../ui/Confirm.jsx'
@@ -19,7 +21,11 @@ export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
   const [note, setNote] = useState('')
   const [result, setResult] = useState('yes')
   const [askDiscard, setAskDiscard] = useState(null) // 'back' | 'close' | null
+  const device = useDevice()
   const walkLabel = lengthLabel(loadWalkPrefs(storage))
+  const profile = visible ? loadProfile(storage) : null
+  const why = profile?.why ?? ''
+  const contact = trustedContact(profile)
 
   const reset = () => { setLogging(false); setNote(''); setResult('yes'); setAskDiscard(null) }
   const close = () => { if (logging && note.trim()) setAskDiscard('close'); else { reset(); onClose() } }
@@ -35,6 +41,7 @@ export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
             <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 34, gap: 14 }} keyboardShouldPersistTaps="handled">
               <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: c.grab }} />
               <T accessibilityRole="header" font="serif" size={30} color={c.title}>Ride it out</T>
+              {why && !logging ? <T font="serifItalic" size={19} color={c.title} testID="ride-why">“{why}”</T> : null}
               {!logging ? (
                 <>
                   <View style={{ flexDirection: 'row', gap: 12 }}>
@@ -61,6 +68,9 @@ export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
                     <T font="bold" size={17} color={c.title}>Just log it</T>
                     <T size={14} color={c.text}>I already rode it out</T>
                   </Pressable>
+                  {contact ? (
+                    <Button kind="secondary" label={`Text ${contact.name}`} onPress={() => device.openURL(contact.href)} testID="ride-text" />
+                  ) : null}
                   <T size={14} color={c.muted} testID="ride-tip">Tip: hold the Ride it out button to start a walk right away.</T>
                 </>
               ) : (
