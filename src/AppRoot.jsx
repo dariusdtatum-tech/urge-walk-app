@@ -3,17 +3,24 @@ import { useStorage as useStorageFromContext } from './ui/StorageContext.js'
 import { Pressable, View } from 'react-native'
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
+import { loadTheme, saveTheme } from './lib/appearance.js'
+import { hasAnyData } from './lib/backup.js'
 import { markSaved, markStress } from './lib/calm.js'
+import { resolveOnboarding } from './lib/profile.js'
 import { readObject, writeObject } from './lib/storage.js'
 import { BREATHE_SAVED_MESSAGES, LOGGED_SAVED_MESSAGE } from './lib/walkMessages.js'
 import { startWalkNow } from './lib/walkStart.js'
 import { appendWalk, buildBreatheRecord, buildLoggedRecord, loadActiveWalk, removeWalk } from './lib/walkStorage.js'
 import { isEnded } from './lib/walkTimer.js'
 import { BreatheScreen } from './screens/BreatheScreen.jsx'
-import { ComingSoon } from './screens/ComingSoon.jsx'
+import { BackupScreen } from './screens/BackupScreen.jsx'
 import { HomeScreen } from './screens/HomeScreen.jsx'
+import { JournalScreen } from './screens/JournalScreen.jsx'
+import { LogScreen } from './screens/LogScreen.jsx'
+import { Onboarding } from './screens/onboarding/Onboarding.jsx'
 import { RideSheet } from './screens/RideSheet.jsx'
 import { WalkScreen } from './screens/WalkScreen.jsx'
+import { YouScreen } from './screens/YouScreen.jsx'
 import { DeviceContext, noopDevice } from './ui/DeviceContext.js'
 import { StorageContext } from './ui/StorageContext.js'
 import { RideCoachmark, TabBar } from './ui/TabBar.jsx'
@@ -23,7 +30,7 @@ import { SchemeContext, useTheme } from './ui/theme.js'
 export const LP_TIP_KEY = 'urgewalk.v1.longPressTipSeen' // { at, coachmarkDone? }
 const TOAST_MS = 6500
 
-function Shell({ clock }) {
+function Shell({ clock, theme, onTheme }) {
   const { c, scheme } = useTheme()
   const insets = useSafeAreaInsets()
   const storage = useStorageFromContext()
@@ -35,6 +42,12 @@ function Shell({ clock }) {
   const [coachmark, setCoachmark] = useState(false)
   const [dataVer, setDataVer] = useState(0)
   const [now, setNow] = useState(clock)
+  // Setup: 'new' on first run (no data, no profile), 'redo' from You, or null. Existing users skip it.
+  const [onboarding, setOnboarding] = useState(() => (resolveOnboarding({ hasData: hasAnyData(storage) }, storage, clock()) ? 'new' : null))
+  const [obBackup, setObBackup] = useState(false)
+  const [backup, setBackup] = useState(false) // the Backup screen, opened from Home or You
+  const [journalEditing, setJournalEditing] = useState(false)
+  const [focusWalkId, setFocusWalkId] = useState(null)
 
   useEffect(() => { const t = setInterval(() => setNow(clock()), 30_000); return () => clearInterval(t) }, [clock])
   useEffect(() => {
@@ -43,7 +56,8 @@ function Shell({ clock }) {
     return () => clearTimeout(t)
   }, [toast])
 
-  const backHome = useCallback(() => { setScreen('tabs'); setTab('home'); setNow(clock()); setDataVer((v) => v + 1) }, [clock])
+  const goTo = useCallback((t) => { setFocusWalkId(null); setBackup(false); setTab(t); setNow(clock()); setDataVer((v) => v + 1) }, [clock])
+  const backHome = useCallback(() => { setScreen('tabs'); goTo('home') }, [goTo])
   const exitWalk = useCallback(() => setScreen((s) => (s === 'walk' ? 'tabs' : s)), [])
 
   function startWalk() {
@@ -87,13 +101,47 @@ function Shell({ clock }) {
     setCoachmark(false)
   }
 
+  const openBackup = () => setBackup(true)
+
+  // ---------- Setup ----------
+  if (onboarding && obBackup) {
+    return (
+      <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
+        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+        <BackupScreen clock={clock} backLabel="Back" onBack={() => setObBackup(false)}
+          onRestored={(text) => {
+            setObBackup(false)
+            if (!resolveOnboarding({ hasData: hasAnyData(storage) }, storage, clock())) { setOnboarding(null); onTheme(loadTheme(storage)); setToast({ text }); goTo('home') }
+          }} />
+      </View>
+    )
+  }
+  if (onboarding) {
+    return (
+      <View style={{ flex: 1, backgroundColor: c.bg }}>
+        <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+        <Onboarding key={onboarding} mode={onboarding} now={clock()} onRestore={() => setObBackup(true)}
+          onCancel={() => { setOnboarding(null); goTo('you') }}
+          onDone={() => { setOnboarding(null); goTo('home') }} />
+      </View>
+    )
+  }
+
   let body
   if (screen === 'walk') body = <WalkScreen clock={clock} longPressTip={lpTip} onSaved={onWalkSaved} onExit={exitWalk} />
   else if (screen === 'breathe') body = <BreatheScreen clock={clock} onSave={onBreatheSaved} onCancel={backHome} />
-  else if (tab === 'home') body = <HomeScreen key={dataVer} now={now} onRide={onRide} liveWalk={!!loadActiveWalk(storage)} onResume={() => setScreen('walk')} />
-  else if (tab === 'log') body = <ComingSoon title="Log" line="Your urges ridden out will show up here in the next update." />
-  else if (tab === 'journal') body = <ComingSoon title="Journal" line="Journal entries come to the phone app in the next update." />
-  else body = <ComingSoon title="You" line="Settings, backup and help come to the phone app in the next update." />
+  else if (backup) body = <BackupScreen key={dataVer} clock={clock} backLabel={tab === 'you' ? 'You' : 'Home'} onBack={() => { setBackup(false); setDataVer((v) => v + 1) }} />
+  else if (tab === 'home') body = <HomeScreen key={dataVer} now={now} clock={clock} onRide={onRide} liveWalk={!!loadActiveWalk(storage)} onResume={() => setScreen('walk')} onOpenBackup={openBackup} />
+  else if (tab === 'log') body = <LogScreen key={dataVer} now={now} onRide={onRide} initialSelectedId={focusWalkId} />
+  else if (tab === 'journal') body = <JournalScreen key={dataVer} now={now} clock={clock} onEditingChange={setJournalEditing} onOpenWalk={(id) => { setTab('log'); setFocusWalkId(id); setDataVer((v) => v + 1) }} />
+  else {
+    body = (
+      <YouScreen key={dataVer} now={now} clock={clock} theme={theme} onTheme={onTheme} onOpenBackup={openBackup}
+        onRedo={() => setOnboarding('redo')}
+        onErased={() => { onTheme('system'); setToast(null); setScreen('tabs'); setTab('home'); setBackup(false); setOnboarding('new') }} />
+    )
+  }
+  const showTabs = screen === 'tabs' && !(tab === 'journal' && journalEditing && !backup)
 
   return (
     <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
@@ -110,10 +158,10 @@ function Shell({ clock }) {
           )}
         </View>
       )}
-      {screen === 'tabs' && (
+      {showTabs && (
         <View>
           {coachmark && <View style={{ position: 'absolute', left: 0, right: 0, bottom: '100%', marginBottom: 30 }}><RideCoachmark onDismiss={dismissCoachmark} /></View>}
-          <TabBar active={tab} onTab={setTab} onRide={onRide} onRideHold={onRideHold} bottomInset={insets.bottom} />
+          <TabBar active={backup ? null : tab} onTab={goTo} onRide={onRide} onRideHold={onRideHold} bottomInset={insets.bottom} />
         </View>
       )}
       <RideSheet visible={showRide} onWalk={startWalk} onBreathe={() => { markStress(clock(), storage); setToast(null); setShowRide(false); setScreen('breathe') }}
@@ -123,13 +171,16 @@ function Shell({ clock }) {
 }
 
 // The whole app. storage / device / scheme / clock are injectable for tests and previews.
+// scheme: 'system' follows the Appearance setting in You (System / Light / Dark); 'light' / 'dark' force it.
 export function AppRoot({ storage, device = noopDevice, scheme = 'system', clock = Date.now }) {
+  const [theme, setTheme] = useState(() => (scheme === 'light' || scheme === 'dark' ? scheme : loadTheme(storage)))
+  const onTheme = useCallback((t) => setTheme(saveTheme(t, storage)), [storage])
   return (
     <SafeAreaProvider>
-      <SchemeContext.Provider value={scheme}>
+      <SchemeContext.Provider value={theme}>
         <StorageContext.Provider value={storage}>
           <DeviceContext.Provider value={device}>
-            <Shell clock={clock} />
+            <Shell clock={clock} theme={theme} onTheme={onTheme} />
           </DeviceContext.Provider>
         </StorageContext.Provider>
       </SchemeContext.Provider>

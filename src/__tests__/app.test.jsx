@@ -23,16 +23,20 @@ describe('Home', () => {
   it('shows the Ride it out bar, the day ring and the next milestone', async () => {
     await renderApp()
     expect(screen.getByTestId('ride-bar')).toBeTruthy()
-    expect(screen.getByTestId('hero-days').props.children).toBe(163)
+    expect(screen.getByTestId('hero-days').props.children).toBe('163')
     expect(screen.getByLabelText('163 days clean')).toBeTruthy()
     expect(screen.getByText(/to 6 months/)).toBeTruthy()
   })
-  it('empty state: one sentence and a way to start', async () => {
-    const { storage } = await renderApp({ storage: memoryStorage() })
+  it('empty state (set up, no tracker): one sentence, add a start date, or restore', async () => {
+    const storage = memoryStorage({ 'urgewalk.v1.profile': JSON.stringify({ version: 1, onboardedAt: '2030-05-01T12:00:00.000Z', skipped: false }) })
+    await renderApp({ storage })
     expect(screen.getByText('Add your start date to begin counting.')).toBeTruthy()
-    await fireEvent.press(screen.getByTestId('start-today'))
-    expect(screen.getByTestId('hero-days').props.children).toBe(0)
-    expect(JSON.parse(storage.getItem('urgewalk.v1.habits')).habits).toHaveLength(1)
+    expect(screen.getByTestId('empty-restore')).toBeTruthy()
+    await fireEvent.press(screen.getByTestId('add-start-date'))
+    await fireEvent.changeText(screen.getByTestId('habit-name'), 'Habit B')
+    await fireEvent.press(screen.getByTestId('habit-save'))
+    expect(screen.getByTestId('hero-days').props.children).toBe('0')
+    expect(JSON.parse(storage.getItem('urgewalk.v1.habits')).habits[0].name).toBe('Habit B')
   })
   it('four tabs plus the centre Ride it out button, all labelled', async () => {
     await renderApp()

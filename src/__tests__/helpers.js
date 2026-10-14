@@ -14,11 +14,18 @@ export function fakeClock(start = T0) {
   clock.advance = (ms) => { t += ms }
   return clock
 }
-export function stubDevice() {
-  const calls = { tap: 0, breathTurn: 0, done: 0, alerts: [] }
+export function stubDevice({ share = 'shared', file = null } = {}) {
+  const calls = { tap: 0, breathTurn: 0, done: 0, alerts: [], shared: [], urls: [], picks: 0 }
   return {
     calls,
+    shareBackup(text, filename) { calls.shared.push({ text, filename }); return share instanceof Error ? Promise.reject(share) : Promise.resolve(share) },
+    pickBackupFile() { calls.picks += 1; return Promise.resolve(file) },
+    openURL(url) { calls.urls.push(url) },
     tap() { calls.tap += 1 }, breathTurn() { calls.breathTurn += 1 }, done() { calls.done += 1 },
     syncWalkAlert(walk, now) { calls.alerts.push({ walk, now }); return Promise.resolve(null) },
   }
 }
+
+export const onboardedProfile = (extra = {}) => ({ 'urgewalk.v1.profile': JSON.stringify({ version: 1, onboardedAt: '2030-05-01T12:00:00.000Z', skipped: false, adultConfirmed: true, ...extra }) })
+export const iso = (ms) => new Date(ms).toISOString()
+export const DAY = 86400000
