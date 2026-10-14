@@ -1,10 +1,10 @@
 // The answer editors used by onboarding (one per screen) and by You → Your answers.
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Pressable, TextInput, View } from 'react-native'
 import Svg, { Circle, Path } from 'react-native-svg'
 import { daysBetween } from '../../lib/cleanTime.js'
 import {
-  communityAvailable, IDENTITY, IMPORTANCE, IMPROVE, MAX_IMPROVE, MAX_TRUSTED_NAME, MAX_WHY, RIDING_GROUPS, SUPPORT, validatePhone,
+  communityAvailable, IDENTITY, IMPORTANCE, IMPROVE_GROUPS, MAX_IMPROVE_OWN, SELF_HARM, MAX_TRUSTED_NAME, MAX_WHY, RIDING_GROUPS, SUPPORT, validatePhone,
 } from '../../lib/profile.js'
 import { MAX_NAME_LENGTH } from '../../lib/storage.js'
 import { DatePicker } from '../../ui/DatePicker.jsx'
@@ -53,12 +53,36 @@ function Option({ selected, onSelect, title, hint, icon, testID }) {
   )
 }
 
-// 03 What are you riding out? (multi-select, own entries)
-export function RidingStep({ picks, onChange }) {
+// A selectable chip (44pt tall, wraps at large text sizes).
+export function Chip({ on, label, onPress, testID, dashed = false, role = 'checkbox' }) {
+  const { c } = useTheme()
+  return (
+    <Pressable onPress={onPress} accessibilityRole={role} accessibilityState={role === 'checkbox' ? { checked: on } : undefined} testID={testID}
+      style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, paddingVertical: 6, borderRadius: 22,
+        borderWidth: on ? 0 : 1, borderStyle: dashed ? 'dashed' : 'solid', borderColor: dashed ? c.title : c.fieldBorder, backgroundColor: on ? c.action : c.card }}>
+      {on ? <Check color={c.onAction} /> : null}
+      <T font="medium" size={15} color={on ? c.onAction : c.title}>{label}</T>
+    </Pressable>
+  )
+}
+
+function GroupLabel({ children }) {
+  const { c } = useTheme()
+  return <T accessibilityRole="header" font="bold" size={13} color={c.muted} style={{ letterSpacing: 1, textTransform: 'uppercase' }}>{children}</T>
+}
+
+// 03 What are you riding out? Grouped and searchable, with your own entries.
+// Picking "Self-harm urges" calls onSelfHarm straight away (setup opens the crisis resources).
+export function RidingStep({ picks, onChange, onSelfHarm }) {
   const { c, fonts } = useTheme()
+  const input = useRef(null)
   const [query, setQuery] = useState('')
   const q = query.trim()
-  const toggle = (name) => onChange(picks.includes(name) ? picks.filter((p) => p !== name) : [...picks, name])
+  const toggle = (name) => {
+    const on = picks.includes(name)
+    onChange(on ? picks.filter((p) => p !== name) : [...picks, name])
+    if (!on && name === SELF_HARM) onSelfHarm?.()
+  }
   const known = RIDING_GROUPS.flatMap((g) => g.items)
   const custom = picks.filter((p) => !known.includes(p))
   const match = (name) => name.toLowerCase().includes(q.toLowerCase())
@@ -68,8 +92,8 @@ export function RidingStep({ picks, onChange }) {
   const add = () => { if (q && !exact) { onChange([...picks, q]); setQuery('') } }
   return (
     <View style={{ gap: 12 }}>
-      <TextInput value={query} onChangeText={setQuery} maxLength={MAX_NAME_LENGTH} placeholder="Search or type your own" placeholderTextColor={c.muted}
-        accessibilityLabel="Search or type your own" testID="riding-search" onSubmitEditing={add} returnKeyType="done" maxFontSizeMultiplier={2}
+      <TextInput ref={input} value={query} onChangeText={setQuery} maxLength={MAX_NAME_LENGTH} placeholder="Search, or type your own" placeholderTextColor={c.muted}
+        accessibilityLabel="Search, or type your own" testID="riding-search" onSubmitEditing={add} returnKeyType="done" maxFontSizeMultiplier={2}
         style={{ minHeight: 48, borderWidth: 1, borderColor: c.fieldBorder, borderRadius: 24, paddingHorizontal: 16, color: c.text, fontFamily: fonts.body, fontSize: 16, backgroundColor: c.card }} />
       {q && !exact ? (
         <Pressable onPress={add} accessibilityRole="button" testID="riding-add" style={{ minHeight: 48, justifyContent: 'center', paddingHorizontal: 14, borderRadius: 14, borderWidth: 1.5, borderStyle: 'dashed', borderColor: c.title }}>
@@ -77,22 +101,22 @@ export function RidingStep({ picks, onChange }) {
         </Pressable>
       ) : null}
       {groups.map((g) => (
-        <View key={g.id} style={{ gap: 8 }}>
-          <T accessibilityRole="header" font="bold" size={13} color={c.muted} style={{ letterSpacing: 1, textTransform: 'uppercase' }}>{g.label}</T>
+        <View key={g.id} style={{ gap: 8 }} testID={`riding-group-${g.id}`}>
+          <GroupLabel>{g.label}</GroupLabel>
           <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-            {g.items.map((name) => {
-              const on = picks.includes(name)
-              return (
-                <Pressable key={name} onPress={() => toggle(name)} accessibilityRole="checkbox" accessibilityState={{ checked: on }} testID={`pick-${name}`}
-                  style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, borderRadius: 22, borderWidth: on ? 0 : 1, borderColor: c.fieldBorder, backgroundColor: on ? c.action : c.card }}>
-                  {on ? <Check color={c.onAction} /> : null}
-                  <T font="medium" size={15} color={on ? c.onAction : c.title}>{name}</T>
-                </Pressable>
-              )
-            })}
+            {g.items.map((name) => <Chip key={name} on={picks.includes(name)} label={name} onPress={() => toggle(name)} testID={`pick-${name}`} />)}
           </View>
         </View>
       ))}
+      {!q ? (
+        <View style={{ gap: 8 }}>
+          <GroupLabel>Other</GroupLabel>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            <Chip role="button" label="Something else" onPress={() => input.current?.focus()} testID="riding-other" />
+            <Chip role="button" dashed label="+ Add your own" onPress={() => input.current?.focus()} testID="riding-own" />
+          </View>
+        </View>
+      ) : null}
     </View>
   )
 }
@@ -120,29 +144,33 @@ export function BeforeSteppers({ value, onChange, prefix = 'ob' }) {
   )
 }
 
-// 07 More of (up to 3)
-export function ImproveStep({ value, onChange }) {
+// 07 More of: chips grouped Body / Mind / Life, plus one of your own.
+export function ImproveStep({ value, onChange, own = '', onOwn }) {
   const { c } = useTheme()
-  const toggle = (id) => {
-    if (value.includes(id)) onChange(value.filter((v) => v !== id))
-    else if (value.length < MAX_IMPROVE) onChange([...value, id])
-  }
+  const [adding, setAdding] = useState(false)
+  const toggle = (id) => onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id])
+  const count = value.length + (own.trim() ? 1 : 0)
   return (
-    <View style={{ gap: 12 }}>
-      <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
-        {IMPROVE.map((o) => {
-          const on = value.includes(o.id)
-          const disabled = !on && value.length >= MAX_IMPROVE
-          return (
-            <Pressable key={o.id} onPress={() => toggle(o.id)} disabled={disabled} accessibilityRole="checkbox" accessibilityState={{ checked: on, disabled }} testID={`improve-${o.id}`}
-              style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, paddingHorizontal: 14, borderRadius: 22, borderWidth: on ? 0 : 1, borderColor: c.fieldBorder, backgroundColor: on ? c.action : c.card, opacity: disabled ? 0.45 : 1 }}>
-              {on ? <Check color={c.onAction} /> : null}
-              <T font="medium" size={15} color={on ? c.onAction : c.title}>{o.label}</T>
-            </Pressable>
-          )
-        })}
-      </View>
-      <T size={14} color={c.muted} testID="ob-improve-count">{value.length} of {MAX_IMPROVE} chosen</T>
+    <View style={{ gap: 14 }}>
+      {IMPROVE_GROUPS.map((g) => (
+        <View key={g.id} style={{ gap: 8 }} testID={`improve-group-${g.id}`}>
+          <GroupLabel>{g.label}</GroupLabel>
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 8 }}>
+            {g.items.map((o) => <Chip key={o.id} on={value.includes(o.id)} label={o.label} onPress={() => toggle(o.id)} testID={`improve-${o.id}`} />)}
+          </View>
+        </View>
+      ))}
+      {onOwn ? (
+        <View style={{ gap: 8 }}>
+          <GroupLabel>Your own</GroupLabel>
+          {adding || own ? (
+            <Field label="Something else you want more of" value={own} onChangeText={onOwn} maxLength={MAX_IMPROVE_OWN} placeholder="e.g. Early mornings" testID="improve-own" autoFocus={adding} />
+          ) : (
+            <View style={{ flexDirection: 'row' }}><Chip role="button" dashed label="+ Add your own" onPress={() => setAdding(true)} testID="improve-own-add" /></View>
+          )}
+        </View>
+      ) : null}
+      <T size={14} color={c.muted} testID="ob-improve-count" accessibilityLiveRegion="polite">{count} selected</T>
     </View>
   )
 }

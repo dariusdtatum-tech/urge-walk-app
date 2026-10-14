@@ -6,13 +6,14 @@ import { daysBetween, todayISO } from '../../lib/cleanTime.js'
 import { shortDate } from '../../lib/homeStats.js'
 import { backfillTracker, loadMilestones, saveMilestones } from '../../lib/milestones.js'
 import {
-  emptyProfile, identityLine, IMPORTANCE, IMPROVE, labelFor, loadProfile, saveProfile, SUPPORT, supportValid, trackersFromPicks,
+  emptyProfile, identityLine, IMPORTANCE, improveLabels, labelFor, loadProfile, saveProfile, SUPPORT, supportValid, trackersFromPicks,
 } from '../../lib/profile.js'
 import { loadHabits, makeId, saveHabits } from '../../lib/storage.js'
 import { Button } from '../../ui/Button.jsx'
 import { useStorage } from '../../ui/StorageContext.js'
 import { T } from '../../ui/Text.jsx'
 import { useTheme } from '../../ui/theme.js'
+import { CrisisSheet } from '../Crisis.jsx'
 import { BeforeSteppers, Check, DateStep, IdentityStep, ImportanceStep, ImproveStep, RidingStep, SupportStep, WhyStep } from './Steps.jsx'
 
 // Step ids kept stable for the recap (6 is gone: "times a day" sits on 5 with "days a week").
@@ -68,13 +69,14 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
       adult: p.adultConfirmed, picks: mode === 'redo' ? habits.map((h) => h.name) : [],
       startDate: mode === 'redo' && habits[0] ? habits[0].startDate : today,
       before: { daysPerWeek: p.before.daysPerWeek, timesPerDay: p.before.timesPerDay },
-      improve: p.improve, importance: p.importance, identity: p.identity,
+      improve: p.improve, improveOwn: p.improveOwn || '', importance: p.importance, identity: p.identity,
       support: { support: p.support, trustedName: p.trustedName, trustedPhone: p.trustedPhone },
       why: p.why, existing: habits.map((h) => h.name),
     }
   })
   const [step, setStep] = useState(mode === 'redo' ? 2 : 1)
   const [fromRecap, setFromRecap] = useState(false)
+  const [crisis, setCrisis] = useState(false)
   const set = (changes) => setDraft((d) => ({ ...d, ...changes }))
   const newPicks = draft.picks.filter((n) => !draft.existing.some((e) => e.toLowerCase() === n.toLowerCase()))
 
@@ -85,7 +87,7 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
     setStep(prevStep(step))
   }
   const SKIP_RESET = {
-    4: { startDate: today }, 5: { before: { daysPerWeek: null, timesPerDay: null } }, 7: { improve: [] },
+    4: { startDate: today }, 5: { before: { daysPerWeek: null, timesPerDay: null } }, 7: { improve: [], improveOwn: '' },
     8: { importance: null }, 9: { identity: null }, 10: { support: { support: null, trustedName: '', trustedPhone: '' } }, 11: { why: '' },
   }
   const skip = () => { set(SKIP_RESET[step]); next() }
@@ -96,7 +98,7 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
     const prev = loadProfile(storage) || emptyProfile()
     saveProfile({
       ...prev, onboardedAt: at, skipped: false, adultConfirmed: true, privacyAckAt: prev.privacyAckAt || at,
-      before: draft.before, improve: draft.improve, importance: draft.importance, identity: draft.identity, ...draft.support, why: draft.why,
+      before: draft.before, improve: draft.improve, improveOwn: draft.improveOwn, importance: draft.importance, identity: draft.identity, ...draft.support, why: draft.why,
     }, storage)
     const habits = loadHabits(storage).habits
     const added = trackersFromPicks(draft.picks, draft.startDate, habits, makeId)
@@ -142,7 +144,7 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
     { step: 3, k: 'Riding out', v: draft.picks.join(', ') },
     { step: 4, k: 'Clean since', v: `${shortDate(draft.startDate, '0000-01-01')} · ${days.toLocaleString()} ${days === 1 ? 'day' : 'days'}` },
     { step: 5, k: 'Before', v: before },
-    { step: 7, k: 'More of', v: draft.improve.map((id) => labelFor(IMPROVE, id)).join(' · ') },
+    { step: 7, k: 'More of', v: improveLabels({ improve: draft.improve, improveOwn: draft.improveOwn.trim() }).join(' · ') },
     { step: 8, k: 'Right now', v: IMPORTANCE.find((o) => o.id === draft.importance)?.recap ?? '' },
     { step: 9, k: 'I see myself as', v: identityLine({ identity: draft.identity }) },
     { step: 10, k: 'Who’s with you', v: sup ? labelFor(SUPPORT, sup) + (sup === 'trusted' ? ` · ${draft.support.trustedName.trim()}` : '') : '' },
@@ -171,15 +173,15 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
         <T size={14} color={c.muted} testID="ob-disclaimer">Urge Walk is a habit tool, not medical treatment.</T>
       </View>
     ) },
-    3: { title: 'What are you riding out?', sub: 'Choose all that apply. You can add more later.', ok: draft.picks.length > 0,
-      body: <RidingStep picks={draft.picks} onChange={(picks) => set({ picks })} /> },
+    3: { title: 'What are you riding out?', sub: 'Pick as many as you like. You can change this any time.', ok: draft.picks.length > 0, cta: draft.picks.length ? `Continue · ${draft.picks.length} selected` : 'Continue',
+      body: <RidingStep picks={draft.picks} onChange={(picks) => set({ picks })} onSelfHarm={() => setCrisis(true)} /> },
     4: { title: 'When did your clean days begin?', sub: dateNote,
       extra: <Button kind="quiet" label="Start today" onPress={() => set({ startDate: today })} testID="ob-start-today" />,
       body: <DateStep value={draft.startDate} today={today} onChange={(startDate) => set({ startDate })} /> },
     5: { title: 'Before you started, how often?', sub: 'Optional. A rough guess is fine. Helps show the time you’ve gained back.',
       body: <BeforeSteppers value={draft.before} onChange={(before) => set({ before })} /> },
-    7: { title: 'What do you want more of?', sub: 'We’ll shape your walk encouragement around these.',
-      body: <ImproveStep value={draft.improve} onChange={(improve) => set({ improve })} /> },
+    7: { cta: `Continue · ${draft.improve.length + (draft.improveOwn.trim() ? 1 : 0)} selected`, title: 'What do you want more of?', sub: 'Choose any that matter. We’ll reflect them back to you.',
+      body: <ImproveStep value={draft.improve} onChange={(improve) => set({ improve })} own={draft.improveOwn} onOwn={(improveOwn) => set({ improveOwn })} /> },
     8: { title: 'How important is this to you right now?', sub: 'Be honest. It only changes how the app shows up for you.',
       body: <ImportanceStep value={draft.importance} onChange={(importance) => set({ importance })} /> },
     9: { title: 'I see myself as someone who is…', sub: 'Shown on your Home screen.',
@@ -235,6 +237,7 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
         )}
         {sc?.extra ?? null}
       </View>
+      {crisis ? <CrisisSheet onClose={() => setCrisis(false)} /> : null}
     </View>
   )
 }

@@ -7,7 +7,7 @@ import { DEFAULT_HOURS_PER_TIME, timeBack } from '../lib/homeIdeas.js'
 import { heroHabit, shortDate } from '../lib/homeStats.js'
 import { earnedList, loadMilestones, saveMilestones } from '../lib/milestones.js'
 import {
-  emptyProfile, identityLine, IMPORTANCE, IMPROVE, labelFor, loadProfile, saveProfile, SUPPORT, supportValid, trustedContact,
+  emptyProfile, identityLine, IMPORTANCE, improveLabels, labelFor, loadProfile, saveProfile, SUPPORT, supportValid, trustedContact,
 } from '../lib/profile.js'
 import { CUSTOM_MAX, CUSTOM_MIN, WALK_OPTIONS, clampCustomMinutes } from '../lib/walkTimer.js'
 import { lengthLabel, loadWalkPrefs, saveWalkPrefs } from '../lib/walkStorage.js'
@@ -26,16 +26,13 @@ import { MilestonesList } from './home/Milestones.jsx'
 import { BeforeSteppers, IdentityStep, ImportanceStep, ImproveStep, SupportStep, WhyStep } from './onboarding/Steps.jsx'
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 
+import { CRISIS, CrisisSheet } from './Crisis.jsx'
+
+export { CRISIS }
 export const LEGAL_LINKS = [
   { label: 'Privacy policy', url: 'https://dariusdtatum-tech.github.io/urgewalk/privacy.html' },
   { label: 'Terms', url: 'https://dariusdtatum-tech.github.io/urgewalk/terms.html' },
   { label: 'Support', url: 'https://dariusdtatum-tech.github.io/urgewalk/support.html' },
-]
-// US crisis lines (public numbers). Each opens the phone's own dialer / messages.
-export const CRISIS = [
-  { id: '988', name: '988 Suicide & Crisis Lifeline', note: 'Free, 24/7. Call or text 988.', links: [{ label: 'Call 988', url: 'tel:988' }, { label: 'Text 988', url: 'sms:988' }] },
-  { id: 'samhsa', name: 'SAMHSA National Helpline', note: 'Free, confidential, 24/7. Treatment referral and information.', links: [{ label: 'Call 1-800-662-4357', url: 'tel:18006624357' }] },
-  { id: '911', name: 'Emergency', note: 'If you or someone else is in immediate danger.', links: [{ label: 'Call 911', url: 'tel:911' }] },
 ]
 const ANSWER_TITLES = { before: 'Before you started', improve: 'What you want more of', importance: 'How important right now', identity: 'I see myself as', support: 'Who’s with you', why: 'Your why' }
 
@@ -46,7 +43,7 @@ function answers(p) {
   ].filter(Boolean).join(' · ')
   return [
     { field: 'before', title: 'Before you started', value: before },
-    { field: 'improve', title: 'More of', value: p.improve.map((id) => labelFor(IMPROVE, id)).join(' · ') },
+    { field: 'improve', title: 'More of', value: improveLabels(p).join(' · ') },
     { field: 'importance', title: 'Right now', value: IMPORTANCE.find((o) => o.id === p.importance)?.recap ?? '' },
     { field: 'identity', title: 'I see myself as', value: identityLine(p) },
     { field: 'support', title: 'Who’s with you', value: p.support ? labelFor(SUPPORT, p.support) + (p.support === 'trusted' ? ` · ${p.trustedName}` : '') : '' },
@@ -178,25 +175,6 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   )
 }
 
-function CrisisSheet({ onClose }) {
-  const { c } = useTheme()
-  const device = useDevice()
-  return (
-    <Sheet title="Crisis resources" onClose={onClose} testID="crisis-sheet" right={<HeaderButton label="✕" accessibilityLabel="Close" onPress={onClose} />}>
-      <T size={16} color={c.text}>If you’re struggling, you don’t have to ride it out alone. Reach out now.</T>
-      {CRISIS.map((r) => (
-        <View key={r.id} testID={`crisis-${r.id}`} style={{ gap: 6, paddingVertical: 6, borderBottomWidth: 1, borderBottomColor: c.border }}>
-          <T font="semibold" size={16} color={c.title}>{r.name}</T>
-          <T size={14} color={c.muted}>{r.note}</T>
-          <View style={{ flexDirection: 'row', gap: 8, flexWrap: 'wrap' }}>
-            {r.links.map((l) => <Button key={l.url} kind="secondary" label={l.label} onPress={() => device.openURL(l.url)} testID={`crisis-link-${l.url}`} />)}
-          </View>
-        </View>
-      ))}
-      <T size={14} color={c.muted} testID="crisis-disclaimer">Urge Walk is a habit tool, not treatment or a substitute for professional care.</T>
-    </Sheet>
-  )
-}
 
 // 5 · 10 · 15 · Custom (1–120) · Open. Remembered, and used by "Walk" in Ride it out.
 function WalkLengthPicker({ prefs, onChange }) {
@@ -300,12 +278,14 @@ function AdjustSheet({ kind, value, onSave, onClose }) {
 function AnswerSheet({ field, profile, onSave, onClose }) {
   const [value, setValue] = useState(() => {
     if (field === 'before') return { ...profile.before }
+    if (field === 'improve') return { improve: profile.improve, improveOwn: profile.improveOwn || '' }
     if (field === 'support') return { support: profile.support, trustedName: profile.trustedName, trustedPhone: profile.trustedPhone }
     return profile[field]
   })
   const ok = field !== 'support' || supportValid(value)
   function save() {
     if (field === 'before') onSave({ before: value })
+    else if (field === 'improve') onSave(value)
     else if (field === 'support') onSave(value.support === 'trusted' ? value : { ...value, trustedName: '', trustedPhone: '' })
     else onSave({ [field]: value })
   }
@@ -317,7 +297,7 @@ function AnswerSheet({ field, profile, onSave, onClose }) {
         <Button kind="quiet" label="Clear" onPress={() => setValue({ daysPerWeek: null, timesPerDay: null })} />
       </>
     )
-  } else if (field === 'improve') editor = <ImproveStep value={value} onChange={setValue} />
+  } else if (field === 'improve') editor = <ImproveStep value={value.improve} own={value.improveOwn} onChange={(improve) => setValue({ ...value, improve })} onOwn={(improveOwn) => setValue({ ...value, improveOwn })} />
   else if (field === 'importance') editor = <ImportanceStep value={value} onChange={setValue} />
   else if (field === 'identity') editor = <IdentityStep value={value} onChange={setValue} />
   else if (field === 'support') editor = <SupportStep value={value} onChange={setValue} />
