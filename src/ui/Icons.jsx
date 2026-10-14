@@ -45,3 +45,10 @@ export function YouIcon({ color, size = 24 }) {
     </Svg>
   )
 }
+export function CommunityIcon({ color, size = 24 }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.7} strokeLinecap="round" {...hide}>
+      <Path d="M9 11a3.5 3.5 0 100-7 3.5 3.5 0 000 7zM2.5 20c.8-3.6 3.3-5.5 6.5-5.5s5.7 1.9 6.5 5.5M16 4.3a3.5 3.5 0 010 6.4M18 14.8c1.8.8 3 2.5 3.5 5.2" />
+    </Svg>
+  )
+}

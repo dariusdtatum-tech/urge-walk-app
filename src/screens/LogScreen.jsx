@@ -59,7 +59,7 @@ function DayRing({ d }) {
 }
 
 // Log: a summary of everything ridden out, this week's day marks, then the history grouped by day.
-export function LogScreen({ now, onRide, initialSelectedId = null }) {
+export function LogScreen({ now, onRide, initialSelectedId = null, header = null }) {
   const storage = useStorage()
   const { c } = useTheme()
   const colors = useOutcomeColors()
@@ -79,7 +79,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null }) {
   if (walks.length === 0) {
     return (
       <ScrollView contentContainerStyle={{ padding: 20, gap: 16 }} testID="log">
-        <T accessibilityRole="header" font="serif" size={34} color={c.title}>Log</T>
+        {header ?? <T accessibilityRole="header" font="serif" size={34} color={c.title}>Log</T>}
         <Notice text={notice} onDismiss={() => setNotice('')} />
         <View style={{ alignItems: 'center', gap: 12, paddingVertical: 32 }} testID="log-empty">
           <T accessibilityRole="header" font="serif" size={26} color={c.title}>No urges logged yet</T>
@@ -98,7 +98,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null }) {
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 140, gap: 16 }} testID="log">
-        <T accessibilityRole="header" font="serif" size={34} color={c.title}>Log</T>
+        {header ?? <T accessibilityRole="header" font="serif" size={34} color={c.title}>Log</T>}
         <Notice text={notice} onDismiss={() => setNotice('')} />
         <Card testID="summary">
           <T size={18} color={c.text} testID="summary-total">

@@ -22,7 +22,7 @@ const moodInfo = (id) => MOODS.find((m) => m.id === id)
 
 // Journal: your entries plus notes from walks / breaths / logs, newest first, with search.
 // The editor autosaves a draft on every keystroke; an unfinished draft reopens next time.
-export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChange = () => {} }) {
+export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChange = () => {}, header = null }) {
   const storage = useStorage()
   const { c, fonts } = useTheme()
   const today = todayISO(new Date(now))
@@ -58,7 +58,7 @@ export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChan
 
   return (
     <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 140, gap: 14 }} testID="journal" keyboardShouldPersistTaps="handled">
-      <T accessibilityRole="header" font="serif" size={34} color={c.title}>Journal</T>
+      {header ?? <T accessibilityRole="header" font="serif" size={34} color={c.title}>Journal</T>}
       <Notice text={notice} onDismiss={() => setNotice('')} />
       {feed.length === 0 ? (
         <View style={{ alignItems: 'center', gap: 12, paddingVertical: 32 }} testID="journal-empty">
