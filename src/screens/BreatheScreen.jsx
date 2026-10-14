@@ -21,7 +21,7 @@ function KeepAwake() {
   return null
 }
 
-// One minute of guided breathing: in 4s, hold 1s, out 6s. A light haptic when the breath turns
+// One minute of guided breathing: in 4s, hold 3s, out 6s. A light haptic when the breath turns
 // (in / out), never on the hold. Its own breath-only lines. Then the same check-in as a walk.
 export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
   const storage = useStorage()

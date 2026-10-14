@@ -122,12 +122,12 @@ describe('backups with kinds', () => {
 })
 
 describe('breathing timing', () => {
-  it('in 4s, hold 1s, out 6s, repeating', () => {
-    expect(BREATH).toEqual({ inMs: 4000, holdMs: 1000, outMs: 6000 })
-    expect([0, 3999, 4000, 4500, 5000, 10999, 11000].map(breathPhase)).toEqual(['in', 'in', 'hold', 'hold', 'out', 'out', 'in'])
+  it('in 4s, hold 3s, out 6s, repeating', () => {
+    expect(BREATH).toEqual({ inMs: 4000, holdMs: 3000, outMs: 6000 })
+    expect([0, 3999, 4000, 5500, 6999, 7000, 12999, 13000].map(breathPhase)).toEqual(['in', 'in', 'hold', 'hold', 'hold', 'out', 'out', 'in'])
   })
   it('about 5.5 breaths in the minute', () => {
-    expect(60_000 / (BREATH.inMs + BREATH.holdMs + BREATH.outMs)).toBeCloseTo(5.45, 1)
+    expect(60_000 / (BREATH.inMs + BREATH.holdMs + BREATH.outMs)).toBeCloseTo(4.62, 1)
   })
 })
 

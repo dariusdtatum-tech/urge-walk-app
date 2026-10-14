@@ -1,5 +1,5 @@
-// One breath: in for 4s, hold for 1s, out for 6s (about 5.5 breaths fill the minute).
-export const BREATH = { inMs: 4000, holdMs: 1000, outMs: 6000 }
+// One breath: in for 4s, hold for 3s, out for 6s (about 4.6 breaths fill the minute).
+export const BREATH = { inMs: 4000, holdMs: 3000, outMs: 6000 }
 const CYCLE = BREATH.inMs + BREATH.holdMs + BREATH.outMs
 
 // Where we are in the breath after `ms`: 'in' (growing), 'hold' (full, still) or 'out' (shrinking).
