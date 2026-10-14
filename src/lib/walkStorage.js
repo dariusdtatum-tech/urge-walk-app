@@ -3,6 +3,7 @@
 // - urgewalk.v1.activeWalk  the walk in progress, so reopening the app resumes it
 // - urgewalk.v1.walkPrefs   last choice (5 / 10 / 15 / custom / open) and last custom length
 import { makeId, readList, readObject, writeList, writeObject } from './storage.js'
+import { sanitizeTags, withTags } from './urgeMap.js'
 import { DEFAULT_CUSTOM_MINUTES, DEFAULT_MINUTES, WALK_OPTIONS, clampCustomMinutes } from './walkTimer.js'
 
 export const WALKS_KEY = 'urgewalk.v1.walks'
@@ -46,12 +47,17 @@ export function sanitizeWalks(list) {
         note: typeof w.note === 'string' ? w.note.slice(0, MAX_NOTE_LENGTH) : '',
         // The "how did it go?" answer, only when there is one (older records and files stay unchanged).
         ...(FOLLOWUP_VALUES.includes(w.followUp) ? { followUp: w.followUp } : {}),
+        // Optional Urge Map context tags, only when some were picked.
+        ...(sanitizeTags(w.tags).length ? { tags: sanitizeTags(w.tags) } : {}),
       }
     })
 }
 
 // A finished minute of breathing (`startedAt` / `endedAt` in ms).
-export function buildBreatheRecord({ id = makeId(), startedAt, endedAt, result = null, note = '' }) {
+export function buildBreatheRecord({ id = makeId(), startedAt, endedAt, result = null, note = '', tags = [] }) {
+  return withTags(breatheRecord({ id, startedAt, endedAt, result, note }), tags)
+}
+function breatheRecord({ id, startedAt, endedAt, result, note }) {
   const actualSeconds = Math.max(0, Math.min(BREATHE_SECONDS, Math.round((endedAt - startedAt) / 1000)))
   return {
     id,
@@ -68,12 +74,12 @@ export function buildBreatheRecord({ id = makeId(), startedAt, endedAt, result =
 }
 
 // "Just log it": an urge ridden out without a walk or breathing, at `at` (ms). It passed, so result is 'yes'.
-export function buildLoggedRecord({ id = makeId(), at, note = '', result = 'yes' }) {
+export function buildLoggedRecord({ id = makeId(), at, note = '', result = 'yes', tags = [] }) {
   const iso = new Date(at).toISOString()
-  return {
+  return withTags({
     id, kind: 'logged', startedAt: iso, endedAt: iso, mode: 'open', plannedMinutes: null,
     actualSeconds: 0, endedEarly: false, result: ['yes', 'kinda', 'no'].includes(result) ? result : 'yes', note: String(note ?? '').trim().slice(0, MAX_NOTE_LENGTH),
-  }
+  }, tags)
 }
 
 // Returns { walks, recovered }. Oldest first.

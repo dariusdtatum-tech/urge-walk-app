@@ -1,3 +1,4 @@
+import { withTags } from './urgeMap.js'
 // Pure timer math for the urge walk. No React and no ticking counters:
 // everything is worked out from saved timestamps (milliseconds since 1970),
 // so the time stays right even if iOS freezes the app or the screen locks.
@@ -124,9 +125,9 @@ export function finishWalk(walk, now, { early = false } = {}) {
 }
 
 // The record saved for the Log. Times are ISO strings so they're easy to read later.
-export function buildWalkRecord(walk, { result = null, note = '' } = {}) {
+export function buildWalkRecord(walk, { result = null, note = '', tags = [] } = {}) {
   const open = isOpen(walk)
-  return {
+  return withTags({
     id: walk.id,
     kind: 'walk',
     startedAt: new Date(walk.startedAt).toISOString(),
@@ -137,7 +138,7 @@ export function buildWalkRecord(walk, { result = null, note = '' } = {}) {
     endedEarly: open ? false : Boolean(walk.endedEarly),
     result,
     note: note.trim(),
-  }
+  }, tags)
 }
 
 function clock(totalSeconds) {
