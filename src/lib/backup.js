@@ -14,6 +14,7 @@
 import { CHECKINS_KEY, loadCheckins, sanitizeCheckins, saveCheckins } from './checkin.js'
 import { todayISO } from './cleanTime.js'
 import { CONTACTS_KEY, loadContactsData, sanitizeContactsData, saveContactsData } from './contacts.js'
+import { MONEY_GOAL_KEY, loadGoal, sanitizeGoal, saveGoal } from './money.js'
 import { MILESTONES_KEY, loadMilestones, sanitizeMilestones, saveMilestones } from './milestones.js'
 import { DRAFT_KEY, JOURNAL_KEY, loadJournal, sanitizeEntries, saveJournal } from './journal.js'
 import { REASONS_KEY, loadReasonsData, reasonsForBackup, saveReasonsData, sanitizeReasonsData } from './reasons.js'
@@ -40,6 +41,7 @@ const DAY_MS = 24 * 60 * 60 * 1000
 export const OPTIONAL_SECTIONS = [
   { name: 'checkins', key: CHECKINS_KEY, load: loadCheckins, sanitize: (r) => (r && typeof r === 'object' && !Array.isArray(r) ? sanitizeCheckins(r) : null), save: saveCheckins, empty: (v) => Object.keys(v.days).length === 0 },
   // Trusted contacts are in the backup so a new phone gets them back (they never leave the phone otherwise).
+  { name: 'moneyGoal', key: MONEY_GOAL_KEY, load: loadGoal, sanitize: sanitizeGoal, save: saveGoal, empty: () => false },
   { name: 'contacts', key: CONTACTS_KEY, load: (s) => (readObject(CONTACTS_KEY, s) ? loadContactsData(s) : null), sanitize: sanitizeContactsData, save: saveContactsData, empty: (v) => v.contacts.length === 0 },
 ]
 
