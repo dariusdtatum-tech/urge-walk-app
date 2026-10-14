@@ -13,6 +13,7 @@
 // A walk in progress and an unfinished journal draft are not included (they're temporary).
 import { CHECKINS_KEY, loadCheckins, sanitizeCheckins, saveCheckins } from './checkin.js'
 import { todayISO } from './cleanTime.js'
+import { CONTACTS_KEY, loadContactsData, sanitizeContactsData, saveContactsData } from './contacts.js'
 import { MILESTONES_KEY, loadMilestones, sanitizeMilestones, saveMilestones } from './milestones.js'
 import { DRAFT_KEY, JOURNAL_KEY, loadJournal, sanitizeEntries, saveJournal } from './journal.js'
 import { PROFILE_KEY, loadProfile, sanitizeProfile, saveProfile } from './profile.js'
@@ -37,6 +38,8 @@ const DAY_MS = 24 * 60 * 60 * 1000
 // { name: key in data, key: storage key, load, sanitize (raw -> clean | null), save, empty(clean) }
 export const OPTIONAL_SECTIONS = [
   { name: 'checkins', key: CHECKINS_KEY, load: loadCheckins, sanitize: (r) => (r && typeof r === 'object' && !Array.isArray(r) ? sanitizeCheckins(r) : null), save: saveCheckins, empty: (v) => Object.keys(v.days).length === 0 },
+  // Trusted contacts are in the backup so a new phone gets them back (they never leave the phone otherwise).
+  { name: 'contacts', key: CONTACTS_KEY, load: (s) => (readObject(CONTACTS_KEY, s) ? loadContactsData(s) : null), sanitize: sanitizeContactsData, save: saveContactsData, empty: (v) => v.contacts.length === 0 },
 ]
 
 // Every key an import replaces (and the safety copy saves).
