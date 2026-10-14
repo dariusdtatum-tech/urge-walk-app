@@ -2,7 +2,10 @@ import { useEffect, useState } from 'react'
 import { AppState, ScrollView, View } from 'react-native'
 import { useKeepAwake } from 'expo-keep-awake'
 import { encouragementLines } from '../lib/encouragement.js'
-import { loadProfile, trustedContact } from '../lib/profile.js'
+import { loadContacts } from '../lib/contacts.js'
+import { loadProfile } from '../lib/profile.js'
+import { Sheet } from '../ui/Sheet.jsx'
+import { ReachOut } from './ReachOut.jsx'
 import { SAVED_MESSAGES } from '../lib/walkMessages.js'
 import { appendWalk, loadActiveWalk, saveActiveWalk } from '../lib/walkStorage.js'
 import {
@@ -35,7 +38,8 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
   const [tip, setTip] = useState(longPressTip)
   const [confirmFinish, setConfirmFinish] = useState(false)
   const [confirmCancel, setConfirmCancel] = useState(false)
-  const [{ lines, why, contact }] = useState(() => { const p = loadProfile(storage); return { lines: encouragementLines(p?.improve), why: p?.why ?? '', contact: trustedContact(p) } })
+  const [reach, setReach] = useState(false)
+  const [{ lines, why, contact }] = useState(() => { const p = loadProfile(storage); return { lines: encouragementLines(p?.improve), why: p?.why ?? '', contact: loadContacts(storage)[0] ?? null } })
   const walking = walk != null && !isEnded(walk) && !isPaused(walk)
 
   function commit(next) {
@@ -124,7 +128,7 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
               onPress={() => canExtend(walk) && commit(extendWalk(walk))} testID="extend" />
           )}
         </View>
-        {contact ? <Button kind="quiet" label={`Text ${contact.name}`} onPress={() => device.openURL(contact.href)} testID="walk-text-contact" /> : null}
+        <Button kind="quiet" label={contact ? `Reach out · ${contact.name}` : 'Reach out'} onPress={() => setReach(true)} testID="walk-reach-open" />
         <View style={{ alignSelf: 'stretch', borderTopWidth: 1, borderTopColor: c.border, marginTop: 20, paddingTop: 8, alignItems: 'center' }}>
           <Button kind="quiet" label="Cancel walk · nothing saved" textColor={c.muted} onPress={() => setConfirmCancel(true)} testID="walk-cancel" />
         </View>
@@ -142,6 +146,7 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
           onCancel={() => setConfirmCancel(false)}
           onConfirm={() => { setConfirmCancel(false); commit(null) }} />
       )}
+      {reach ? <Sheet title="Reach out" onClose={() => setReach(false)} testID="walk-reach-sheet"><ReachOut testID="walk-reach" title={null} /></Sheet> : null}
     </View>
   )
 }

@@ -7,7 +7,7 @@ import { DEFAULT_HOURS_PER_TIME, timeBack } from '../lib/homeIdeas.js'
 import { heroHabit, shortDate } from '../lib/homeStats.js'
 import { earnedList, loadMilestones, saveMilestones } from '../lib/milestones.js'
 import {
-  emptyProfile, identityLine, IMPORTANCE, improveLabels, labelFor, loadProfile, saveProfile, SUPPORT, supportValid, trustedContact,
+  emptyProfile, identityLine, IMPORTANCE, improveLabels, labelFor, loadProfile, saveProfile, SUPPORT, supportValid,
 } from '../lib/profile.js'
 import { DEFAULT_REMINDER, loadReminder, reminderLabel, saveReminder, stepReminder } from '../lib/checkin.js'
 import { clearPendingFollowUp, loadFollowUpEnabled, saveFollowUpEnabled } from '../lib/followUp.js'
@@ -29,6 +29,8 @@ import { BeforeSteppers, IdentityStep, ImportanceStep, ImproveStep, SupportStep,
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 
 import { CRISIS, CrisisSheet } from './Crisis.jsx'
+import { ContactsSheet, ReachOut } from './ReachOut.jsx'
+import { MAX_CONTACTS, loadContacts } from '../lib/contacts.js'
 
 export { CRISIS }
 export const LEGAL_LINKS = [
@@ -69,13 +71,16 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [answer, setAnswer] = useState(null)
   const [showAnswers, setShowAnswers] = useState(false)
   const [showCrisis, setShowCrisis] = useState(false)
+  const [showContacts, setShowContacts] = useState(false)
+  const [contactsVer, setContactsVer] = useState(0)
+  const people = loadContacts(storage)
   const [followUpOn, setFollowUpOn] = useState(() => loadFollowUpEnabled(storage))
   const [reminder, setReminder] = useState(() => loadReminder(storage))
   const changeReminder = (r) => { saveReminder(r, storage); setReminder(r); device.syncCheckinReminder(r) }
   const [reset, setReset] = useState(null) // null | 'confirm' | 'saved?' | 'notSaved'
   const hero = heroHabit(habits)
   const earned = hero ? earnedList(milestones, hero.id).length : 0
-  const contact = trustedContact(profile)
+
   const list = answers(profile)
 
   function changeProfile(changes) {
@@ -132,7 +137,8 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
 
         <GroupTitle>Help now</GroupTitle>
         <Row title="Crisis resources" sub="988, SAMHSA helpline, 911" testID="crisis-row" onPress={() => setShowCrisis(true)} />
-        {contact ? <Row title={`Text ${contact.name}`} sub="Your trusted person" testID="you-text-contact" accessibilityRole="link" onPress={() => device.openURL(contact.href)} /> : null}
+        <Card><ReachOut key={contactsVer} testID="you-reach" title={null} onSetup={() => setShowContacts(true)} /></Card>
+        <Row title="Trusted contacts" sub={people.length ? people.map((p) => p.name).join(' · ') : `Up to ${MAX_CONTACTS} people and a message ready to go`} testID="contacts-row" onPress={() => setShowContacts(true)} />
 
         <GroupTitle>Your recovery</GroupTitle>
         <Row title="Trackers" sub={habits.length === 0 ? 'Add the date you started' : habits.map((h) => h.name).join(' · ')} testID="trackers-row" onPress={() => setSheet({ mode: 'manage' })} />
@@ -182,6 +188,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
 
       {sheet?.mode === 'milestones' && hero ? <MilestonesList data={milestones} habit={hero} today={today} onClose={() => setSheet(null)} /> : null}
       {editor.sheets}
+      {showContacts ? <ContactsSheet onClose={() => { setShowContacts(false); setContactsVer((v) => v + 1) }} /> : null}
       {showCrisis ? <CrisisSheet onClose={() => setShowCrisis(false)} /> : null}
       {answer ? (
         <AnswerSheet field={answer} profile={profile} onClose={() => setAnswer(null)}

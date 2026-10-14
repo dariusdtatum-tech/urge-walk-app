@@ -206,14 +206,15 @@ describe('You', () => {
     const storage = memoryStorage({ ...habitsSeed(), ...onboardedProfile({ support: 'trusted', trustedName: 'Sam', trustedPhone: '(555) 123-4567' }) })
     const { device } = await renderApp({ storage })
     await tab('You')
-    await fireEvent.press(screen.getByTestId('you-text-contact'))
+    await fireEvent.press(screen.getByTestId('you-reach-text-0'))
     await fireEvent.press(screen.getByTestId('legal-0'))
     await fireEvent.press(screen.getByTestId('legal-1'))
     await fireEvent.press(screen.getByTestId('legal-2'))
     await fireEvent.press(screen.getByTestId('crisis-row'))
     await fireEvent.press(screen.getByTestId('crisis-link-tel:988'))
+    expect(device.calls.texts).toHaveLength(1)
+    expect(device.calls.texts[0].phone).toBe('5551234567')
     expect(device.calls.urls).toEqual([
-      'sms:5551234567',
       'https://dariusdtatum-tech.github.io/urgewalk/privacy.html',
       'https://dariusdtatum-tech.github.io/urgewalk/terms.html',
       'https://dariusdtatum-tech.github.io/urgewalk/support.html',

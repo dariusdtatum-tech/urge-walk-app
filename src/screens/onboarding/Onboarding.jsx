@@ -14,6 +14,7 @@ import { useStorage } from '../../ui/StorageContext.js'
 import { T } from '../../ui/Text.jsx'
 import { useTheme } from '../../ui/theme.js'
 import { CrisisSheet } from '../Crisis.jsx'
+import { addContact } from '../../lib/contacts.js'
 import { BeforeSteppers, Check, DateStep, IdentityStep, ImportanceStep, ImproveStep, RidingStep, SupportStep, WhyStep } from './Steps.jsx'
 
 // Step ids kept stable for the recap (6 is gone: "times a day" sits on 5 with "days a week").
@@ -100,6 +101,8 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
       ...prev, onboardedAt: at, skipped: false, adultConfirmed: true, privacyAckAt: prev.privacyAckAt || at,
       before: draft.before, improve: draft.improve, improveOwn: draft.improveOwn, importance: draft.importance, identity: draft.identity, ...draft.support, why: draft.why,
     }, storage)
+    // The trusted person from setup joins the trusted contacts list (no-op if already there).
+    if (draft.support.support === 'trusted') addContact(storage, { name: draft.support.trustedName, phone: draft.support.trustedPhone })
     const habits = loadHabits(storage).habits
     const added = trackersFromPicks(draft.picks, draft.startDate, habits, makeId)
     if (added.length) {

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, useWindowDimensions, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { STACK_FONT_SCALE, useReducedMotion } from '../ui/motion.js'
-import { loadProfile, trustedContact } from '../lib/profile.js'
+import { loadProfile } from '../lib/profile.js'
 import { lengthLabel, loadWalkPrefs } from '../lib/walkStorage.js'
 import { useDevice } from '../ui/DeviceContext.js'
 import { Button } from '../ui/Button.jsx'
@@ -10,6 +10,7 @@ import { NoteField, OutcomePicker } from '../ui/CheckIn.jsx'
 import { Confirm } from '../ui/Confirm.jsx'
 import { PathIcon, WaveIcon } from '../ui/Icons.jsx'
 import { useStorage } from '../ui/StorageContext.js'
+import { ReachOut } from './ReachOut.jsx'
 import { T } from '../ui/Text.jsx'
 import { useTheme } from '../ui/theme.js'
 
@@ -30,7 +31,6 @@ export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
   const walkLabel = lengthLabel(loadWalkPrefs(storage))
   const profile = visible ? loadProfile(storage) : null
   const why = profile?.why ?? ''
-  const contact = trustedContact(profile)
 
   const reset = () => { setLogging(false); setNote(''); setResult('yes'); setAskDiscard(null) }
   const close = () => { if (logging && note.trim()) setAskDiscard('close'); else { reset(); onClose() } }
@@ -73,9 +73,7 @@ export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
                     <T font="bold" size={17} color={c.title}>Just log it</T>
                     <T size={14} color={c.text}>I already rode it out</T>
                   </Pressable>
-                  {contact ? (
-                    <Button kind="secondary" label={`Text ${contact.name}`} onPress={() => device.openURL(contact.href)} testID="ride-text" />
-                  ) : null}
+                  <ReachOut testID="ride-reach" />
                   <T size={14} color={c.muted} testID="ride-tip">Tip: hold the Ride it out button to start a walk right away.</T>
                 </>
               ) : (
