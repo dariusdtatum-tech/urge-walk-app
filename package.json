@@ -22,6 +22,7 @@
     "react-native-web": "^0.21.2"
   },
   "devDependencies": {
+    "@expo/ngrok": "^4.1.0",
     "@testing-library/react-native": "^14.1.0",
     "@types/jest": "^30.0.0",
     "@types/react": "~19.2.2",
@@ -39,7 +40,8 @@
     "test": "vitest run && jest",
     "typecheck": "tsc --noEmit",
     "test:logic": "vitest run",
-    "test:ui": "jest"
+    "test:ui": "jest",
+    "tunnel": "expo start --tunnel"
   },
   "private": true,
   "jest": {
