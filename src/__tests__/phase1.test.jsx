@@ -296,3 +296,50 @@ describe('idea 4: money kept', () => {
     expect(screen.queryByTestId('reason-goal')).toBeNull()
   })
 })
+
+describe('idea 1: Urge Map', () => {
+  const urge = (daysAgo, h, m, result = 'yes', tags) => {
+    const d = new Date(T0 - daysAgo * 86400000); d.setHours(h, m, 0, 0)
+    const iso = d.toISOString()
+    return { id: `u${daysAgo}${h}${m}`, kind: 'logged', startedAt: iso, endedAt: iso, mode: 'open', plannedMinutes: null, actualSeconds: 0, endedEarly: false, result, note: '', ...(tags ? { tags } : {}) }
+  }
+  const seeded = (walks) => memoryStorage({ ...habitsSeed(), ...onboardedProfile(), 'urgewalk.v1.walks': JSON.stringify({ version: 1, walks }) })
+
+  test('no pattern card until 3 urges in the week', async () => {
+    await renderApp({ storage: seeded([urge(1, 20, 30), urge(2, 20, 45)]) })
+    expect(screen.queryByTestId('pattern-card')).toBeNull()
+  })
+
+  test('one plain sentence, a heat strip, and an optional check-in suggestion', async () => {
+    const device = stubDevice()
+    const { storage } = await renderApp({ device, storage: seeded([urge(1, 20, 30, 'yes', ['stressed']), urge(2, 20, 45, 'kinda', ['stressed']), urge(3, 21, 0), urge(4, 9, 0, 'no')]) })
+    expect(screen.getByTestId('pattern-sentence')).toHaveTextContent(/Most urges hit 8 to 10 PM.*“Stressed” came up most\. 2 of 4 passed\./)
+    expect(screen.getByTestId('pattern-strip')).toBeTruthy()
+    expect(screen.getByTestId('pattern-suggest')).toHaveTextContent(/7:45 PM/)
+    await press('pattern-suggest-yes')
+    expect(JSON.parse(storage.getItem('urgewalk.v1.checkinPrefs')).reminder).toEqual({ hour: 19, minute: 45 })
+    expect(screen.getByTestId('pattern-set')).toBeTruthy()
+  })
+
+  test('Not now hides the suggestion', async () => {
+    const { storage } = await renderApp({ storage: seeded([urge(1, 20, 30), urge(2, 20, 45), urge(3, 21, 0)]) })
+    await press('pattern-suggest-no')
+    expect(screen.queryByTestId('pattern-suggest')).toBeNull()
+    expect(JSON.parse(storage.getItem('urgewalk.v1.patternPrefs')).suggestDismissedAt).toBeTruthy()
+  })
+
+  test('optional tags on Just log it are saved on the entry', async () => {
+    const { storage } = await renderApp()
+    await press('ride-button'); await press('ride-log')
+    await press('log-tags-open')
+    await press('log-tags-home'); await press('log-tags-bored'); await press('log-tags-home'); await press('log-tags-tired')
+    await press('log-save')
+    expect(loadWalks(storage).walks.at(-1).tags).toEqual(['bored', 'tired'])
+  })
+
+  test('no tags picked: the entry has no tags field', async () => {
+    const { storage } = await renderApp()
+    await logUrge()
+    expect(loadWalks(storage).walks.at(-1)).not.toHaveProperty('tags')
+  })
+})

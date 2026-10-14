@@ -113,8 +113,8 @@ function Shell({ clock, theme, onTheme }) {
     markStress(clock(), storage)
     setShowRide(true)
   }
-  function onLog(note, result) {
-    const record = buildLoggedRecord({ at: clock(), note, result })
+  function onLog(note, result, tags) {
+    const record = buildLoggedRecord({ at: clock(), note, result, tags })
     appendWalk(record, storage)
     markSaved(record.id, clock(), storage)
     setShowRide(false)
@@ -131,8 +131,8 @@ function Shell({ clock, theme, onTheme }) {
     if (lpTip) { setLpTip(false); const seen = readObject(LP_TIP_KEY, storage); if (seen && !seen.coachmarkDone) setCoachmark(true) }
     backHome()
   }
-  function onBreatheSaved({ startedAt, endedAt, result, note }) {
-    const record = buildBreatheRecord({ id: breatheId.current || makeId(), startedAt, endedAt, result, note })
+  function onBreatheSaved({ startedAt, endedAt, result, note, tags }) {
+    const record = buildBreatheRecord({ id: breatheId.current || makeId(), startedAt, endedAt, result, note, tags })
     appendWalk(record, storage)
     breatheId.current = null
     markSaved(null, clock(), storage)

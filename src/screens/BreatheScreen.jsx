@@ -70,7 +70,7 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
     return (
       <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 32 }} testID="breathe-done">
         <CheckIn heading="Nice. That one passed a little." sub={`You breathed for ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}.`}
-          onSave={({ result, note }) => onSave({ startedAt, endedAt, result, note })}
+          onSave={({ result, note, tags }) => onSave({ startedAt, endedAt, result, note, tags })}
           onSkip={() => onSave({ startedAt, endedAt, result: null, note: '' })} />
       </ScrollView>
     )

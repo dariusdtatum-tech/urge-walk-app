@@ -6,7 +6,7 @@ import { loadProfile } from '../lib/profile.js'
 import { lengthLabel, loadWalkPrefs } from '../lib/walkStorage.js'
 import { useDevice } from '../ui/DeviceContext.js'
 import { Button } from '../ui/Button.jsx'
-import { NoteField, OutcomePicker } from '../ui/CheckIn.jsx'
+import { NoteField, OutcomePicker, TagPicker } from '../ui/CheckIn.jsx'
 import { Confirm } from '../ui/Confirm.jsx'
 import { PathIcon, WaveIcon } from '../ui/Icons.jsx'
 import { useStorage } from '../ui/StorageContext.js'
@@ -24,6 +24,7 @@ export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
   const insets = useSafeAreaInsets()
   const stack = useWindowDimensions().fontScale > STACK_FONT_SCALE
   const [logging, setLogging] = useState(false)
+  const [tags, setTags] = useState([])
   const [note, setNote] = useState('')
   const [result, setResult] = useState('yes')
   const [askDiscard, setAskDiscard] = useState(null) // 'back' | 'close' | null
@@ -32,7 +33,7 @@ export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
   const profile = visible ? loadProfile(storage) : null
   const why = profile?.why ?? ''
 
-  const reset = () => { setLogging(false); setNote(''); setResult('yes'); setAskDiscard(null) }
+  const reset = () => { setLogging(false); setNote(''); setTags([]); setResult('yes'); setAskDiscard(null) }
   const close = () => { if (logging && note.trim()) setAskDiscard('close'); else { reset(); onClose() } }
   const back = () => { if (note.trim()) setAskDiscard('back'); else setLogging(false) }
 
@@ -82,9 +83,10 @@ export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
                   <T font="semibold" size={16} color={c.title}>Did the urge pass?</T>
                   <OutcomePicker value={result} onChange={(v) => setResult(v ?? 'yes')} testID="log-result" />
                   <NoteField value={note} onChange={setNote} />
+                  <TagPicker value={tags} onChange={setTags} testID="log-tags" />
                   <View style={{ flexDirection: 'row', gap: 12 }}>
                     <Button kind="secondary" label="Back" onPress={back} style={{ flex: 1 }} testID="log-back" />
-                    <Button label="Save" onPress={() => { onLog(note, result); reset() }} style={{ flex: 1 }} testID="log-save" />
+                    <Button label="Save" onPress={() => { onLog(note, result, tags); reset() }} style={{ flex: 1 }} testID="log-save" />
                   </View>
                 </View>
               )}

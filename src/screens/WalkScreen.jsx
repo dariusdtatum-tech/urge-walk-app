@@ -77,8 +77,8 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
     let heading = 'You did it.'
     if (isOpen(walk)) heading = 'Nice walk.'
     else if (walk.endedEarly) heading = 'You took a break from the urge.'
-    const save = ({ result, note }, skipped = false) => {
-      const record = buildWalkRecord(walk, skipped ? {} : { result, note })
+    const save = ({ result, note, tags }, skipped = false) => {
+      const record = buildWalkRecord(walk, skipped ? {} : { result, note, tags })
       appendWalk(record, storage)
       saveActiveWalk(null, storage)
       onSaved(SAVED_MESSAGES[skipped || !result ? 'skip' : result], record)
