@@ -27,7 +27,27 @@
     "plugins": [
       "expo-sqlite",
       "expo-font",
-      "expo-sharing"
+      "expo-sharing",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Urge Walk uses the microphone only when you record a voice note for Your reasons. It stays on this phone."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Urge Walk lets you choose a photo for Your reasons. It stays on this phone.",
+          "cameraPermission": false,
+          "microphonePermission": false
+        }
+      ],
+      [
+        "expo-local-authentication",
+        {
+          "faceIDPermission": "Urge Walk can keep Your reasons covered until you unlock them with Face ID."
+        }
+      ]
     ]
   }
 }

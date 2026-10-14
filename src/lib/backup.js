@@ -16,6 +16,7 @@ import { todayISO } from './cleanTime.js'
 import { CONTACTS_KEY, loadContactsData, sanitizeContactsData, saveContactsData } from './contacts.js'
 import { MILESTONES_KEY, loadMilestones, sanitizeMilestones, saveMilestones } from './milestones.js'
 import { DRAFT_KEY, JOURNAL_KEY, loadJournal, sanitizeEntries, saveJournal } from './journal.js'
+import { REASONS_KEY, loadReasonsData, reasonsForBackup, saveReasonsData, sanitizeReasonsData } from './reasons.js'
 import { PROFILE_KEY, loadProfile, sanitizeProfile, saveProfile } from './profile.js'
 import { HABITS_KEY, loadHabits, readObject, sanitizeHabits, saveHabits, writeObject } from './storage.js'
 import {
@@ -43,7 +44,7 @@ export const OPTIONAL_SECTIONS = [
 ]
 
 // Every key an import replaces (and the safety copy saves).
-const DATA_KEYS = [HABITS_KEY, WALKS_KEY, JOURNAL_KEY, WALK_PREFS_KEY, MILESTONES_KEY, PROFILE_KEY, ACTIVE_WALK_KEY, DRAFT_KEY, ...OPTIONAL_SECTIONS.map((x) => x.key)]
+const DATA_KEYS = [REASONS_KEY, HABITS_KEY, WALKS_KEY, JOURNAL_KEY, WALK_PREFS_KEY, MILESTONES_KEY, PROFILE_KEY, ACTIVE_WALK_KEY, DRAFT_KEY, ...OPTIONAL_SECTIONS.map((x) => x.key)]
 
 // ---------- Export ----------
 
@@ -69,6 +70,8 @@ export function buildBackup(storage = globalThis.localStorage, now = Date.now())
       milestones: { trackers: loadMilestones(storage).trackers },
       ...(loadProfile(storage) ? { profile: loadProfile(storage) } : {}),
       ...optionalData(storage),
+      // Your reasons: words only (photos and voice notes stay on this phone).
+      ...(reasonsForBackup(readObject(REASONS_KEY, storage)) ? { reasons: reasonsForBackup(readObject(REASONS_KEY, storage)) } : {}),
     },
   }
 }
@@ -157,6 +160,12 @@ export function validateBackup(text) {
     data[x.name] = clean
   }
 
+  // Written reasons are optional. Only words are taken from a file; anything else is dropped.
+  if (d.reasons != null) {
+    const clean = reasonsForBackup(d.reasons)
+    if (clean) data.reasons = clean
+  }
+
   const backup = { app: APP_NAME, format: raw.format, exportedAt: raw.exportedAt, data }
   const summary = {
     habits: data.habits.length,
@@ -208,11 +217,22 @@ export function applyBackup(backup, storage = globalThis.localStorage, now = Dat
     (backup.data.profile ? saveProfile(backup.data.profile, storage) : writeObject(PROFILE_KEY, null, storage)) &&
     // Optional sections missing from the file are cleared, like the rest of the data.
     OPTIONAL_SECTIONS.every((x) => (backup.data[x.name] ? x.save(backup.data[x.name], storage) : writeObject(x.key, null, storage)))
+  // Reasons: written reasons come from the file; photos and voice notes already on this phone stay.
+  if (ok) mergeImportedReasons(backup.data.reasons, storage)
   // The backup's data replaces any walk in progress or unfinished draft.
   writeObject(ACTIVE_WALK_KEY, null, storage)
   writeObject(DRAFT_KEY, null, storage)
   if (!ok) undoImport(storage) // storage full or blocked: put everything back
   return ok
+}
+
+function mergeImportedReasons(raw, storage) {
+  const local = loadReasonsData(storage)
+  const file = sanitizeReasonsData(raw)
+  const media = local.reasons.filter((r) => r.kind !== 'text')
+  const words = (file?.reasons ?? []).filter((r) => r.kind === 'text' && !media.some((m) => m.id === r.id))
+  if (!media.length && !words.length && !file?.lock) return writeObject(REASONS_KEY, null, storage)
+  return saveReasonsData({ version: 1, reasons: [...media, ...words], next: 0, lock: file ? file.lock : local.lock }, storage)
 }
 
 // { savedAt } if an import can be undone, otherwise null.
