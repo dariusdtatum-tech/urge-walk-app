@@ -1,19 +1,13 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import { useFonts } from 'expo-font';
+import { View } from 'react-native';
+import { AppRoot } from './src/AppRoot.jsx';
+import { device } from './src/native/device.js';
+import { getStorage } from './src/storage';
+import { FONT_FILES } from './src/ui/theme.js';
 
-// Milestone 1: logic + storage only. The screens are ported in later milestones.
+// Bundled OFL fonts load first (they ship inside the app; no network).
 export default function App() {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Urge Walk</Text>
-      <Text style={styles.sub}>Native app in progress.</Text>
-      <StatusBar style="auto" />
-    </View>
-  );
+  const [loaded] = useFonts(FONT_FILES);
+  if (!loaded) return <View style={{ flex: 1, backgroundColor: '#faf7f1' }} />;
+  return <AppRoot storage={getStorage()} device={device} />;
 }
-
-const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#faf7f1', alignItems: 'center', justifyContent: 'center' },
-  title: { fontSize: 28, fontWeight: '600', color: '#24395c' },
-  sub: { marginTop: 8, fontSize: 16, color: '#4a5468' },
-});
