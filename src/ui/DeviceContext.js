@@ -11,6 +11,10 @@ export const noopDevice = {
   shareBackup: (_text, _filename) => Promise.resolve(/** @type {'shared' | 'downloaded'} */ ('shared')),
   pickBackupFile: () => Promise.resolve(/** @type {{ size: number, text: string } | null} */ (null)),
   openURL: (_url) => {},
+  // The "how did it go?" follow-up (local notification). onFollowUp(cb) returns an unsubscribe.
+  scheduleFollowUp: (_urgeId) => Promise.resolve(false),
+  cancelFollowUp: () => Promise.resolve(),
+  onFollowUp: (_cb) => () => {},
 }
 export const DeviceContext = createContext(noopDevice)
 export const useDevice = () => useContext(DeviceContext)

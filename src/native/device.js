@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics'
 import * as Notifications from 'expo-notifications'
 import { pickBackupFile, shareBackup } from './backupFile.js'
 import { syncWalkAlert } from './walkAlert.js'
+import { cancelFollowUp, listenFollowUp, scheduleFollowUp } from './followUpNotify.js'
 
 const native = Platform.OS === 'ios' || Platform.OS === 'android'
 
@@ -22,6 +23,16 @@ export const device = {
   breathTurn() { if (native) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft).catch(() => {}) },
   done() { if (native) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}) },
   syncWalkAlert(walk, now) { return native ? syncWalkAlert(Notifications, walk, now) : Promise.resolve(null) },
+  scheduleFollowUp(urgeId) { return native ? scheduleFollowUp(Notifications, urgeId) : Promise.resolve(false) },
+  cancelFollowUp() { return native ? cancelFollowUp(Notifications) : Promise.resolve() },
+  onFollowUp(cb) {
+    if (native) return listenFollowUp(Notifications, cb)
+    // Web preview has no notifications: a 'urgewalk-followup' window event stands in for a tap.
+    if (typeof window === 'undefined' || !window.addEventListener) return () => {}
+    const f = (e) => e?.detail?.urgeId && cb({ urgeId: e.detail.urgeId, action: e.detail.action || 'open' })
+    window.addEventListener('urgewalk-followup', f)
+    return () => window.removeEventListener('urgewalk-followup', f)
+  },
   shareBackup,
   pickBackupFile,
   openURL(url) { Linking.openURL(url).catch(() => {}) },

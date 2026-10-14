@@ -1,15 +1,17 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useStorage as useStorageFromContext } from './ui/StorageContext.js'
-import { Pressable, View } from 'react-native'
+import { AppState, Pressable, View } from 'react-native'
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { loadTheme, saveTheme } from './lib/appearance.js'
 import { hasAnyData } from './lib/backup.js'
 import { markSaved, markStress } from './lib/calm.js'
+import { answerFollowUp, claimFollowUp } from './lib/followUp.js'
 import { resolveOnboarding } from './lib/profile.js'
 import { readObject, writeObject } from './lib/storage.js'
 import { BREATHE_SAVED_MESSAGES, LOGGED_SAVED_MESSAGE } from './lib/walkMessages.js'
 import { startWalkNow } from './lib/walkStart.js'
+import { makeId } from './lib/storage.js'
 import { appendWalk, buildBreatheRecord, buildLoggedRecord, loadActiveWalk, removeWalk } from './lib/walkStorage.js'
 import { isEnded } from './lib/walkTimer.js'
 import { BreatheScreen } from './screens/BreatheScreen.jsx'
@@ -18,6 +20,7 @@ import { HomeScreen } from './screens/HomeScreen.jsx'
 import { CommunityScreen } from './screens/CommunityScreen.jsx'
 import { TrackScreen } from './screens/TrackScreen.jsx'
 import { Onboarding } from './screens/onboarding/Onboarding.jsx'
+import { FollowUpSheet } from './screens/FollowUpSheet.jsx'
 import { RideSheet } from './screens/RideSheet.jsx'
 import { WalkScreen } from './screens/WalkScreen.jsx'
 import { YouScreen } from './screens/YouScreen.jsx'
@@ -50,6 +53,10 @@ function Shell({ clock, theme, onTheme }) {
   const [backup, setBackup] = useState(false) // the Backup screen, opened from Home or You
   const [journalEditing, setJournalEditing] = useState(false)
   const [focusWalkId, setFocusWalkId] = useState(null)
+  const [followUpFor, setFollowUpFor] = useState(null) // urge id when the follow-up sheet is open
+  const breatheId = useRef(null) // the urge id for the Breathe minute in progress
+  const screenRef = useRef(screen)
+  screenRef.current = screen
 
   useEffect(() => { const t = setInterval(() => setNow(clock()), 30_000); return () => clearInterval(t) }, [clock])
   useEffect(() => {
@@ -57,6 +64,27 @@ function Shell({ clock, theme, onTheme }) {
     const t = setTimeout(() => setToast(null), TOAST_MS)
     return () => clearTimeout(t)
   }, [toast])
+
+  // "How did it go?": one local notification ~30 min after an urge (max one per urge, switch in You).
+  const followUp = useCallback((urgeId) => { if (claimFollowUp(urgeId, storage, clock())) device.scheduleFollowUp(urgeId) }, [storage, clock, device])
+  // Leaving the app partway through a walk or Breathe counts as the end of Ride it out for this.
+  useEffect(() => {
+    const sub = AppState.addEventListener?.('change', (state) => {
+      if (state === 'active') return
+      if (screenRef.current === 'walk') { const live = loadActiveWalk(storage); if (live) followUp(live.id) }
+      else if (screenRef.current === 'breathe' && breatheId.current) followUp(breatheId.current)
+    })
+    return () => sub?.remove?.()
+  }, [storage, followUp])
+  const applyFollowUp = useCallback((urgeId, action) => {
+    setFollowUpFor(null)
+    if (action === 'open') { setFollowUpFor(urgeId); return }
+    answerFollowUp(urgeId, action, storage)
+    setDataVer((v) => v + 1)
+    if (action === 'tough') { setScreen((sc) => (sc === 'walk' || sc === 'breathe' ? sc : 'tabs')); if (!loadActiveWalk(storage)) setShowRide(true) }
+    else if (action === 'passed') setToast({ text: 'Glad it passed. Saved to that entry.' })
+  }, [storage])
+  useEffect(() => device.onFollowUp(({ urgeId, action }) => applyFollowUp(urgeId, action)), [device, applyFollowUp])
 
   const goTo = useCallback((t) => { setFocusWalkId(null); setBackup(false); setTab(t); setNow(clock()); setDataVer((v) => v + 1) }, [clock])
   const backHome = useCallback(() => { setScreen('tabs'); goTo('home') }, [goTo])
@@ -86,20 +114,25 @@ function Shell({ clock, theme, onTheme }) {
     markSaved(record.id, clock(), storage)
     setShowRide(false)
     device.done()
+    followUp(record.id)
     setToast({ text: result === 'yes' ? LOGGED_SAVED_MESSAGE : 'Saved. An honest log still counts.', undoId: record.id })
     setDataVer((v) => v + 1)
   }
-  function onWalkSaved(text) {
+  function onWalkSaved(text, record) {
     markSaved(null, clock(), storage)
     device.done()
+    if (record) followUp(record.id)
     setToast({ text })
     if (lpTip) { setLpTip(false); const seen = readObject(LP_TIP_KEY, storage); if (seen && !seen.coachmarkDone) setCoachmark(true) }
     backHome()
   }
   function onBreatheSaved({ startedAt, endedAt, result, note }) {
-    appendWalk(buildBreatheRecord({ startedAt, endedAt, result, note }), storage)
+    const record = buildBreatheRecord({ id: breatheId.current || makeId(), startedAt, endedAt, result, note })
+    appendWalk(record, storage)
+    breatheId.current = null
     markSaved(null, clock(), storage)
     device.done()
+    followUp(record.id)
     setToast({ text: BREATHE_SAVED_MESSAGES[result || 'skip'] })
     backHome()
   }
@@ -184,8 +217,9 @@ function Shell({ clock, theme, onTheme }) {
           <TabBar active={backup ? null : tab} onTab={goTo} onRide={onRide} onRideHold={onRideHold} bottomInset={insets.bottom} />
         </View>
       )}
-      <RideSheet visible={showRide} onWalk={startWalk} onBreathe={() => { markStress(clock(), storage); setToast(null); setShowRide(false); setScreen('breathe') }}
+      <RideSheet visible={showRide} onWalk={startWalk} onBreathe={() => { markStress(clock(), storage); breatheId.current = makeId(); setToast(null); setShowRide(false); setScreen('breathe') }}
         onLog={onLog} onClose={() => setShowRide(false)} />
+      {followUpFor ? <FollowUpSheet onAnswer={(a) => applyFollowUp(followUpFor, a)} onClose={() => setFollowUpFor(null)} /> : null}
     </View>
   )
 }

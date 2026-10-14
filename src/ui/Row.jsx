@@ -1,4 +1,4 @@
-import { Pressable, View } from 'react-native'
+import { Pressable, Switch, View } from 'react-native'
 import { T } from './Text.jsx'
 import { useTheme } from './theme.js'
 
@@ -36,6 +36,21 @@ export function Notice({ text, onDismiss }) {
       <Pressable onPress={onDismiss} accessibilityRole="button" accessibilityLabel="Dismiss" style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}>
         <T size={16} color={c.mutedSand}>✕</T>
       </Pressable>
+    </View>
+  )
+}
+
+// A row with an on/off switch (the whole row is the label).
+export function ToggleRow({ title, sub, value, onChange, testID }) {
+  const { c } = useTheme()
+  return (
+    <View style={{ minHeight: 56, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: 16, paddingVertical: 10, backgroundColor: c.card, borderRadius: 14, borderWidth: 1, borderColor: c.border }}>
+      <View style={{ flex: 1, gap: 2 }}>
+        <T font="semibold" size={16} color={c.title}>{title}</T>
+        {sub ? <T size={14} color={c.textSoft}>{sub}</T> : null}
+      </View>
+      <Switch value={value} onValueChange={onChange} testID={testID} accessibilityLabel={title}
+        trackColor={{ true: c.action, false: c.track }} thumbColor={c.card} ios_backgroundColor={c.track} />
     </View>
   )
 }

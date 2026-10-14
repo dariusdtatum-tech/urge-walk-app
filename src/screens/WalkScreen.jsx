@@ -71,9 +71,10 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
     if (isOpen(walk)) heading = 'Nice walk.'
     else if (walk.endedEarly) heading = 'You took a break from the urge.'
     const save = ({ result, note }, skipped = false) => {
-      appendWalk(buildWalkRecord(walk, skipped ? {} : { result, note }), storage)
+      const record = buildWalkRecord(walk, skipped ? {} : { result, note })
+      appendWalk(record, storage)
       saveActiveWalk(null, storage)
-      onSaved(SAVED_MESSAGES[skipped || !result ? 'skip' : result])
+      onSaved(SAVED_MESSAGES[skipped || !result ? 'skip' : result], record)
     }
     return (
       <ScrollView contentContainerStyle={{ padding: 20, paddingTop: 32 }} testID="walk-finish">

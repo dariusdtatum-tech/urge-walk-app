@@ -9,13 +9,14 @@ import { earnedList, loadMilestones, saveMilestones } from '../lib/milestones.js
 import {
   emptyProfile, identityLine, IMPORTANCE, improveLabels, labelFor, loadProfile, saveProfile, SUPPORT, supportValid, trustedContact,
 } from '../lib/profile.js'
+import { clearPendingFollowUp, loadFollowUpEnabled, saveFollowUpEnabled } from '../lib/followUp.js'
 import { CUSTOM_MAX, CUSTOM_MIN, WALK_OPTIONS, clampCustomMinutes } from '../lib/walkTimer.js'
 import { lengthLabel, loadWalkPrefs, saveWalkPrefs } from '../lib/walkStorage.js'
 import { Button } from '../ui/Button.jsx'
 import { Confirm } from '../ui/Confirm.jsx'
 import { useDevice } from '../ui/DeviceContext.js'
 import { Field } from '../ui/Field.jsx'
-import { Card, GroupTitle, Notice, Row } from '../ui/Row.jsx'
+import { Card, GroupTitle, Notice, Row, ToggleRow } from '../ui/Row.jsx'
 import { Seg } from '../ui/Seg.jsx'
 import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { Stepper } from '../ui/Stepper.jsx'
@@ -67,6 +68,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [answer, setAnswer] = useState(null)
   const [showAnswers, setShowAnswers] = useState(false)
   const [showCrisis, setShowCrisis] = useState(false)
+  const [followUpOn, setFollowUpOn] = useState(() => loadFollowUpEnabled(storage))
   const [reset, setReset] = useState(null) // null | 'confirm' | 'saved?' | 'notSaved'
   const hero = heroHabit(habits)
   const earned = hero ? earnedList(milestones, hero.id).length : 0
@@ -134,6 +136,9 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
         {hero ? <Row title="Milestones" sub={`${earned === 1 ? '1 earned' : `${earned} earned`} · ${hero.name}`} testID="milestones-row" onPress={() => setSheet({ mode: 'milestones' })} /> : null}
         <Row title="Walk length" sub={`${lengthLabel(prefs)} · for Walk`} testID="walk-length" chevron={showLengths ? '⌃' : '›'} onPress={() => setShowLengths(!showLengths)} />
         {showLengths ? <WalkLengthPicker prefs={prefs} onChange={changePrefs} /> : null}
+        <ToggleRow title="Check in after an urge" sub="One quiet notification about 30 minutes later. Never more than one per urge."
+          value={followUpOn} testID="followup-toggle"
+          onChange={(on) => { saveFollowUpEnabled(on, storage); setFollowUpOn(on); if (!on) { clearPendingFollowUp(storage); device.cancelFollowUp() } }} />
         <TimeBackCard profile={profile} hero={hero} today={today} onChange={changeProfile} />
 
         <GroupTitle>About you</GroupTitle>
