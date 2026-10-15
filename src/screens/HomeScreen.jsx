@@ -86,14 +86,14 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
       <ResetToast editor={editor} />
 
       <Pressable onPress={liveWalk ? onResume : onRide} accessibilityRole="button" testID="ride-bar"
-        accessibilityLabel={liveWalk ? 'Back to your walk. Your walk is still going.' : 'Ride it out. Walk, breathe, or just log it.'}
+        accessibilityLabel={liveWalk ? 'Back to your walk. Your walk is still going.' : 'Ride it out. Walk, breathe, ground, or just log it.'}
         style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: sz.rideBar, paddingHorizontal: space.rowX, paddingVertical: space.rowY, borderRadius: radius.card, backgroundColor: c.action, opacity: pressed ? 0.9 : 1 })}>
         <View style={{ width: sz.rideBarIcon, height: sz.rideBarIcon, borderRadius: sz.rideBarIcon / 2, borderWidth: 1.5, borderColor: c.onActionSoft, alignItems: 'center', justifyContent: 'center' }}>
           <WaveIcon color={c.onAction} size={18} />
         </View>
         <View style={{ flex: 1 }}>
           <T font="bold" size={type.rideBar} color={c.onAction}>{liveWalk ? 'Back to your walk' : 'Ride it out'}</T>
-          <T size={type.rideBarSub} color={c.onActionSoft}>{liveWalk ? 'Your walk is still going.' : 'Walk, breathe, or just log it.'}</T>
+          <T size={type.rideBarSub} color={c.onActionSoft}>{liveWalk ? 'Your walk is still going.' : 'Walk, breathe, ground, or just log it.'}</T>
         </View>
         <T size={22} color={c.onAction} accessibilityElementsHidden importantForAccessibility="no">›</T>
       </Pressable>
