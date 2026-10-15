@@ -1,6 +1,7 @@
 // Tracker switcher. Default: a bottom sheet (TrackerSheet). The left drawer (Option C) stays behind
 // You → Appearance and lock → Tracker switcher: Drawer. Both share DrawerBody.
-// Top: Reach out. Middle: your trackers (your own names and day counts, a check on the one Home shows),
+// Top: Reach out. Middle: your trackers (your own names and day counts, the one Home shows is one treatment in both modes: a solid
+// action fill (navy light, sea glass dark) with on-action text and a check),
 // Edit and + Add tracker. Bottom: one honest status row about where your data lives.
 // Never holds Ride it out, and never shows Premium, Plus, upgrades or prices (tests enforce this).
 import { useEffect, useRef } from 'react'
@@ -63,8 +64,9 @@ export function TrackerDrawer({ habits, activeId, today, now = Date.now(), onSel
           <Pressable style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.overlay }} onPress={onClose} accessibilityRole="button" accessibilityLabel="Close trackers" testID="drawer-backdrop" />
         </Animated.View>
         <Animated.View {...pan.panHandlers} testID="drawer" accessibilityViewIsModal
-          style={{ width: panelW, backgroundColor: c.sand, borderTopRightRadius: radius.card, borderBottomRightRadius: radius.card,
-            paddingTop: insets.top + 24, paddingBottom: insets.bottom + 12, opacity: reduced ? fade : 1, transform: [{ translateX: x }] }}>
+          style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: panelW, backgroundColor: c.sand, borderTopRightRadius: radius.card, borderBottomRightRadius: radius.card,
+            overflow: 'hidden', paddingTop: insets.top + 8, paddingBottom: insets.bottom + 12, opacity: reduced ? fade : 1, transform: [{ translateX: x }] }}>
+          <DrawerHeader onClose={onClose} />
           <DrawerBody habits={habits} activeId={activeId} today={today} backup={backup} onSelect={onSelect} onEdit={onEdit} onManage={onManage} onAdd={onAdd} onReachOut={onReachOut} onBackup={onBackup} />
         </Animated.View>
       </View>
@@ -90,14 +92,14 @@ function DrawerBody({ habits, activeId, today, backup, onSelect, onEdit, onManag
               accessibilityRole="button" accessibilityState={{ selected: on }}
               accessibilityLabel={`${h.name}, ${dayCount(days)}${on ? ', on Home' : ''}`} accessibilityHint="Shows this tracker on Home. Long press to edit."
               style={({ pressed }) => ({ minHeight: sz.row, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: space.rowX, paddingVertical: space.rowY,
-                backgroundColor: c.card, borderRadius: radius.row, borderWidth: on ? 2 : 1, borderColor: on ? c.accent : c.border, opacity: pressed ? 0.85 : 1 })}>
+                backgroundColor: on ? c.action : c.card, borderRadius: radius.row, borderWidth: 1, borderColor: on ? c.action : c.border, opacity: pressed ? 0.85 : 1 })}>
               <View style={{ flex: 1, gap: 2 }}>
-                <T font="semibold" size={type.rowTitle} color={c.title} numberOfLines={2}>{h.name}</T>
-                <T size={14} color={c.muted} testID={tid(`drawer-days-${h.id}`)}>{dayCount(days)}</T>
+                <T font="semibold" size={type.rowTitle} color={on ? c.onAction : c.title} numberOfLines={2}>{h.name}</T>
+                <T size={14} color={on ? c.onAction : c.muted} testID={tid(`drawer-days-${h.id}`)}>{dayCount(days)}</T>
               </View>
               {on ? (
-                <View testID={tid(`drawer-check-${h.id}`)} style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: c.action, alignItems: 'center', justifyContent: 'center' }}>
-                  <Check color={c.onAction} />
+                <View testID={tid(`drawer-check-${h.id}`)} style={{ width: 26, height: 26, borderRadius: 13, backgroundColor: c.onAction, alignItems: 'center', justifyContent: 'center' }}>
+                  <Check color={c.action} />
                 </View>
               ) : null}
             </Pressable>
@@ -132,9 +134,21 @@ export function DrawerPeek({ x, width, habits, activeId, today, now = Date.now()
       style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
       <Animated.View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.overlay, opacity: dim }} />
       <Animated.View style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width, backgroundColor: c.sand, borderTopRightRadius: radius.card, borderBottomRightRadius: radius.card,
-        paddingTop: insets.top + 24, paddingBottom: insets.bottom + 12, transform: [{ translateX: x }] }}>
+        overflow: 'hidden', paddingTop: insets.top + 8, paddingBottom: insets.bottom + 12, transform: [{ translateX: x }] }}>
+        <DrawerHeader peek />
         <DrawerBody peek habits={habits} activeId={activeId} today={today} backup={backup} onSelect={() => {}} onEdit={() => {}} onManage={() => {}} onAdd={() => {}} onReachOut={() => {}} onBackup={() => {}} />
       </Animated.View>
+    </View>
+  )
+}
+
+// Drawer header: "Trackers" and a 44pt close button, below the top safe area.
+function DrawerHeader({ onClose, peek = false }) {
+  const { c } = useTheme()
+  return (
+    <View testID={peek ? undefined : 'drawer-header'} style={{ flexDirection: 'row', alignItems: 'center', minHeight: 44, paddingLeft: space.screen, paddingRight: 8, marginBottom: 8 }}>
+      <T accessibilityRole="header" font="serif" size={type.sheetTitle} color={c.title} style={{ flex: 1 }}>Trackers</T>
+      <HeaderButton label="✕" accessibilityLabel="Close trackers" onPress={onClose ?? (() => {})} testID={peek ? undefined : 'drawer-close'} />
     </View>
   )
 }

@@ -55,6 +55,24 @@ describe('tracker title and drawer', () => {
     expect(a.props.accessibilityLabel).toBe('Habit A, 163 days, on Home')
   })
 
+  it('drawer has a Trackers header with a 44pt close; the selected row is one solid action fill plus a check, the same in both modes', async () => {
+    const { StyleSheet } = require('react-native')
+    const { palettes } = require('../ui/palette.js')
+    await renderApp(twoHabits())
+    await press('home-title')
+    expect(within(screen.getByTestId('drawer-header')).getByText('Trackers')).toBeTruthy()
+    const close = StyleSheet.flatten(screen.getByTestId('drawer-close').props.style)
+    expect(close.minHeight).toBeGreaterThanOrEqual(44); expect(close.minWidth).toBeGreaterThanOrEqual(44)
+    const panel = StyleSheet.flatten(screen.getByTestId('drawer').props.style)
+    expect(panel).toMatchObject({ position: 'absolute', left: 0, overflow: 'hidden' })
+    const st = (id) => { const p = screen.getByTestId(id).props.style; return StyleSheet.flatten(typeof p === 'function' ? p({ pressed: false }) : p) }
+    expect(st('drawer-tracker-h1').backgroundColor).toBe(palettes.light.action)
+    expect(st('drawer-tracker-h2').backgroundColor).toBe(palettes.light.card)
+    expect(st('drawer-tracker-h1').borderWidth).toBe(st('drawer-tracker-h2').borderWidth)
+    await press('drawer-close')
+    expect(screen.queryByTestId('drawer')).toBeNull()
+  })
+
   it('names are shown exactly as the person wrote them: no category words added', async () => {
     await renderApp(twoHabits([{ id: 'h3', name: 'mornings', startDate: '2030-05-14' }]))
     await press('home-title')
@@ -124,7 +142,8 @@ describe('tracker title and drawer', () => {
     const { device } = await renderApp()
     await press('home-title')
     const rows = within(screen.getByTestId('drawer')).getAllByRole('button')
-    expect(rows[0].props.testID).toBe('drawer-reach')
+    expect(rows[0].props.testID).toBe('drawer-close') // the header close, then content
+    expect(rows[1].props.testID).toBe('drawer-reach')
     await press('drawer-reach')
     expect(screen.queryByTestId('drawer')).toBeNull()
     expect(screen.getByTestId('home-reach-988')).toBeTruthy()
