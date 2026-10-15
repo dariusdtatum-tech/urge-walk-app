@@ -12,6 +12,7 @@ import { composeText, pickPhoneContact } from './reachOut.js'
 import * as Notifications from 'expo-notifications'
 import { pickBackupFile, shareBackup } from './backupFile.js'
 import { syncWalkAlert } from './walkAlert.js'
+import { ensureChannel } from './channel.js'
 import { listenCheckin, syncCheckinReminder } from './checkinReminder.js'
 import { cancelFollowUp, listenFollowUp, scheduleFollowUp } from './followUpNotify.js'
 
@@ -19,6 +20,7 @@ const native = Platform.OS === 'ios' || Platform.OS === 'android'
 const voice = makeVoice(Audio, native ? FS : null, Platform)
 
 if (native) {
+  ensureChannel(Notifications, Platform.OS)
   Notifications.setNotificationHandler({
     handleNotification: async () => ({ shouldPlaySound: true, shouldSetBadge: false, shouldShowBanner: true, shouldShowList: true }),
   })

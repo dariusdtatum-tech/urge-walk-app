@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { AccessibilityInfo, Animated, Easing, ScrollView, View } from 'react-native'
+import { Animated, Easing, ScrollView, View } from 'react-native'
 import { useKeepAwake } from 'expo-keep-awake'
 import { BREATH, breathPhase } from '../lib/breathe.js'
 import { BREATHE_LINES } from '../lib/encouragement.js'
@@ -9,6 +9,7 @@ import { Button } from '../ui/Button.jsx'
 import { CheckIn } from '../ui/CheckIn.jsx'
 import { useDevice } from '../ui/DeviceContext.js'
 import { ReasonCard } from './Reasons.jsx'
+import { useReducedMotion } from '../ui/motion.js'
 import { useGoalLine } from './home/MoneyCard.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
@@ -27,7 +28,7 @@ function KeepAwake() {
 // (in / out), never on the hold. Its own breath-only lines. Then the same check-in as a walk.
 export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
   const storage = useStorage()
-  const goalLine = useGoalLine()
+  const goalLine = useGoalLine(clock())
   const device = useDevice()
   const { c } = useTheme()
   const [startedAt] = useState(clock)
@@ -35,13 +36,12 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
   const [endedAt, setEndedAt] = useState(null)
   const [why] = useState(() => loadProfile(storage)?.why ?? '')
   const [offset] = useState(() => Math.floor(Math.random() * BREATHE_LINES.length))
-  const [still, setStill] = useState(false)
+  const still = useReducedMotion() // follows the setting live, like the rest of the app
   const scale = useRef(new Animated.Value(SMALL)).current
   const elapsed = (endedAt ?? now) - startedAt
   const phase = breathPhase(elapsed)
   const left = Math.max(0, Math.ceil((BREATHE_SECONDS * 1000 - elapsed) / 1000))
 
-  useEffect(() => { AccessibilityInfo.isReduceMotionEnabled?.().then((v) => setStill(!!v)).catch(() => {}) }, [])
   useEffect(() => {
     if (endedAt != null) return undefined
     const t = setInterval(() => setNow(clock()), 200)

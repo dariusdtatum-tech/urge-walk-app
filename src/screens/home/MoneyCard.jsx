@@ -44,13 +44,13 @@ export function MoneyCard({ profile, hero, walks, today, since }) {
 }
 
 // The small goal line with a reason on Walk and Breathe: only when money is on and a goal is named.
-export function useGoalLine() {
+export function useGoalLine(now = Date.now()) {
   const storage = useStorage()
   const { c } = useTheme()
   const [line] = useState(() => {
     const goal = loadGoal(storage)
     if (!goal?.name) return null
-    const kept = moneyKept(loadProfile(storage), heroHabit(loadHabits(storage).habits), loadWalks(storage).walks, todayISO())
+    const kept = moneyKept(loadProfile(storage), heroHabit(loadHabits(storage).habits), loadWalks(storage).walks, todayISO(new Date(now)))
     return kept ? `${goal.name} · ${fmtMoney(kept.total)} kept` : null
   })
   return line ? <T size={15} color={c.text} testID="reason-goal">{line}</T> : null
