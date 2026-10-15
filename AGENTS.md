@@ -25,9 +25,8 @@ Run lint and typecheck before declaring any task done.
 
 ## Navigation & Routing
 
-- Use **Expo Router** for all navigation. Routes live in `src/app/` — every file there is a screen, `_layout.tsx` files define navigators. Keep non-route code (components, hooks, utils) outside `src/app/`.
-- Import `Link`, `router`, and `useLocalSearchParams` from `expo-router`.
-- Docs: https://docs.expo.dev/router/introduction.md
+- This app does **not** use Expo Router. Navigation is plain React state in `src/AppRoot.jsx`: `screen` is one of `tabs`, `walk` or `breathe`, and `tab` is one of `home`, `track`, `community` or `you`. Sheets (Ride it out, check-in, follow-up, etc.) are booleans there too.
+- To add a screen, add a state value and render branch in `AppRoot.jsx`. Don't add `src/app/` or `expo-router`.
 
 ## Building with EAS
 

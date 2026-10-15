@@ -311,35 +311,3 @@ export function clearAllData(storage = globalThis.localStorage) {
   for (const k of ours) storage.removeItem(k)
   return ours.length
 }
-
-// ---------- Sharing / downloading the file (browser only) ----------
-
-// Returns 'shared', 'downloaded', or 'cancelled'. Throws only on real failures.
-export async function shareOrDownload(text, filename) {
-  const blob = new Blob([text], { type: 'application/json' })
-  let file = null
-  try {
-    file = new File([blob], filename, { type: 'application/json' })
-  } catch {
-    file = null
-  }
-  // iPhone: the share sheet lets you "Save to Files" (including iCloud Drive).
-  if (file && navigator.canShare && navigator.share && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file], title: 'Urge Walk backup' })
-      return 'shared'
-    } catch (err) {
-      if (err && err.name === 'AbortError') return 'cancelled'
-      // Some browsers refuse; fall through to a normal download.
-    }
-  }
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement('a')
-  a.href = url
-  a.download = filename
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  setTimeout(() => URL.revokeObjectURL(url), 10000)
-  return 'downloaded'
-}
