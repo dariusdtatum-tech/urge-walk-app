@@ -17,7 +17,7 @@ import { T } from '../ui/Text.jsx'
 import { size as sz, space, type, useTheme } from '../ui/theme.js'
 import { ResultWord } from './LogScreen.jsx'
 
-const NOTE_TAGS = { walk: '🚶 Walk note', breathe: '🌬️ Breathe note', logged: '🌊 Urge note' }
+const NOTE_TAGS = { walk: '🚶 Walk note', breathe: '🌬️ Breathe note', ground: '🌿 Ground note', logged: '🌊 Urge note' }
 const moodInfo = (id) => MOODS.find((m) => m.id === id)
 
 // Journal: your entries plus notes from walks / breaths / logs, newest first, with search.

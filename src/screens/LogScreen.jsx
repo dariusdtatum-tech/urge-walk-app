@@ -112,7 +112,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
           <T size={14} color={c.muted} testID="summary-passed">{s.yes} passed · {s.totalMinutes} {s.totalMinutes === 1 ? 'minute' : 'minutes'} walked</T>
           {!s.onlyWalks ? (
             <T size={14} color={c.muted} testID="summary-kinds">
-              {[`${s.kinds.walk} ${s.kinds.walk === 1 ? 'walk' : 'walks'}`, s.kinds.breathe ? `${s.kinds.breathe} breathing` : null, s.kinds.logged ? `${s.kinds.logged} logged` : null].filter(Boolean).join(' · ')}
+              {[`${s.kinds.walk} ${s.kinds.walk === 1 ? 'walk' : 'walks'}`, s.kinds.breathe ? `${s.kinds.breathe} breathing` : null, s.kinds.ground ? `${s.kinds.ground} ground` : null, s.kinds.logged ? `${s.kinds.logged} logged` : null].filter(Boolean).join(' · ')}
             </T>
           ) : null}
           <View style={{ flexDirection: 'row', gap: 6 }}>
@@ -172,7 +172,7 @@ function WalkDetailSheet({ walk, today, onSave, onDelete, onClose }) {
   const [confirm, setConfirm] = useState(false)
   const kind = kindOf(walk)
   const facts = [
-    [{ walk: 'Walked', breathe: 'Breathed', logged: 'Logged' }[kind], kind === 'logged' ? 'Rode it out' : formatDuration(walk.actualSeconds)],
+    [{ walk: 'Walked', breathe: 'Breathed', ground: 'Grounded', logged: 'Logged' }[kind], kind === 'logged' ? 'Rode it out' : formatDuration(walk.actualSeconds)],
     ['Planned', plannedLabel(walk)],
     ['Finished', finishedLabel(walk)],
   ]

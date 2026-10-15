@@ -215,6 +215,58 @@ describe('Breathe', () => {
   })
 })
 
+describe('Ground', () => {
+  const open = async (opts) => {
+    const r = await renderApp(opts)
+    await fireEvent.press(screen.getByTestId('ride-button'))
+    await fireEvent.press(screen.getByTestId('ride-ground'))
+    return r
+  }
+  it('is a third Ride it out choice, silent and text-only', async () => {
+    await renderApp()
+    await fireEvent.press(screen.getByTestId('ride-button'))
+    expect(screen.getByTestId('ride-ground')).toBeTruthy()
+    expect(screen.getByLabelText('Ground. 5 senses, silent')).toBeTruthy()
+  })
+  it('one line at a time, tap to continue, notes optional and never saved; logs a ground record', async () => {
+    const { clock, storage, device } = await open()
+    const seen = [screen.getByTestId('ground-text').props.children]
+    expect(screen.queryByTestId('ground-note')).toBeNull()
+    await fireEvent.press(screen.getByTestId('ground-line')) // tapping the line itself continues
+    seen.push(screen.getByTestId('ground-text').props.children)
+    expect(screen.getByTestId('ground-progress')).toHaveTextContent('1 of 5')
+    await fireEvent.changeText(screen.getByTestId('ground-note'), 'lamp')
+    for (let i = 0; i < 5; i++) { clock.advance(20000); await fireEvent.press(screen.getByTestId('ground-next')); if (screen.queryByTestId('ground-text')) seen.push(screen.getByTestId('ground-text').props.children) }
+    expect(seen).toEqual([
+      'Let’s notice what’s around you, one sense at a time. Tap to continue.',
+      'Name 5 things you can see.', 'Name 4 things you can feel.', 'Name 3 things you can hear.',
+      'Name 2 things you can smell.', 'Name 1 thing you can taste.', 'You’re here. Take your time.',
+    ])
+    for (const l of seen) expect(l).not.toMatch(/walk|step|mov|keep going|pace/i)
+    expect(screen.getByTestId('ground-next')).toHaveTextContent('Done')
+    await fireEvent.press(screen.getByTestId('ground-next'))
+    expect(screen.getByTestId('ground-done')).toBeTruthy()
+    await fireEvent.press(screen.getByTestId('outcome-yes'))
+    await fireEvent.press(screen.getByTestId('save'))
+    const [w] = loadWalks(storage).walks
+    expect(w).toMatchObject({ kind: 'ground', result: 'yes', endedEarly: false, actualSeconds: 100 })
+    expect(JSON.stringify(w)).not.toMatch(/lamp/)
+    expect(device.calls.followUps).toEqual([w.id])
+    expect(screen.getByTestId('home')).toBeTruthy()
+  })
+  it('Finish early saves an ended-early ground; Cancel saves nothing', async () => {
+    const { storage } = await open()
+    await fireEvent.press(screen.getByTestId('ground-next'))
+    await fireEvent.press(screen.getByTestId('ground-finish'))
+    await fireEvent.press(screen.getByTestId('skip'))
+    expect(loadWalks(storage).walks.map((w) => [w.kind, w.endedEarly])).toEqual([['ground', true]])
+    await fireEvent.press(screen.getByTestId('ride-button'))
+    await fireEvent.press(screen.getByTestId('ride-ground'))
+    await fireEvent.press(screen.getByTestId('ground-cancel'))
+    expect(loadWalks(storage).walks).toHaveLength(1)
+  })
+})
+
 describe('Dynamic Type', () => {
   it('ring text is capped; other text may grow to 2x', async () => {
     await renderApp()

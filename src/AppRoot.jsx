@@ -9,16 +9,17 @@ import { markSaved, markStress } from './lib/calm.js'
 import { answerFollowUp, cancelFollowUpFor, claimFollowUp, settleFollowUpDefault } from './lib/followUp.js'
 import { resolveOnboarding } from './lib/profile.js'
 import { readObject, writeObject } from './lib/storage.js'
-import { BREATHE_SAVED_MESSAGES, LOGGED_SAVED_MESSAGE } from './lib/walkMessages.js'
+import { BREATHE_SAVED_MESSAGES, GROUND_SAVED_MESSAGES, LOGGED_SAVED_MESSAGE } from './lib/walkMessages.js'
 import { startWalkNow } from './lib/walkStart.js'
 import { makeId } from './lib/storage.js'
-import { appendWalk, buildBreatheRecord, buildLoggedRecord, loadActiveWalk, removeWalk } from './lib/walkStorage.js'
+import { appendWalk, buildBreatheRecord, buildGroundRecord, buildLoggedRecord, loadActiveWalk, removeWalk } from './lib/walkStorage.js'
 import { isEnded } from './lib/walkTimer.js'
 import { withKept } from './lib/money.js'
 import { loadProfile } from './lib/profile.js'
 import { LOCK_ERRORS, loadAppLock, lockView } from './lib/appLock.js'
 import { LockCover } from './screens/LockCover.jsx'
 import { BreatheScreen } from './screens/BreatheScreen.jsx'
+import { GroundScreen } from './screens/GroundScreen.jsx'
 import { BackupScreen } from './screens/BackupScreen.jsx'
 import { HomeScreen } from './screens/HomeScreen.jsx'
 import { CommunityScreen } from './screens/CommunityScreen.jsx'
@@ -85,6 +86,7 @@ function Shell({ clock, theme, onTheme }) {
   }, [storage, unlockApp])
   const lock = lockView({ enabled: lockOn, locked, appState })
   const [followUpFor, setFollowUpFor] = useState(null) // urge id when the follow-up sheet is open
+  const groundId = useRef(null) // the urge id for the Ground in progress
   const breatheId = useRef(null) // the urge id for the Breathe minute in progress
   const screenRef = useRef(screen)
   screenRef.current = screen
@@ -106,6 +108,7 @@ function Shell({ clock, theme, onTheme }) {
       if (state === 'active') return
       if (screenRef.current === 'walk') { const live = loadActiveWalk(storage); if (live) followUp(live.id) }
       else if (screenRef.current === 'breathe' && breatheId.current) followUp(breatheId.current)
+      else if (screenRef.current === 'ground' && groundId.current) followUp(groundId.current)
     })
     return () => sub?.remove?.()
   }, [storage, followUp])
@@ -114,7 +117,7 @@ function Shell({ clock, theme, onTheme }) {
     if (action === 'open') { setFollowUpFor(urgeId); return }
     answerFollowUp(urgeId, action, storage)
     setDataVer((v) => v + 1)
-    if (action === 'tough') { setScreen((sc) => (sc === 'walk' || sc === 'breathe' ? sc : 'tabs')); if (!loadActiveWalk(storage)) setShowRide(true) }
+    if (action === 'tough') { setScreen((sc) => (sc === 'walk' || sc === 'breathe' || sc === 'ground' ? sc : 'tabs')); if (!loadActiveWalk(storage)) setShowRide(true) }
     else if (action === 'passed') setToast({ text: 'Glad it passed. Saved to that entry.' })
   }, [storage])
   useEffect(() => device.onCheckinReminder(() => { if (screenRef.current === 'tabs') setCheckIn(true) }), [device])
@@ -170,6 +173,16 @@ function Shell({ clock, theme, onTheme }) {
     setToast({ text: withKept(BREATHE_SAVED_MESSAGES[result || 'skip'], loadProfile(storage), result) })
     backHome()
   }
+  function onGroundSaved({ startedAt, endedAt, result, note, tags, completed }) {
+    const record = buildGroundRecord({ id: groundId.current || makeId(), startedAt, endedAt, result, note, tags, completed })
+    appendWalk(record, storage)
+    groundId.current = null
+    markSaved(null, clock(), storage)
+    device.done()
+    followUp(record.id)
+    setToast({ text: withKept(GROUND_SAVED_MESSAGES[result || 'skip'], loadProfile(storage), result) })
+    backHome()
+  }
   function dismissCoachmark() {
     writeObject(LP_TIP_KEY, { ...(readObject(LP_TIP_KEY, storage) || {}), coachmarkDone: true }, storage)
     setCoachmark(false)
@@ -210,6 +223,7 @@ function Shell({ clock, theme, onTheme }) {
 
   let body
   if (screen === 'walk') body = <WalkScreen clock={clock} longPressTip={lpTip} onSaved={onWalkSaved} onExit={exitWalk} />
+  else if (screen === 'ground') body = <GroundScreen clock={clock} onSave={onGroundSaved} onCancel={() => { dropFollowUp(groundId.current); groundId.current = null; backHome() }} />
   else if (screen === 'breathe') body = <BreatheScreen clock={clock} onSave={onBreatheSaved} onCancel={() => { dropFollowUp(breatheId.current); breatheId.current = null; backHome() }} />
   else if (backup) body = <BackupScreen key={dataVer} clock={clock} backLabel={tab === 'you' ? 'You' : 'Home'} onBack={() => { setBackup(false); setDataVer((v) => v + 1) }} />
   else if (tab === 'home') body = <HomeScreen key={dataVer} now={now} clock={clock} onRide={onRide} liveWalk={!!loadActiveWalk(storage)} onResume={() => setScreen('walk')} onOpenBackup={openBackup} onCheckIn={() => setCheckIn(true)} />
@@ -254,6 +268,7 @@ function Shell({ clock, theme, onTheme }) {
         </View>
       )}
       <RideSheet visible={showRide} onWalk={startWalk} onBreathe={() => { markStress(clock(), storage); breatheId.current = makeId(); setToast(null); setShowRide(false); setScreen('breathe') }}
+        onGround={() => { markStress(clock(), storage); groundId.current = makeId(); setToast(null); setShowRide(false); setScreen('ground') }}
         onLog={onLog} onClose={() => setShowRide(false)} />
       {checkIn && screen === 'tabs' ? (
         <CheckInSheet now={now} clock={clock} onClose={() => { setCheckIn(false); setDataVer((v) => v + 1) }}

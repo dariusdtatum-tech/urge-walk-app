@@ -8,16 +8,16 @@ import { useDevice } from '../ui/DeviceContext.js'
 import { Button } from '../ui/Button.jsx'
 import { NoteField, OutcomePicker, TagPicker } from '../ui/CheckIn.jsx'
 import { Confirm } from '../ui/Confirm.jsx'
-import { PathIcon, WaveIcon } from '../ui/Icons.jsx'
+import { LeafIcon, PathIcon, WaveIcon } from '../ui/Icons.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { ReachOut } from './ReachOut.jsx'
 import { T } from '../ui/Text.jsx'
 import { radius, size as sz, space, type, useTheme } from '../ui/theme.js'
 
-// "Ride it out": Walk (remembered length) or Breathe (1 min), plus a full-width "Just log it".
+// "Ride it out": Walk (remembered length), Breathe (1 min) or Ground (5 senses, silent), plus a full-width "Just log it".
 // A typed note is never thrown away without asking: Back → Discard returns to the choices,
 // closing → Discard closes the sheet.
-export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
+export function RideSheet({ visible, onWalk, onBreathe, onGround, onLog, onClose }) {
   const storage = useStorage()
   const { c } = useTheme()
   const reduced = useReducedMotion()
@@ -68,6 +68,14 @@ export function RideSheet({ visible, onWalk, onBreathe, onLog, onClose }) {
                       </View>
                     </Pressable>
                   </View>
+                  <Pressable onPress={onGround} testID="ride-ground" accessibilityRole="button" accessibilityLabel="Ground. 5 senses, silent"
+                    style={{ minHeight: sz.logIt, borderRadius: radius.row, backgroundColor: c.card, borderWidth: 1.5, borderColor: c.fieldBorder, paddingHorizontal: space.rowX, paddingVertical: space.rowY, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                    <LeafIcon color={c.title} />
+                    <View style={{ flex: 1 }}>
+                      <T font="bold" size={type.bodyLg} color={c.title}>Ground</T>
+                      <T size={14} color={c.text}>5 senses · silent, no sound</T>
+                    </View>
+                  </Pressable>
                   <Pressable onPress={() => setLogging(true)} testID="ride-log" accessibilityRole="button"
                     accessibilityLabel="Just log it. I already rode it out"
                     style={{ minHeight: sz.logIt, borderRadius: radius.row, backgroundColor: c.sand, paddingHorizontal: space.rowX, paddingVertical: space.rowY, justifyContent: 'center' }}>

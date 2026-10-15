@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Animated, Easing, ScrollView, View } from 'react-native'
 import { useKeepAwake } from 'expo-keep-awake'
+import TOOLS from '../content/tools.json'
 import { BREATH, breathPhase } from '../lib/breathe.js'
 import { BREATHE_LINES } from '../lib/encouragement.js'
 import { loadProfile } from '../lib/profile.js'
@@ -15,7 +16,7 @@ import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
 import { MAX_SCALE, space, type, useTheme } from '../ui/theme.js'
 
-export const PHASE_WORDS = { in: 'Breathe in', hold: 'Hold', out: 'Breathe out' }
+export const PHASE_WORDS = TOOLS.breathe.words
 const ORB = 220
 const SMALL = 0.577
 

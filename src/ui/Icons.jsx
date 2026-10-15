@@ -10,6 +10,13 @@ export function WaveIcon({ color, size = 24 }) {
     </Svg>
   )
 }
+export function LeafIcon({ color, size = 24 }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...hide}>
+      <Path d="M5 19c0-8 5-13 14-14-1 9-6 14-14 14z" /><Path d="M5 19l7-7" />
+    </Svg>
+  )
+}
 export function PathIcon({ color, size = 30 }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...hide}>
