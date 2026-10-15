@@ -71,7 +71,7 @@ describe('stats count urges ridden out separately from walks', () => {
   })
   it('Log summary: totals by kind; minutes are walking minutes only', () => {
     const s = summarize(list)
-    expect(s.kinds).toEqual({ walk: 3, breathe: 2, logged: 1 })
+    expect(s.kinds).toEqual({ walk: 3, breathe: 2, ground: 0, logged: 1 })
     expect(s.total).toBe(6)
     expect(s.onlyWalks).toBe(false)
     expect(s.totalMinutes).toBe(30)

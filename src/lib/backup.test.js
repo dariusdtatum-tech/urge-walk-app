@@ -69,7 +69,7 @@ describe('validation', () => {
   it('accepts a real backup and summarizes it', () => {
     const r = validateBackup(fileText())
     expect(r.ok).toBe(true)
-    expect(r.summary).toEqual({ habits: 2, walks: 2, breathes: 0, logged: 0, journal: 1, exportedAt: '2026-10-08T13:30:00.000Z', skipped: 0 })
+    expect(r.summary).toEqual({ habits: 2, walks: 2, breathes: 0, grounds: 0, logged: 0, journal: 1, exportedAt: '2026-10-08T13:30:00.000Z', skipped: 0 })
     expect(summaryText(r.summary)).toBe('2 habits, 2 walks, 1 journal entry')
   })
 

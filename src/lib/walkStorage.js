@@ -4,16 +4,17 @@
 // - urgewalk.v1.walkPrefs   last choice (5 / 10 / 15 / custom / open) and last custom length
 import { makeId, readList, readObject, writeList, writeObject } from './storage.js'
 import { sanitizeTags, withTags } from './urgeMap.js'
+import TOOLS from '../content/tools.json'
 import { DEFAULT_CUSTOM_MINUTES, DEFAULT_MINUTES, WALK_OPTIONS, clampCustomMinutes } from './walkTimer.js'
 
 export const WALKS_KEY = 'urgewalk.v1.walks'
 export const ACTIVE_WALK_KEY = 'urgewalk.v1.activeWalk'
 export const WALK_PREFS_KEY = 'urgewalk.v1.walkPrefs'
 export const RESULTS = ['yes', 'kinda', 'no']
-// What kind of urge record: a walk, a minute of breathing, or an urge just logged as ridden out.
+// What kind of urge record: a walk, a minute of breathing, a Ground (5-4-3-2-1 senses), or an urge just logged as ridden out.
 // Records saved before kinds existed have no `kind` and are all walks.
-export const KINDS = ['walk', 'breathe', 'logged']
-export const BREATHE_SECONDS = 60
+export const KINDS = ['walk', 'breathe', 'ground', 'logged']
+export const BREATHE_SECONDS = TOOLS.breathe.seconds
 export const MAX_NOTE_LENGTH = 280
 export const FOLLOWUP_VALUES = ['passed', 'tough', 'skip']
 
@@ -42,7 +43,7 @@ export function sanitizeWalks(list) {
         mode: open ? 'open' : 'timed',
         plannedMinutes: open ? null : w.plannedMinutes,
         actualSeconds: kind === 'logged' ? 0 : Math.round(w.actualSeconds),
-        endedEarly: open ? false : Boolean(w.endedEarly),
+        endedEarly: kind === 'ground' ? Boolean(w.endedEarly) : open ? false : Boolean(w.endedEarly),
         result: RESULTS.includes(w.result) ? w.result : null,
         note: typeof w.note === 'string' ? w.note.slice(0, MAX_NOTE_LENGTH) : '',
         // The "how did it go?" answer, only when there is one (older records and files stay unchanged).
@@ -71,6 +72,21 @@ function breatheRecord({ id, startedAt, endedAt, result, note }) {
     result: RESULTS.includes(result) ? result : null,
     note: String(note ?? '').trim().slice(0, MAX_NOTE_LENGTH),
   }
+}
+
+// A finished Ground. Open-ended (no set time); `completed` = reached the end of all five senses.
+// The optional words typed during Ground are never saved; only the check-in note is.
+export function buildGroundRecord({ id = makeId(), startedAt, endedAt, result = null, note = '', tags = [], completed = true }) {
+  return withTags({
+    id, kind: 'ground',
+    startedAt: new Date(startedAt).toISOString(),
+    endedAt: new Date(endedAt).toISOString(),
+    mode: 'open', plannedMinutes: null,
+    actualSeconds: Math.max(0, Math.round((endedAt - startedAt) / 1000)),
+    endedEarly: !completed,
+    result: RESULTS.includes(result) ? result : null,
+    note: String(note ?? '').trim().slice(0, MAX_NOTE_LENGTH),
+  }, tags)
 }
 
 // "Just log it": an urge ridden out without a walk or breathing, at `at` (ms). It passed, so result is 'yes'.

@@ -28,4 +28,11 @@ export const BREATHE_SAVED_MESSAGES = {
   no: 'Thanks for stopping to breathe. Showing up is the hard part.',
   skip: 'Saved. Good job taking care of yourself.',
 }
+// After Ground
+export const GROUND_SAVED_MESSAGES = {
+  yes: 'Nice work. You rode it out.',
+  kinda: 'Every moment of noticing helps. Glad you paused.',
+  no: 'Thanks for pausing to notice. Showing up is the hard part.',
+  skip: 'Saved. Good job taking care of yourself.',
+}
 export const LOGGED_SAVED_MESSAGE = 'Saved. You rode one out.'

@@ -1,5 +1,8 @@
 // One breath: in for 4s, hold for 3s, out for 6s (about 4.6 breaths fill the minute).
-export const BREATH = { inMs: 4000, holdMs: 3000, outMs: 6000 }
+// Timing lives in content/tools.json, shared with the website's /breathe page.
+import TOOLS from '../content/tools.json'
+
+export const BREATH = { inMs: TOOLS.breathe.inMs, holdMs: TOOLS.breathe.holdMs, outMs: TOOLS.breathe.outMs }
 const CYCLE = BREATH.inMs + BREATH.holdMs + BREATH.outMs
 
 // Where we are in the breath after `ms`: 'in' (growing), 'hold' (full, still) or 'out' (shrinking).

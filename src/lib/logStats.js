@@ -4,12 +4,12 @@ import { KINDS, MAX_NOTE_LENGTH, RESULTS } from './walkStorage.js'
 
 // Older records have no kind: they're walks.
 export const kindOf = (w) => (KINDS.includes(w?.kind) ? w.kind : 'walk')
-export const KIND_LABELS = { walk: 'Walk', breathe: 'Breathe', logged: 'Logged' }
+export const KIND_LABELS = { walk: 'Walk', breathe: 'Breathe', ground: 'Ground', logged: 'Logged' }
 
 // Totals for the summary card.
 // total = every urge ridden out (all kinds); minutes count walking only.
 export function summarize(walks) {
-  const s = { total: walks.length, yes: 0, kinda: 0, no: 0, skipped: 0, totalSeconds: 0, kinds: { walk: 0, breathe: 0, logged: 0 } }
+  const s = { total: walks.length, yes: 0, kinda: 0, no: 0, skipped: 0, totalSeconds: 0, kinds: { walk: 0, breathe: 0, ground: 0, logged: 0 } }
   for (const w of walks) {
     const kind = kindOf(w)
     s.kinds[kind] += 1
@@ -90,6 +90,7 @@ export function walkSummaryLabel(w) {
   const kind = kindOf(w)
   if (kind === 'logged') return 'Rode it out · logged'
   if (kind === 'breathe') return `Breathed · ${formatDuration(w.actualSeconds)}`
+  if (kind === 'ground') return `Grounded · ${formatDuration(w.actualSeconds)}`
   if (w.plannedMinutes == null) return `Open walk · ${formatDuration(w.actualSeconds)}`
   return `${formatDuration(w.actualSeconds)} walk`
 }
@@ -97,6 +98,7 @@ export function walkSummaryLabel(w) {
 // "Planned" field in the details sheet.
 export function plannedLabel(w) {
   if (kindOf(w) === 'logged') return 'Just logged'
+  if (kindOf(w) === 'ground') return '5 senses'
   return w.plannedMinutes == null ? 'No set time' : `${w.plannedMinutes} min`
 }
 
@@ -104,6 +106,7 @@ export function plannedLabel(w) {
 export function finishedLabel(w) {
   if (kindOf(w) === 'logged') return 'Rode it out'
   if (kindOf(w) === 'breathe') return w.endedEarly ? 'Ended early' : 'Full minute'
+  if (kindOf(w) === 'ground') return w.endedEarly ? 'Ended early' : 'All five senses'
   if (w.plannedMinutes == null) return 'Open walk'
   return w.endedEarly ? 'Ended early' : 'Full walk'
 }

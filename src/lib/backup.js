@@ -173,6 +173,7 @@ export function validateBackup(text) {
     habits: data.habits.length,
     walks: data.walks.filter((w) => w.kind === 'walk').length,
     breathes: data.walks.filter((w) => w.kind === 'breathe').length,
+    grounds: data.walks.filter((w) => w.kind === 'ground').length,
     logged: data.walks.filter((w) => w.kind === 'logged').length,
     journal: data.journal.length,
     exportedAt: raw.exportedAt,
@@ -187,6 +188,7 @@ const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`
 export function summaryText(s) {
   return [plural(s.habits, 'habit', 'habits'), plural(s.walks, 'walk', 'walks'),
     s.breathes ? plural(s.breathes, 'breathing minute', 'breathing minutes') : null,
+    s.grounds ? plural(s.grounds, 'ground', 'grounds') : null,
     s.logged ? plural(s.logged, 'logged urge', 'logged urges') : null,
     plural(s.journal, 'journal entry', 'journal entries')].filter(Boolean).join(', ')
 }

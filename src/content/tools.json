@@ -1,0 +1,24 @@
+{
+  "version": 1,
+  "breathe": {
+    "inMs": 4000,
+    "holdMs": 3000,
+    "outMs": 6000,
+    "seconds": 60,
+    "words": { "in": "Breathe in", "hold": "Hold", "out": "Breathe out" }
+  },
+  "ground": {
+    "title": "Ground",
+    "intro": "Let’s notice what’s around you, one sense at a time. Tap to continue.",
+    "steps": [
+      { "count": 5, "sense": "see", "line": "Name 5 things you can see.", "hint": "Colors, shapes, light." },
+      { "count": 4, "sense": "touch", "line": "Name 4 things you can feel.", "hint": "Your clothes, a chair, the air." },
+      { "count": 3, "sense": "hear", "line": "Name 3 things you can hear.", "hint": "Near or far, loud or soft." },
+      { "count": 2, "sense": "smell", "line": "Name 2 things you can smell.", "hint": "Or 2 smells you like." },
+      { "count": 1, "sense": "taste", "line": "Name 1 thing you can taste.", "hint": "Or one taste you like." }
+    ],
+    "outro": "You’re here. Take your time.",
+    "notePlaceholder": "A word or two, if you like",
+    "noteHelp": "Optional. Only on screen, never saved."
+  }
+}
