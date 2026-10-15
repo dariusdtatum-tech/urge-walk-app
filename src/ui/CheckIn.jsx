@@ -5,6 +5,7 @@ import { MAX_TAGS, TAG_GROUPS } from '../lib/urgeMap.js'
 import { Button } from './Button.jsx'
 import { T } from './Text.jsx'
 import { space, type, useTheme } from './theme.js'
+import { ReachOut } from '../screens/ReachOut.jsx'
 
 export const OUTCOMES = [{ id: 'yes', label: 'Passed' }, { id: 'kinda', label: 'Kinda' }, { id: 'no', label: 'Didn’t' }]
 
@@ -85,12 +86,24 @@ export function CheckIn({ heading, sub, onSave, onSkip }) {
       <T size={type.body} color={c.text}>{sub}</T>
       <T font="semibold" size={type.body} color={c.title}>Did the urge pass?</T>
       <OutcomePicker value={result} onChange={setResult} />
+      {result === 'no' ? <DidntReachOut /> : null}
       <NoteField value={note} onChange={setNote} label="Anything you want to remember? (optional)" placeholder="What helped, what you noticed…" />
       <TagPicker value={tags} onChange={setTags} />
       <View style={{ flexDirection: 'row', gap: 12 }}>
         <Button kind="secondary" label="Skip" onPress={onSkip} style={{ flex: 1 }} testID="skip" />
         <Button label="Save" onPress={() => onSave({ result, note, tags })} style={{ flex: 1 }} testID="save" />
       </View>
+    </View>
+  )
+}
+
+// Shown right after "Didn't": no judgment, just help one tap away (988 and your trusted people).
+export function DidntReachOut({ testID = 'didnt-reach' }) {
+  const { c } = useTheme()
+  return (
+    <View style={{ gap: 8 }} testID={testID} accessibilityLiveRegion="polite">
+      <T size={type.body} color={c.text}>That’s okay. It still counts that you checked in. If you want someone with you right now:</T>
+      <ReachOut testID={`${testID}-list`} title="" />
     </View>
   )
 }

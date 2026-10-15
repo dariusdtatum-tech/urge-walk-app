@@ -99,7 +99,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const changeReminder = (r) => { saveReminder(r, storage); setReminder(r); device.syncCheckinReminder(r) }
   const [reset, setReset] = useState(null) // null | 'confirm' | 'saved?' | 'notSaved'
   const hero = editor.hero
-  const [section, setSection] = useState(open === 'reasons' ? 'why' : open === 'contacts' ? 'support' : initialSection)
+  const [section, setSection] = useState(open === 'reasons' ? 'why' : open === 'contacts' ? 'support' : SECTION_ORDER.includes(open) ? open : initialSection)
   const earned = hero ? earnedList(milestones, hero.id).length : 0
 
   const list = answers(profile)

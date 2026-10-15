@@ -34,11 +34,13 @@ describe('Home extras', () => {
     await renderApp({ storage })
     expect(screen.getByTestId('identity-line').props.children).toBe('Someone riding it out, wave by wave')
     expect(screen.getByTestId('daily-line')).toBeTruthy()
-    expect(screen.getByTestId('nz-clean')).toHaveTextContent('30 of 30')
     await fireEvent.press(screen.getByTestId('pager-dot-1'))
     expect(screen.getByTestId('clean-time-value').props.accessibilityLabel).toMatch(/^163 days/)
     expect(screen.getByTestId('ms-last')).toHaveTextContent(/90 days|3 months/i)
     expect(screen.getByTestId('ms-next')).toHaveTextContent(/6 months/i)
+    expect(screen.queryByTestId('nz-clean')).toBeNull() // Never zero lives on Track → Log now
+    await tab('Log')
+    expect(screen.getByTestId('nz-clean')).toHaveTextContent('30 of 30')
   })
 
   it('a newly reached milestone shows one calm sheet, once', async () => {
@@ -52,6 +54,7 @@ describe('Home extras', () => {
 
   it('Start a new count: kept list, then the 24h undo banner puts the date back', async () => {
     const { storage } = await renderApp()
+    await fireEvent.press(screen.getByTestId('home-title'))
     await fireEvent.press(screen.getByTestId('home-edit'))
     await fireEvent.press(screen.getByTestId('edit-0'))
     await fireEvent.press(screen.getByTestId('start-new-count'))
@@ -64,13 +67,15 @@ describe('Home extras', () => {
     expect(JSON.parse(storage.getItem('urgewalk.v1.habits')).habits[0].startDate).toBe('2029-12-02')
   })
 
-  it('backup nudge appears when calm and data is old enough, and can be dismissed', async () => {
+  it('no backup nudge on Home; the drawer bottom row shows where data lives and opens Backup', async () => {
     const seed = { ...habitsSeed(), 'urgewalk.v1.backupMeta': JSON.stringify({ lastBackupAt: iso(T0 - 20 * DAY) }) }
-    const { storage } = await renderApp({ storage: memoryStorage(seed) })
-    expect(screen.getByTestId('backup-nudge')).toBeTruthy()
-    await fireEvent.press(screen.getByLabelText('Dismiss backup reminder'))
+    await renderApp({ storage: memoryStorage(seed) })
     expect(screen.queryByTestId('backup-nudge')).toBeNull()
-    expect(JSON.parse(storage.getItem('urgewalk.v1.backupMeta')).nudgeDismissedAt).toBeTruthy()
+    await fireEvent.press(screen.getByTestId('home-title'))
+    expect(screen.getByTestId('drawer-backup')).toHaveTextContent('On this phone only · Last backup 20 days agoBack up')
+    await fireEvent.press(screen.getByTestId('drawer-backup'))
+    expect(screen.queryByTestId('drawer')).toBeNull()
+    expect(screen.getByTestId('backup')).toBeTruthy()
   })
 })
 
@@ -78,6 +83,8 @@ describe('Your walks card (Week / Month / All time) with the calm Week total', (
   it('Week shows one total of days with an urge passed, no run brackets; Month and All time switch the card only', async () => {
     const seed = { ...habitsSeed(), ...walksSeed([logged(0, 'yes'), logged(1, 'yes'), logged(2, 'yes'), logged(4, 'no')]) }
     const { storage } = await renderApp({ storage: memoryStorage(seed) })
+    expect(screen.queryByTestId('walks-card')).toBeNull() // moved off Home (five-item limit)
+    await tab('Log')
     expect(screen.queryByTestId('day-run')).toBeNull()
     expect(screen.getByTestId('week-passed-days')).toHaveTextContent('3days with an urge passed')
     expect(screen.getByTestId('week-passed-days').props.accessibilityLabel).toBe('3 days with an urge passed this week')
@@ -88,6 +95,7 @@ describe('Your walks card (Week / Month / All time) with the calm Week total', (
     expect(screen.getByText('3-day avg · urges ridden out')).toBeTruthy()
     expect(JSON.parse(storage.getItem('urgewalk.v1.homePrefs')).walksRange).toBe('month')
     await fireEvent.press(screen.getByTestId('range-all'))
+    await tab('Home')
     expect(screen.getByTestId('hero-days').props.children).toBe('163') // the ring never changes with the range
   })
 })

@@ -262,7 +262,7 @@ function Shell({ clock, theme, onTheme }) {
   else if (screen === 'ground') body = <GroundScreen clock={clock} onSave={onGroundSaved} onCancel={() => { dropFollowUp(groundId.current); groundId.current = null; backHome() }} />
   else if (screen === 'breathe') body = <BreatheScreen clock={clock} onSave={onBreatheSaved} onCancel={() => { dropFollowUp(breatheId.current); breatheId.current = null; backHome() }} />
   else if (backup) body = <BackupScreen key={dataVer} clock={clock} backLabel={tab === 'you' ? 'You' : 'Home'} onBack={() => { setBackup(false); setDataVer((v) => v + 1) }} />
-  else if (tab === 'home') body = <HomeScreen key={dataVer} now={now} clock={clock} onRide={onRide} liveWalk={!!loadActiveWalk(storage)} onResume={() => setScreen('walk')} onOpenBackup={openBackup} onCheckIn={() => setCheckIn(true)} onFirstWeek={onFirstWeek} />
+  else if (tab === 'home') body = <HomeScreen key={dataVer} now={now} clock={clock} onRide={onRide} liveWalk={!!loadActiveWalk(storage)} onResume={() => setScreen('walk')} onOpenBackup={openBackup} onCheckIn={() => setCheckIn(true)} onFirstWeek={onFirstWeek} onOpenYou={(o) => goTo('you', o)} />
   else if (tab === 'track') {
     body = (
       <TrackScreen key={dataVer} view={trackView} onView={(v) => { setTrackView(v); setFocusWalkId(null) }} now={now} clock={clock} onRide={onRide}

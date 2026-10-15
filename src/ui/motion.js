@@ -5,13 +5,17 @@ import { AccessibilityInfo } from 'react-native'
 // Design Check only: force Reduce Motion on for a preview.
 export const PreviewReducedMotion = createContext(null)
 
+// The last answer is remembered so something mounted later (a drawer, a sheet) starts with the right
+// motion on its very first frame instead of sliding once before the setting arrives.
+let lastKnown = false
 export function useReducedMotion() {
   const forced = useContext(PreviewReducedMotion)
-  const [reduced, setReduced] = useState(false)
+  const [reduced, setReduced] = useState(lastKnown)
   useEffect(() => {
     let live = true
-    AccessibilityInfo.isReduceMotionEnabled?.().then((v) => { if (live) setReduced(!!v) }).catch(() => {})
-    const sub = AccessibilityInfo.addEventListener?.('reduceMotionChanged', (v) => setReduced(!!v))
+    const set = (v) => { lastKnown = !!v; setReduced(!!v) }
+    AccessibilityInfo.isReduceMotionEnabled?.()?.then((v) => { if (live) set(v) }).catch(() => {})
+    const sub = AccessibilityInfo.addEventListener?.('reduceMotionChanged', (v) => set(v))
     return () => { live = false; sub?.remove?.() }
   }, [])
   return forced ?? reduced

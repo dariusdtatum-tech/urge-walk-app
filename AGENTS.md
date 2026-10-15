@@ -38,3 +38,9 @@ Docs: https://docs.expo.dev/eas/index.md
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand — configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `npx expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check your available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+
+## Layout limits (Option C)
+
+- Home holds at most five things: the tracker title (switcher), Ride it out, the ring, the "Your why" line, and check-in (`HOME_ITEMS` in `src/screens/HomeScreen.jsx`, enforced by `src/__tests__/drawer.test.jsx`). Short-lived helpers (undo banners, notices, the first-week card) may come and go. Anything new replaces one of the five or goes to the drawer, Track or You.
+- The tracker drawer opens only from the title (no edge swipe). It holds Reach out (top), trackers with the user's own names and day counts, + Add tracker / Edit trackers, and the backup status row (bottom). Never Ride it out, and never Premium, Plus, upgrades or prices (tested).
+- You is six section rows plus "Your plan" last.

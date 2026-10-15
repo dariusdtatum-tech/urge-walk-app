@@ -6,7 +6,7 @@ import { loadProfile } from '../lib/profile.js'
 import { lengthLabel, loadWalkPrefs } from '../lib/walkStorage.js'
 import { useDevice } from '../ui/DeviceContext.js'
 import { Button } from '../ui/Button.jsx'
-import { NoteField, OutcomePicker, TagPicker } from '../ui/CheckIn.jsx'
+import { DidntReachOut, NoteField, OutcomePicker, TagPicker } from '../ui/CheckIn.jsx'
 import { Confirm } from '../ui/Confirm.jsx'
 import { LeafIcon, PathIcon, WaveIcon } from '../ui/Icons.jsx'
 import { useStorage } from '../ui/StorageContext.js'
@@ -90,6 +90,7 @@ export function RideSheet({ visible, onWalk, onBreathe, onGround, onLog, onClose
                   <T size={type.body} color={c.text}>An urge from just now, logged as it went.</T>
                   <T font="semibold" size={type.body} color={c.title}>Did the urge pass?</T>
                   <OutcomePicker value={result} onChange={(v) => setResult(v ?? 'yes')} testID="log-result" />
+                  {result === 'no' ? <DidntReachOut testID="log-didnt-reach" /> : null}
                   <NoteField value={note} onChange={setNote} />
                   <TagPicker value={tags} onChange={setTags} testID="log-tags" />
                   <View style={{ flexDirection: 'row', gap: 12 }}>

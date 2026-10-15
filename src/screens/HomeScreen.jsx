@@ -1,10 +1,9 @@
-import { useEffect, useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
-import { dismissNudge, hasAnyData, loadBackupMeta, shouldNudge } from '../lib/backup.js'
-import { bannerDismissed, dismissBanner, isCalm, recentlySaved } from '../lib/calm.js'
+import { useEffect, useRef, useState } from 'react'
+import { AccessibilityInfo, findNodeHandle, Pressable, ScrollView, View } from 'react-native'
+import { bannerDismissed, dismissBanner } from '../lib/calm.js'
 import { todayISO } from '../lib/cleanTime.js'
 import { undoableReset } from '../lib/homeIdeas.js'
-import { cleanDays, heroHabit, loadRange, saveRange, shortDate } from '../lib/homeStats.js'
+import { cleanDays, shortDate } from '../lib/homeStats.js'
 import { loadMilestones, ringLabel, ringSegment, saveMilestones, syncMilestones } from '../lib/milestones.js'
 import { identityLine, loadProfile } from '../lib/profile.js'
 import { loadWalks } from '../lib/walkStorage.js'
@@ -16,18 +15,25 @@ import { T } from '../ui/Text.jsx'
 import { radius, size as sz, space, type, useTheme } from '../ui/theme.js'
 import { HeroPager } from './home/HeroPager.jsx'
 import { MilestoneSheet } from './home/Milestones.jsx'
-import { NeverZero } from './home/NeverZero.jsx'
-import { WalksCard } from './home/WalksCard.jsx'
 import { CheckInCard } from './CheckInSheet.jsx'
-import { MoneyCard } from './home/MoneyCard.jsx'
-import { PatternCard } from './home/PatternCard.jsx'
 import { FirstWeekCard } from './home/FirstWeekCard.jsx'
+import { TrackerDrawer } from './home/TrackerDrawer.jsx'
+import { WhyLine, YourWhySheet } from './home/YourWhy.jsx'
+import { ReachOut } from './ReachOut.jsx'
+import { ReasonsSheet } from './Reasons.jsx'
+import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 
-// Home (the PWA's HomeTab): date + Edit, identity line, undo-reset banners, the Ride it out bar, the
-// two-page hero (ring + daily line / clean time + milestone cards), Never zero, Your walks, the calm
-// backup nudge, and one milestone sheet per new milestone.
-export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, onOpenBackup, onCheckIn = () => {}, onFirstWeek = () => {} }) {
+// Home holds at most five things (Option C, written down in docs and enforced by a test):
+//   1. the title, which is the tracker switcher (opens the left drawer)
+//   2. Ride it out
+//   3. the ring (two-page hero with the daily line / clean time + milestone cards)
+//   4. the "Your why" line (or "+ Add a habit" in the same slot while there's one tracker)
+//   5. check-in
+// Short-lived helpers (undo-reset banners, notices, the first-week card) come and go; anything new
+// must replace one of the five or live in the drawer, Track or You.
+export const HOME_ITEMS = ['home-title', 'ride-bar', 'hero', 'why-line', 'checkin-card']
+export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, onOpenBackup, onCheckIn = () => {}, onFirstWeek = () => {}, onOpenYou = () => {} }) {
   const storage = useStorage()
   const { c } = useTheme()
   const today = todayISO(new Date(now))
@@ -36,13 +42,26 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
   const [milestones, setMilestones] = useState(() => loadMilestones(storage))
   const storeMilestones = (next) => { saveMilestones(next, storage); setMilestones(next) }
   const editor = useTrackerEditor({ today, now: clock, onOpenBackup, onMilestones: storeMilestones })
-  const { habits, notice, setNotice, sheet, setSheet } = editor
-  const [range, setRange] = useState(() => loadRange(storage))
+  const { habits, notice, setNotice, sheet, setSheet, hero, activeId, setActive } = editor
   const [celebrations, setCelebrations] = useState([])
-  // The backup reminder waits 30 minutes after a stressful moment (Ride it out, a walk, a reset).
-  const [showNudge, setShowNudge] = useState(() => isCalm(now, storage) && shouldNudge(loadBackupMeta(storage), hasAnyData(storage), now))
-  const [highlight] = useState(() => recentlySaved(now, storage))
+  const [drawer, setDrawer] = useState(false)
+  const [panel, setPanel] = useState(null) // 'why' | 'reasons' | 'reach'
   const [, setTick] = useState(0)
+  const titleRef = useRef(null)
+  // Closing the drawer puts screen-reader focus back on the title that opened it.
+  const closeDrawer = (then) => {
+    setDrawer(false)
+    // After the modal is gone (iOS needs a beat), move VoiceOver / TalkBack focus back to the title.
+    setTimeout(() => {
+      const el = titleRef.current
+      if (!el) return
+      try {
+        if (AccessibilityInfo.sendAccessibilityEvent) AccessibilityInfo.sendAccessibilityEvent(el, 'focus')
+        else { const node = findNodeHandle(el); if (node) AccessibilityInfo.setAccessibilityFocus?.(node) }
+      } catch { /* web: nothing to do */ }
+    }, 350)
+    if (typeof then === 'function') then()
+  }
 
   useEffect(() => {
     const result = syncMilestones(loadMilestones(storage), habits, today)
@@ -52,13 +71,10 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
     if (result.celebrate.length > 0) setCelebrations((q) => [...q, ...result.celebrate])
   }, [habits, today, storage])
 
-  const hero = heroHabit(habits)
   const days = cleanDays(hero, today)
   const segment = ringSegment(days)
   const label = ringLabel(days)
   const since = hero ? `${hero.startDate > today ? 'starts' : 'since'} ${shortDate(hero.startDate, today)}` : ''
-  const firstWalk = walks.reduce((min, w) => (w.startedAt < min ? w.startedAt : min), '9999')
-  const allSince = [hero?.startDate, firstWalk === '9999' ? null : todayISO(new Date(firstWalk))].filter(Boolean).sort()[0] || today
   const celebration = celebrations[0]
   const celebrated = celebration && habits.find((h) => h.id === celebration.habitId)
   const dateLine = new Date(now).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
@@ -66,11 +82,13 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
 
   return (
     <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="home">
-      <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-        <T font="medium" size={15} color={c.muted} style={{ flex: 1 }}>{dateLine}</T>
-        <Pressable onPress={() => setSheet({ mode: 'manage' })} accessibilityRole="button" accessibilityLabel="Edit trackers" testID="home-edit"
-          style={{ minHeight: 44, minWidth: 44, alignItems: 'flex-end', justifyContent: 'center' }}>
-          <T font="semibold" size={type.body} color={c.accent}>Edit</T>
+      <View style={{ gap: 2 }}>
+        <T font="medium" size={15} color={c.muted}>{dateLine}</T>
+        <Pressable ref={titleRef} onPress={() => setDrawer(true)} testID="home-title" accessibilityRole="button"
+          accessibilityLabel={hero ? `${hero.name}. ${habits.length > 1 ? 'Switch or edit trackers' : 'Your trackers'}` : 'Your trackers'}
+          style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}>
+          <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title} numberOfLines={2} style={{ flexShrink: 1 }}>{hero ? hero.name : 'Home'}</T>
+          {habits.length > 1 ? <T size={20} color={c.title} testID="home-title-caret" accessibilityElementsHidden importantForAccessibility="no">▾</T> : null}
         </Pressable>
       </View>
       {identity ? <T font="serifItalic" size={type.identity} color={c.title} testID="identity-line">{identity}</T> : null}
@@ -110,26 +128,30 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
         </View>
       )}
 
+      {hero ? (
+        <WhyLine today={today} onOpen={() => setPanel('why')} onAddHabit={habits.length === 1 ? () => setSheet({ mode: 'add' }) : null} />
+      ) : null}
       <FirstWeekCard now={now} onStep={(id) => (id === 'start' ? setSheet({ mode: 'add' }) : onFirstWeek(id))} />
       <CheckInCard today={today} onOpen={onCheckIn} />
-      <PatternCard walks={walks} now={now} />
-      {hero || walks.length ? <MoneyCard profile={profile} hero={hero} walks={walks} today={today} since={hero ? shortDate(hero.startDate, today) : ''} /> : null}
-      {hero ? <NeverZero hero={hero} walks={walks} today={today} highlight={highlight} /> : null}
-      {hero || walks.length > 0 ? (
-        <WalksCard walks={walks} range={range} onRange={(id) => { setRange(id); saveRange(id, storage) }} streak={hero ? days : null} now={now} since={allSince} />
-      ) : null}
 
-      {showNudge ? (
-        <View testID="backup-nudge" style={{ flexDirection: 'row', alignItems: 'center', gap: 6, backgroundColor: c.sand, borderRadius: 14, paddingLeft: 14 }}>
-          <T size={14} color={c.text} style={{ flex: 1, paddingVertical: 10 }}>Your data lives only on this phone. It’s been a while since your last backup.</T>
-          <Pressable onPress={onOpenBackup} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 6 }}>
-            <T font="bold" size={14} color={c.title}>Back up</T>
-          </Pressable>
-          <Pressable onPress={() => { dismissNudge(now, storage); setShowNudge(false) }} accessibilityRole="button" accessibilityLabel="Dismiss backup reminder"
-            style={{ minHeight: 44, minWidth: 44, alignItems: 'center', justifyContent: 'center' }}>
-            <T size={type.body} color={c.mutedSand}>✕</T>
-          </Pressable>
-        </View>
+      {drawer ? (
+        <TrackerDrawer habits={habits} activeId={activeId} today={today} now={now} onClose={() => closeDrawer()}
+          onSelect={(id) => closeDrawer(() => setActive(id))}
+          onEdit={(habit) => closeDrawer(() => setSheet({ mode: 'edit', habit, from: 'manage' }))}
+          onManage={() => closeDrawer(() => setSheet({ mode: 'manage' }))}
+          onAdd={() => closeDrawer(() => setSheet({ mode: 'add' }))}
+          onReachOut={() => closeDrawer(() => setPanel('reach'))}
+          onBackup={() => closeDrawer(onOpenBackup)} />
+      ) : null}
+      {panel === 'why' ? (
+        <YourWhySheet profile={profile} hero={hero} walks={walks} today={today} onClose={() => setPanel(null)}
+          onEditReasons={() => setPanel('reasons')} onSettings={() => { setPanel(null); onOpenYou('why') }} />
+      ) : null}
+      {panel === 'reasons' ? <ReasonsSheet onClose={() => setPanel('why')} /> : null}
+      {panel === 'reach' ? (
+        <Sheet onClose={() => setPanel(null)} title="Reach out" testID="home-reach-sheet" right={<HeaderButton label="Done" onPress={() => setPanel(null)} testID="home-reach-done" />}>
+          <ReachOut testID="home-reach" title="" onSetup={() => { setPanel(null); onOpenYou('contacts') }} />
+        </Sheet>
       ) : null}
 
       {celebrated && !sheet ? (

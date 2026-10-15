@@ -5,6 +5,7 @@ import { T } from '../ui/Text.jsx'
 import { type, useTheme } from '../ui/theme.js'
 import { JournalScreen } from './JournalScreen.jsx'
 import { LogScreen } from './LogScreen.jsx'
+import { TrackInsights } from './home/TrackInsights.jsx'
 
 export const TRACK_VIEWS = [{ id: 'log', label: 'Log' }, { id: 'journal', label: 'Journal' }]
 
@@ -18,5 +19,5 @@ export function TrackScreen({ view, onView, now, clock, onRide, focusWalkId, onE
   )
   return view === 'journal'
     ? <JournalScreen now={now} clock={clock} header={header} onEditingChange={onEditingChange} onOpenWalk={onOpenWalk} />
-    : <LogScreen now={now} onRide={onRide} initialSelectedId={focusWalkId} header={header} />
+    : <LogScreen now={now} onRide={onRide} initialSelectedId={focusWalkId} header={<View style={{ gap: 20 }}>{header}<TrackInsights now={now} /></View>} />
 }

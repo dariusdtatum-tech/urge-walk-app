@@ -273,12 +273,17 @@ describe('idea 4: money kept', () => {
     expect(logged.result).toBe('yes')
     expect(toast).toHaveTextContent(/\+\$12 kept/)
     await tab('You'); await tab('Home')
-    expect(screen.getByTestId('money-card')).toBeTruthy()
-    expect(screen.getByTestId('money-goal')).toHaveTextContent(/Car fund/)
+    expect(screen.queryByTestId('money-card')).toBeNull() // Home stays at five things; money lives in Your why
+    await press('why-open')
+    expect(screen.getByTestId('why-money')).toHaveTextContent(/Money kept\$12/)
+    expect(screen.getByTestId('why-goal')).toHaveTextContent(/Car fund · \$200/)
+    await press('why-done')
     await tab('You')
     await fireEvent((await youEl(screen, fireEvent, 'money-toggle')), 'valueChange', false)
     await tab('Home')
-    expect(screen.queryByTestId('money-card')).toBeNull()
+    await press('why-open')
+    expect(screen.queryByTestId('why-money')).toBeNull()
+    expect(screen.queryByTestId('why-goal')).toBeNull()
   })
 
   test('the goal shows with a reason on Breathe only when money is on', async () => {
@@ -309,12 +314,16 @@ describe('idea 1: Urge Map', () => {
 
   test('no pattern card until 3 urges in the week', async () => {
     await renderApp({ storage: seeded([urge(1, 20, 30), urge(2, 20, 45)]) })
+    await tab('Track')
+    expect(screen.getByTestId('track-insights')).toBeTruthy()
     expect(screen.queryByTestId('pattern-card')).toBeNull()
   })
 
   test('one plain sentence, a heat strip, and an optional check-in suggestion', async () => {
     const device = stubDevice()
     const { storage } = await renderApp({ device, storage: seeded([urge(1, 20, 30, 'yes', ['stressed']), urge(2, 20, 45, 'kinda', ['stressed']), urge(3, 21, 0), urge(4, 9, 0, 'no')]) })
+    expect(screen.queryByTestId('pattern-card')).toBeNull() // not on Home
+    await tab('Track')
     expect(screen.getByTestId('pattern-sentence')).toHaveTextContent(/Most urges hit 8 to 10 PM.*“Stressed” came up most\. 2 of 4 passed\./)
     expect(screen.getByTestId('pattern-strip')).toBeTruthy()
     expect(screen.getByTestId('pattern-suggest')).toHaveTextContent(/7:45 PM/)
@@ -325,6 +334,7 @@ describe('idea 1: Urge Map', () => {
 
   test('Not now hides the suggestion', async () => {
     const { storage } = await renderApp({ storage: seeded([urge(1, 20, 30), urge(2, 20, 45), urge(3, 21, 0)]) })
+    await tab('Track')
     await press('pattern-suggest-no')
     expect(screen.queryByTestId('pattern-suggest')).toBeNull()
     expect(JSON.parse(storage.getItem('urgewalk.v1.patternPrefs')).suggestDismissedAt).toBeTruthy()
