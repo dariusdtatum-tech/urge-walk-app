@@ -9,6 +9,8 @@ import { Badge } from './Milestones.jsx'
 // Home hero, two swipeable pages: 1 = the milestone ring + label (no rotating quote: your why is
 // permanent and already shows under the date as your identity line),
 // 2 = clean time (days and hours) with the last and next milestone cards.
+export const pageAt = (x, width) => Math.max(0, Math.min(1, Math.round(x / Math.max(1, width))))
+
 export function HeroPager({ hero, days, since, segment, label, milestones, today, profile, now }) {
   const { c } = useTheme()
   const [page, setPage] = useState(0)
@@ -26,8 +28,14 @@ export function HeroPager({ hero, days, since, segment, label, milestones, today
   return (
     <View style={{ gap: 10 }} testID="hero">
       <View onLayout={(e) => setWidth(e.nativeEvent.layout.width)}>
-        <ScrollView ref={track} horizontal pagingEnabled showsHorizontalScrollIndicator={false} testID="hero-pager"
-          onMomentumScrollEnd={(e) => { const i = Math.round(e.nativeEvent.contentOffset.x / Math.max(1, width)); if (i !== page) setPage(i) }}>
+        {/* Swipe sideways between the two pages. Snap to the page width (not just pagingEnabled), lock to one
+            direction so Home's vertical scroll still wins on up/down drags, and track the page while scrolling
+            because momentum-end doesn't always fire on a slow drag. */}
+        <ScrollView ref={track} horizontal pagingEnabled snapToInterval={width || undefined} snapToAlignment="start" decelerationRate="fast"
+          disableIntervalMomentum directionalLockEnabled nestedScrollEnabled showsHorizontalScrollIndicator={false} scrollEventThrottle={32} testID="hero-pager"
+          contentContainerStyle={width ? { width: width * 2 } : undefined}
+          onScroll={(e) => { const i = pageAt(e.nativeEvent.contentOffset.x, width); if (i !== page) setPage(i) }}
+          onMomentumScrollEnd={(e) => { const i = pageAt(e.nativeEvent.contentOffset.x, width); if (i !== page) setPage(i) }}>
           <View style={pageStyle} importantForAccessibility={page === 0 ? 'auto' : 'no-hide-descendants'} accessibilityElementsHidden={page !== 0}>
             <Ring value={segment.progress} testID="hero-ring">
               <T font="bold" size={type.ringName} max={MAX_SCALE.ringSmall} color={c.accent} numberOfLines={1} accessibilityLabel={hero.name}
@@ -48,7 +56,9 @@ export function HeroPager({ hero, days, since, segment, label, milestones, today
           </View>
         </ScrollView>
       </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'center' }} accessibilityRole="tablist">
+      <View style={{ flexDirection: 'row', justifyContent: 'center' }} accessibilityRole="tablist" testID="hero-tabs"
+        accessibilityActions={[{ name: 'increment', label: 'Next page' }, { name: 'decrement', label: 'Previous page' }]}
+        onAccessibilityAction={(e) => go(e.nativeEvent.actionName === 'increment' ? 1 : 0)}>
         {['Milestone ring', 'Clean time'].map((name, i) => (
           <Pressable key={name} onPress={() => go(i)} accessibilityRole="tab" accessibilityLabel={name} accessibilityState={{ selected: page === i }}
             testID={`pager-dot-${i}`} style={{ width: 44, height: 44, alignItems: 'center', justifyContent: 'center' }}>

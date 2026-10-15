@@ -369,3 +369,58 @@ describe('You as six rows', () => {
     expect(screen.getByTestId('you-data')).toHaveTextContent(/Last backup yesterday/)
   })
 })
+
+describe('ring pager swipe, and how it shares Home with the edge swipe', () => {
+  const layoutAndScroll = async (x) => {
+    await fireEvent(screen.getByTestId('hero').children[0], 'layout', { nativeEvent: { layout: { width: 358, height: 200 } } })
+    await fireEvent.scroll(screen.getByTestId('hero-pager'), { nativeEvent: { contentOffset: { x, y: 0 }, contentSize: { width: 716, height: 200 }, layoutMeasurement: { width: 358, height: 200 } } })
+  }
+  it('snaps to pages, one direction per drag, and the dots follow while dragging', async () => {
+    await renderApp()
+    const pager = screen.getByTestId('hero-pager')
+    expect(pager.props.horizontal).toBe(true)
+    expect(pager.props.directionalLockEnabled).toBe(true)
+    expect(pager.props.pagingEnabled).toBe(true)
+    await layoutAndScroll(358)
+    expect(screen.getByTestId('hero-pager').props.snapToInterval).toBe(358)
+    expect(screen.getByTestId('pager-dot-1').props.accessibilityState.selected).toBe(true)
+    expect(screen.queryByTestId('ring-label')).toBeNull()
+    await layoutAndScroll(100) // dragging back past halfway shows page 1 again
+    expect(screen.getByTestId('pager-dot-0').props.accessibilityState.selected).toBe(true)
+  })
+
+  it('VoiceOver: swipe up/down on the dots moves between pages', async () => {
+    await renderApp()
+    await fireEvent(screen.getByTestId('hero-tabs'), 'accessibilityAction', { nativeEvent: { actionName: 'increment' } })
+    expect(screen.getByTestId('pager-dot-1').props.accessibilityState.selected).toBe(true)
+    await fireEvent(screen.getByTestId('hero-tabs'), 'accessibilityAction', { nativeEvent: { actionName: 'decrement' } })
+    expect(screen.getByTestId('pager-dot-0').props.accessibilityState.selected).toBe(true)
+  })
+
+  it('pageAt clamps to the two pages', () => {
+    const { pageAt } = require('../screens/home/HeroPager.jsx')
+    expect([pageAt(0, 300), pageAt(140, 300), pageAt(160, 300), pageAt(900, 300), pageAt(-50, 300)]).toEqual([0, 0, 1, 1, 0])
+  })
+
+  it('split: the edge strip owns drags that start in it, the ring pager is inset beyond it, vertical scroll can take the strip back', async () => {
+    const H = require('../screens/HomeScreen.jsx')
+    const { StyleSheet } = require('react-native')
+    await renderApp()
+    // 1. Geometry: the strip covers only the side padding; Home's content (and so the pager) starts after it.
+    const pad = StyleSheet.flatten(screen.getByTestId('home').props.contentContainerStyle).padding
+    expect(H.EDGE_ZONE).toBeLessThanOrEqual(pad)
+    // 2. The strip is drawn on top of the scroll view (a later sibling), so a touch that starts in it reaches it first...
+    const edge = screen.getByTestId('home-edge', { includeHiddenElements: true })
+    const kids = edge.parent.children.map((k) => k.props?.testID)
+    expect(kids.indexOf('home-edge')).toBeGreaterThan(kids.indexOf('home'))
+    // ...and claims it at the start.
+    const evt = { nativeEvent: { touches: [{}], changedTouches: [{}], timestamp: 0 }, touchHistory: { touchBank: [], numberActiveTouches: 1, indexOfSingleActiveTouch: 0, mostRecentTimeStamp: 0 } }
+    expect(edge.props.onStartShouldSetResponder(evt)).toBe(true)
+    // 3. Until the drag is clearly sideways, it lets Home's vertical scroll take the touch.
+    expect(edge.props.onResponderTerminationRequest(evt)).toBe(true)
+    expect(H.edgeIntent(4, 30)).toBe(false) // a vertical drag never opens the drawer
+    // 4. Inside the ring, sideways drags belong to the pager (direction-locked), not the drawer.
+    expect(screen.getByTestId('hero-pager').props.directionalLockEnabled).toBe(true)
+    expect(H.edgeIntent(-60, 2)).toBe(false) // swiping left to go back a page never opens the drawer
+  })
+})
