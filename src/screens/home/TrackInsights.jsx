@@ -14,12 +14,14 @@ import { NeverZero } from './NeverZero.jsx'
 import { PatternCard } from './PatternCard.jsx'
 import { WalksCard } from './WalksCard.jsx'
 
-export function TrackInsights({ now }) {
+// range comes from Track's title row (Week / Month / All); without it (older callers) it's local.
+export function TrackInsights({ now, range: rangeProp = null }) {
   const storage = useStorage()
   const today = todayISO(new Date(now))
   const [walks] = useState(() => loadWalks(storage).walks)
   const [hero] = useState(() => heroHabit(loadHabits(storage).habits, loadActiveTrackerId(storage)))
-  const [range, setRange] = useState(() => loadRange(storage))
+  const [ownRange, setRange] = useState(() => loadRange(storage))
+  const range = rangeProp ?? ownRange
   const [highlight] = useState(() => recentlySaved(now, storage))
   const firstWalk = walks.reduce((min, w) => (w.startedAt < min ? w.startedAt : min), '9999')
   const since = [hero?.startDate, firstWalk === '9999' ? null : todayISO(new Date(firstWalk))].filter(Boolean).sort()[0] || today
@@ -28,7 +30,7 @@ export function TrackInsights({ now }) {
     <View style={{ gap: space.section }} testID="track-insights">{/* Urge Map is the one sand panel; the rest are unboxed sections */}
       <PatternCard walks={walks} now={now} />
       {hero ? <NeverZero hero={hero} walks={walks} today={today} highlight={highlight} /> : null}
-      <WalksCard walks={walks} range={range} onRange={(id) => { setRange(id); saveRange(id, storage) }} now={now} since={since} />
+      <WalksCard walks={walks} range={range} onRange={rangeProp ? null : (id) => { setRange(id); saveRange(id, storage) }} now={now} since={since} />
     </View>
   )
 }

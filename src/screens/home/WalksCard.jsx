@@ -13,7 +13,8 @@ const H = 74
 const PAD_TOP = 10
 const PAD_BOTTOM = 6
 
-// "Your walks": Week / Month / All time switches only what's inside this card.
+// "Your walks": Week / Month / All time switches only what's inside this section. On Track the pill sits in
+// the title row (onRange null here); it only renders here when a caller passes onRange.
 // The third chip is the average walk length in the range (no streak wording here).
 export function WalksCard({ walks, range, onRange, now, since }) {
   const { c } = useTheme()
@@ -33,7 +34,7 @@ export function WalksCard({ walks, range, onRange, now, since }) {
     <View testID="walks-card" style={{ gap: 10 }}>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
         <View style={{ flex: 1 }}><SectionLabel>Your walks</SectionLabel></View>
-        <Seg items={RANGE_IDS.map((id) => ({ id, label: id === 'all' ? 'All' : RANGES[id].name, a11y: RANGES[id].name }))} value={range} onChange={onRange} label="Walks range" testID="range" compact />
+        {onRange ? <Seg items={RANGE_IDS.map((id) => ({ id, label: id === 'all' ? 'All' : RANGES[id].name, a11y: RANGES[id].name }))} value={range} onChange={onRange} label="Walks range" testID="range" compact /> : null}
       </View>
       <View style={{ flexDirection: 'row', paddingVertical: 12, borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.hairline }}>
         {chips.map((ch, i) => (

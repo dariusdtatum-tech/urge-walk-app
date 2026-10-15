@@ -4,7 +4,7 @@ import { SectionLabel } from '../../ui/kit.jsx'
 import { T } from '../../ui/Text.jsx'
 import { type, useTheme } from '../../ui/theme.js'
 
-// Never zero: lifetime urges ridden out (never resets) and the last 30 days as dots.
+// Last 30 days (was "Never zero"): lifetime urges ridden out (never resets) and the last 30 days as dots.
 // Clean days are filled sea-glass dots; other days a hollow outline. No red, no X.
 export function NeverZero({ hero, walks, today, highlight = false }) {
   const { c } = useTheme()
@@ -22,7 +22,7 @@ export function NeverZero({ hero, walks, today, highlight = false }) {
   )
   return (
     <View>
-    <SectionLabel>Never zero</SectionLabel>
+    <SectionLabel>Last 30 days</SectionLabel>
     <View testID="never-zero" style={{ gap: 10, paddingVertical: 12, borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.hairline }}>
       <View style={{ flexDirection: 'row', gap: 12 }}>
         {col('Urges ridden out', total.toLocaleString(), null, 'lifetime · walks, breaths, logs', 'nz-lifetime', highlight)}

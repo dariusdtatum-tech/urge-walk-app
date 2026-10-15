@@ -60,10 +60,22 @@ export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChan
   const feed = buildFeed(entries, initial.walks)
   const shown = filterFeed(feed, query)
   const groups = groupByDay(shown, today, (item) => item.time)
+  const newEntryButton = (
+    <Pressable onPress={() => openEditor(newDraft(clock()))} accessibilityRole="button" accessibilityLabel="New entry" testID="journal-new"
+      style={({ pressed }) => ({ minHeight: 44, paddingHorizontal: 14, borderRadius: 22, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', backgroundColor: c.action, opacity: pressed ? 0.85 : 1 })}>
+      <T font="semibold" size={14} color={c.onAction}>+ New entry</T>
+    </Pressable>
+  )
 
   return (
     <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: bottom, gap: 14 }} testID="journal" keyboardShouldPersistTaps="handled">
-      {header ?? <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Journal</T>}
+      {/* + New entry sits in the title row as a compact button (once there's something in the journal). */}
+      {typeof header === 'function' ? header(feed.length ? newEntryButton : null) : header ?? (
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title} style={{ flex: 1 }}>Journal</T>
+          {feed.length ? newEntryButton : null}
+        </View>
+      )}
       <Notice text={notice} onDismiss={() => setNotice('')} />
       {feed.length === 0 ? (
         <View style={{ alignItems: 'center', gap: 12, paddingVertical: 32 }} testID="journal-empty">
@@ -73,7 +85,6 @@ export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChan
         </View>
       ) : (
         <>
-          <Button label="+ New entry" onPress={() => openEditor(newDraft(clock()))} testID="journal-new" />
           <TextInput value={query} onChangeText={setQuery} placeholder="Search your journal" placeholderTextColor={c.muted}
             accessibilityLabel="Search your journal" testID="journal-search" returnKeyType="search" maxFontSizeMultiplier={2}
             style={{ minHeight: 48, borderWidth: 1, borderColor: c.fieldBorder, borderRadius: 24, paddingHorizontal: 16, color: c.text, fontFamily: fonts.body, fontSize: 16, backgroundColor: c.card }} />

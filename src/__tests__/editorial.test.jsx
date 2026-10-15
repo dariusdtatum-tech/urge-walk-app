@@ -154,3 +154,20 @@ test('Progress, Track Log and Journal pad the bottom by tab bar + safe area + 24
   await press('track-journal'); expect(pad('journal')).toBe(bottomSpace(0))
   await tab('You'); await press('you-progress'); expect(pad('you')).toBe(bottomSpace(0))
 })
+
+test('Track header: Week / Month / All sits in the title row on Log, + New entry on Journal; "Last 30 days" replaces "Never zero"', async () => {
+  const at = new Date(T0).toISOString()
+  await renderApp('light', { ...habitsSeed(), 'urgewalk.v1.walks': JSON.stringify({ version: 1, walks: [buildLoggedRecord({ id: 'w', at: T0, note: 'n', result: 'yes' })] }),
+    'urgewalk.v1.journal': JSON.stringify({ version: 1, entries: [{ id: 'a', createdAt: at, title: 'One', body: 'x', mood: 3 }] }) })
+  await tab('Track')
+  const { within } = require('@testing-library/react-native')
+  expect(within(screen.getByTestId('track-title-row')).getByTestId('range')).toBeTruthy()
+  expect(screen.getAllByTestId('range')).toHaveLength(1) // not repeated in Your walks
+  expect(screen.getAllByText('Last 30 days').length).toBeGreaterThan(0)
+  expect(screen.queryByText(/never zero/i)).toBeNull()
+  await press('range-month')
+  expect(screen.getByTestId('range-month').props.accessibilityState.checked).toBe(true)
+  await press('track-journal')
+  expect(within(screen.getByTestId('track-title-row')).getByTestId('journal-new')).toBeTruthy()
+  expect(StyleSheet.flatten(screen.getByTestId('journal-new').props.style).minHeight).toBeGreaterThanOrEqual(44)
+})
