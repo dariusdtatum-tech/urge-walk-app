@@ -135,7 +135,7 @@ export function ReasonsSheet({ onClose }) {
         </View>
       ) : null}
       {note ? <T size={14} color={c.error} accessibilityRole="alert" testID="reason-note">{note}</T> : null}
-      <ToggleRow title="Lock with Face ID" sub="Your reason stays covered until you unlock it." value={data.lock} testID="reasons-lock"
+      <ToggleRow title="Lock with Face ID" sub="Stays covered on Walk and Breathe until you unlock it." value={data.lock} testID="reasons-lock"
         onChange={(on) => { setReasonsLock(storage, on); refresh() }} />
     </Sheet>
   )

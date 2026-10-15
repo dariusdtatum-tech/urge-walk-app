@@ -6,7 +6,9 @@ import {
   OUTCOME_LABELS, deleteWalk, dayLabel, finishedLabel, formatDuration, formatTimeOfDay, groupByDay, kindOf, localDayKey,
   outcomeKey, plannedLabel, summarize, updateWalk, walkSummaryLabel, weekDays,
 } from '../lib/logStats.js'
+import { cancelFollowUpFor } from '../lib/followUp.js'
 import { tagLabel } from '../lib/urgeMap.js'
+import { useDevice } from '../ui/DeviceContext.js'
 import { loadWalks, MAX_NOTE_LENGTH, saveWalks } from '../lib/walkStorage.js'
 import { Button } from '../ui/Button.jsx'
 import { OutcomePicker } from '../ui/CheckIn.jsx'
@@ -62,6 +64,7 @@ function DayRing({ d }) {
 // Log: a summary of everything ridden out, this week's day marks, then the history grouped by day.
 export function LogScreen({ now, onRide, initialSelectedId = null, header = null }) {
   const storage = useStorage()
+  const device = useDevice()
   const { c } = useTheme()
   const colors = useOutcomeColors()
   const today = todayISO(new Date(now))
@@ -154,7 +157,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
       {selected ? (
         <WalkDetailSheet key={selected.id} walk={selected} today={today}
           onSave={(changes) => update(updateWalk(walks, selected.id, changes))}
-          onDelete={() => update(deleteWalk(walks, selected.id))}
+          onDelete={() => { if (cancelFollowUpFor(selected.id, storage)) device.cancelFollowUp(); update(deleteWalk(walks, selected.id)) }}
           onClose={() => setSelectedId(null)} />
       ) : null}
     </View>

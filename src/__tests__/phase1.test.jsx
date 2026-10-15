@@ -416,3 +416,62 @@ describe('daily verse (You, opt-in)', () => {
     expect(screen.queryByTestId('daily-verse')).toBeNull()
   })
 })
+
+describe('Gemini r5: follow-ups never outlive their urge', () => {
+  const spyAppState = () => {
+    const handlers = new Set()
+    jest.spyOn(AppState, 'addEventListener').mockImplementation((_e, f) => { handlers.add(f); return { remove() { handlers.delete(f) } } })
+    return (st) => handlers.forEach((f) => f(st))
+  }
+  const pending = (storage) => JSON.parse(storage.getItem('urgewalk.v1.followUp') || '{}').pending ?? null
+
+  test('toast Undo cancels the follow-up', async () => {
+    const { device, storage } = await renderApp()
+    await logUrge()
+    expect(pending(storage)).not.toBeNull()
+    await press('toast-undo')
+    expect(device.calls.followUpCancels).toBe(1)
+    expect(pending(storage)).toBeNull()
+  })
+
+  test('deleting the entry in Track cancels its follow-up', async () => {
+    const { device, storage } = await renderApp()
+    await logUrge()
+    await tab('Track')
+    await fireEvent.press(screen.getAllByTestId('log-entry')[0])
+    await press('detail-delete')
+    await press('confirm-ok')
+    expect(device.calls.followUpCancels).toBe(1)
+    expect(pending(storage)).toBeNull()
+  })
+
+  test('walk backgrounded then cancelled cancels its follow-up', async () => {
+    const onChange = spyAppState()
+    const { device, storage } = await renderApp()
+    await press('ride-button'); await press('ride-walk')
+    await act(async () => { onChange('background') })
+    expect(device.calls.followUps).toHaveLength(1)
+    await act(async () => { onChange('active') })
+    await press('walk-cancel'); await press('confirm-ok')
+    expect(device.calls.followUpCancels).toBe(1)
+    expect(pending(storage)).toBeNull()
+  })
+
+  test('Breathe backgrounded then cancelled cancels its follow-up', async () => {
+    const onChange = spyAppState()
+    const { device, storage } = await renderApp()
+    await press('ride-button'); await press('ride-breathe')
+    await act(async () => { onChange('background') })
+    expect(device.calls.followUps).toHaveLength(1)
+    await act(async () => { onChange('active') })
+    await press('breathe-cancel')
+    expect(device.calls.followUpCancels).toBe(1)
+    expect(pending(storage)).toBeNull()
+  })
+
+  test('the reasons lock label says where it applies', async () => {
+    await renderApp()
+    await tab('You'); await press('reasons-row')
+    expect(screen.getByText('Stays covered on Walk and Breathe until you unlock it.')).toBeTruthy()
+  })
+})

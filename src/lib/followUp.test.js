@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildBackup, validateBackup } from './backup.js'
-import { FOLLOWUP_ANSWERS, answerFollowUp, claimFollowUp, clearPendingFollowUp, loadFollowUpEnabled, pendingFollowUp, saveFollowUpEnabled, settleFollowUpDefault } from './followUp.js'
+import { FOLLOWUP_ANSWERS, answerFollowUp, claimFollowUp, clearPendingFollowUp, loadFollowUpEnabled, pendingFollowUp, saveFollowUpEnabled, settleFollowUpDefault, cancelFollowUpFor } from './followUp.js'
 import { FOLLOWUP_VALUES, appendWalk, buildLoggedRecord, loadWalks } from './walkStorage.js'
 
 function mem() {
@@ -68,4 +68,17 @@ describe('how did it go? follow-up', () => {
     expect(claimFollowUp('a', s)).toBe(false)
   })
   it('answers match the stored values', () => { expect(FOLLOWUP_ANSWERS).toEqual(FOLLOWUP_VALUES) })
+
+  it('cancelFollowUpFor clears only a matching pending id and forgets that urge', () => {
+    const s = mem()
+    saveFollowUpEnabled(true, s)
+    expect(claimFollowUp('a', s, 1)).toBe(true)
+    expect(claimFollowUp('b', s, 2)).toBe(true)
+    expect(cancelFollowUpFor('a', s)).toBe(false)
+    expect(pendingFollowUp(s)).toEqual({ urgeId: 'b', at: 2 })
+    expect(claimFollowUp('a', s, 3)).toBe(true)
+    expect(cancelFollowUpFor('a', s)).toBe(true)
+    expect(pendingFollowUp(s)).toBeNull()
+    expect(cancelFollowUpFor(null, s)).toBe(false)
+  })
 })

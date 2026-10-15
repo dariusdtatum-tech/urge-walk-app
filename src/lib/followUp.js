@@ -54,6 +54,16 @@ export function answerFollowUp(urgeId, answer, storage) {
   return answer
 }
 
+// The urge is gone (toast Undo, entry deleted, Walk or Breathe cancelled): forget it, so its
+// follow-up can't land on nothing. Returns true when it was the pending one (cancel the notification).
+export function cancelFollowUpFor(urgeId, storage) {
+  if (!urgeId) return false
+  const s = loadState(storage)
+  const wasPending = s.pending?.urgeId === urgeId
+  writeObject(FOLLOWUP_STATE_KEY, { asked: s.asked.filter((x) => x !== urgeId), pending: wasPending ? null : s.pending }, storage)
+  return wasPending
+}
+
 // Turning it off clears anything pending.
 export function clearPendingFollowUp(storage) {
   const s = loadState(storage)
