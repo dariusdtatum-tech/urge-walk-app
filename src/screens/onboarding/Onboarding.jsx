@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { Platform, Pressable, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Circle, Defs, LinearGradient, Path, Rect, Stop } from 'react-native-svg'
 import { daysBetween, todayISO } from '../../lib/cleanTime.js'
@@ -30,28 +30,46 @@ const PRIVACY = [
 const joinNames = (n) => (n.length <= 1 ? n[0] || '' : `${n.slice(0, -1).join(', ')} and ${n.at(-1)}`)
 
 const SKY = {
-  light: { a: '#f6efe3', b: '#efe5d3', sun: '#f3e3c6', w1: 'rgba(127,174,159,0.6)', w2: 'rgba(169,203,192,0.85)', w3: 'rgba(211,230,223,0.9)', foam: 'rgba(253,251,247,0.9)', w4: 'rgba(230,216,191,0.9)' },
-  dark: { a: '#1b3152', b: '#0f1d33', sun: 'rgba(239,230,212,0.85)', w1: 'rgba(169,203,192,0.25)', w2: 'rgba(58,90,115,0.7)', w3: 'rgba(44,66,102,0.85)', foam: 'rgba(169,203,192,0.9)', w4: 'rgba(36,57,92,0.9)' },
+  light: { a: '#f6efe3', b: '#efe5d3', sun: '#dec29b', path: 'rgba(239,228,207,0.95)', pathEdge: 'rgba(141,135,120,0.35)', w1: 'rgba(127,174,159,0.6)', w2: 'rgba(169,203,192,0.85)', w3: 'rgba(211,230,223,0.9)', foam: 'rgba(253,251,247,0.9)', w4: 'rgba(230,216,191,0.9)' },
+  dark: { a: '#1b3152', b: '#0f1d33', sun: 'rgba(239,230,212,0.85)', path: 'rgba(169,203,192,0.35)', pathEdge: 'rgba(169,203,192,0.5)', w1: 'rgba(169,203,192,0.25)', w2: 'rgba(58,90,115,0.7)', w3: 'rgba(44,66,102,0.85)', foam: 'rgba(169,203,192,0.9)', w4: 'rgba(36,57,92,0.9)' },
 }
-// The welcome scene: sun (moon at night) over layered sea-glass waves.
+// The welcome scene: sun (moon at night) over layered sea-glass waves, with a path tapering toward
+// the horizon. "slice" keeps the sun a true circle on any screen (it used to be stretched by "none").
+export const WELCOME_ASPECT = 'xMidYMax slice'
 function WelcomeScene() {
   const { c, scheme } = useTheme()
   const s = SKY[scheme]
   return (
-    <Svg width="100%" height="100%" viewBox="0 0 390 520" preserveAspectRatio="none" style={{ position: 'absolute', top: 0, left: 0 }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+    <Svg width="100%" height="100%" viewBox="0 0 390 440" preserveAspectRatio={WELCOME_ASPECT} testID="ob-scene" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       <Defs>
         <LinearGradient id="obSky" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor={s.a} /><Stop offset="1" stopColor={s.b} /></LinearGradient>
-        <LinearGradient id="obFade" x1="0" y1="0" x2="0" y2="1"><Stop offset="0.7" stopColor={c.bg} stopOpacity={0} /><Stop offset="1" stopColor={c.bg} stopOpacity={1} /></LinearGradient>
+        <LinearGradient id="obFade" x1="0" y1="0" x2="0" y2="1"><Stop offset="0.75" stopColor={c.bg} stopOpacity={0} /><Stop offset="1" stopColor={c.bg} stopOpacity={1} /></LinearGradient>
       </Defs>
-      <Rect width="390" height="520" fill="url(#obSky)" />
-      <Circle cx="270" cy="150" r="46" fill={s.sun} />
-      <Path d="M0 250 C 80 238 160 262 240 248 C 300 238 350 252 390 244 L390 520 L0 520Z" fill={s.w1} />
-      <Path d="M0 300 C 90 280 170 318 250 298 C 320 282 360 300 390 292 L390 520 L0 520Z" fill={s.w2} />
-      <Path d="M0 352 C 100 334 180 372 260 352 C 330 336 365 352 390 346 L390 520 L0 520Z" fill={s.w3} />
-      <Path d="M0 352 C 100 334 180 372 260 352 C 330 336 365 352 390 346" stroke={s.foam} strokeWidth={2} fill="none" />
-      <Path d="M0 404 C 110 390 190 420 280 404 C 340 394 370 404 390 400 L390 520 L0 520Z" fill={s.w4} />
-      <Rect width="390" height="520" fill="url(#obFade)" />
+      <Rect x="-400" width="1190" height="440" fill="url(#obSky)" />
+      <Circle cx="270" cy="150" r="46" fill={s.sun} testID="ob-sun" />
+      <Path d="M-400 250 C 80 238 160 262 240 248 C 300 238 350 252 790 244 L790 440 L-400 440Z" fill={s.w1} />
+      <Path d="M-400 300 C 90 280 170 318 250 298 C 320 282 360 300 790 292 L790 440 L-400 440Z" fill={s.w2} />
+      <Path d="M-400 352 C 100 334 180 372 260 352 C 330 336 365 352 790 346 L790 440 L-400 440Z" fill={s.w3} />
+      <Path d="M-400 352 C 100 334 180 372 260 352 C 330 336 365 352 790 346" stroke={s.foam} strokeWidth={2} fill="none" />
+      <Path d="M-400 404 C 110 390 190 420 280 404 C 340 394 370 404 790 400 L790 440 L-400 440Z" fill={s.w4} />
+      {/* A gentle path: wide at the bottom, narrowing as it winds up toward the horizon. */}
+      <Path d="M150 440 C 175 400 215 372 206 336 C 200 312 222 292 236 282 L 240 283 C 230 296 214 316 220 338 C 230 378 210 410 240 440 Z" fill={s.path} stroke={s.pathEdge} strokeWidth={1} testID="ob-path" />
+      <Rect x="-400" width="1190" height="440" fill="url(#obFade)" />
     </Svg>
+  )
+}
+
+// Evenfaring placeholder mark (App Design will refine it): a small astrolabe ring with a four-point star.
+function EvenfaringMark() {
+  const { c } = useTheme()
+  return (
+    <View accessible accessibilityRole="image" accessibilityLabel="Evenfaring" testID="ob-emblem" style={{ alignItems: 'center' }}>
+      <Svg width={36} height={36} viewBox="0 0 36 36">
+        <Circle cx="18" cy="18" r="15" stroke={c.title} strokeWidth={1.5} fill="none" />
+        <Circle cx="18" cy="18" r="10" stroke={c.title} strokeWidth={1} fill="none" opacity={0.6} />
+        <Path d="M18 6 L20 16 L30 18 L20 20 L18 30 L16 20 L6 18 L16 16 Z" fill={c.title} />
+      </Svg>
+    </View>
   )
 }
 
@@ -122,9 +140,13 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
   if (step === 1) {
     return (
       <View style={{ flex: 1, backgroundColor: c.bg }} testID="onboarding" accessibilityLabel="Setup step 1">
-        <WelcomeScene />
+        <View style={{ flex: 1, minHeight: 200 }}>
+          <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}><WelcomeScene /></View>
+          <View style={{ paddingTop: (Platform.OS === 'web' ? Math.max(insets.top, 59) : insets.top) + 8 }}><EvenfaringMark /></View>
+        </View>
         {mode === 'redo' ? <BackButton onPress={onCancel} top={insets.top} /> : null}
-        <View style={{ flex: 1, justifyContent: 'flex-end', padding: 24, gap: 10 }}>
+        {/* The words sit in their own lower zone, clear of the wave crest. */}
+        <View style={{ paddingHorizontal: 24, paddingTop: 20, gap: 10 }} testID="ob-words">
           <T accessibilityRole="header" font="serif" size={52} color={c.title}>You’re here.</T>
           <T font="serifItalic" size={24} color={c.title}>That’s the first step.</T>
           <T size={17} color={c.text}>Urge Walk helps you ride out urges, one walk at a time. Private, on your phone.</T>

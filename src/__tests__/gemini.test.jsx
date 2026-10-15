@@ -120,3 +120,15 @@ describe('Track > Your walks range', () => {
     expect(screen.queryByText(/Streak/)).toBeNull()
   })
 })
+
+describe('Onboarding welcome', () => {
+  test('true-circle scene (slice, not none), warmer light sun, a path, the words below the scene, and an Evenfaring mark', async () => {
+    await render(<AppRoot storage={memoryStorage()} device={stubDevice()} clock={fakeClock()} scheme="light" />)
+    const scene = screen.getByTestId('ob-scene', { includeHiddenElements: true })
+    expect(scene.props.preserveAspectRatio).not.toBe('none')
+    expect(screen.getByTestId('ob-sun', { includeHiddenElements: true }).props.fill.payload).toBe(0xffdec29b) // #dec29b
+    expect(screen.getByTestId('ob-path', { includeHiddenElements: true })).toBeTruthy()
+    expect(screen.getByTestId('ob-words')).toHaveTextContent(/You’re here\./)
+    expect(screen.getByLabelText('Evenfaring')).toBeTruthy()
+  })
+})
