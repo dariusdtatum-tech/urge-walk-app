@@ -58,16 +58,6 @@ function WelcomeScene() {
   )
 }
 
-// The crosshair-like placeholder mark is gone (Gemini review 2). A quiet 12pt tracked wordmark keeps
-// the maker's name without a second circle competing with the sun.
-function EvenfaringMark() {
-  const { c } = useTheme()
-  return (
-    <View accessible accessibilityRole="image" accessibilityLabel="Evenfaring" testID="ob-emblem" style={{ alignItems: 'center' }}>
-      <T font="semibold" size={12} color={c.title} style={{ letterSpacing: 12 * 0.16, textTransform: 'uppercase' }}>Evenfaring</T>
-    </View>
-  )
-}
 
 // Setup: 11 screens, one question each (the two "before" steppers share one), then the recap.
 // mode 'new' (first run) or 'redo' (from You: answers prefilled, existing trackers kept, not duplicated).
@@ -138,7 +128,7 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
       <View style={{ flex: 1, backgroundColor: c.bg }} testID="onboarding" accessibilityLabel="Setup step 1">
         <View style={{ flex: 1, minHeight: 200 }}>
           <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}><WelcomeScene /></View>
-          <View style={{ paddingTop: (Platform.OS === 'web' ? Math.max(insets.top, 59) : insets.top) + 8 }}><EvenfaringMark /></View>
+          <View testID="ob-top-space" style={{ paddingTop: (Platform.OS === 'web' ? Math.max(insets.top, 59) : insets.top) + 8, paddingBottom: 16 }} />{/* brand mark on hold: space left empty */}
         </View>
         {mode === 'redo' ? <BackButton onPress={onCancel} top={insets.top} /> : null}
         {/* The words sit in their own lower zone, clear of the wave crest. */}

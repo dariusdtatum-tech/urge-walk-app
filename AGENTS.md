@@ -45,7 +45,7 @@ Docs: https://docs.expo.dev/eas/index.md
 - Gemini review 2 (Oct 15 2026), also enforced by tests:
   - Scroll padding: Progress, Track Log and Journal end with `bottomSpace(inset)` = tab bar height (`size.tabBar` 84) + bottom safe area + 24 (`src/ui/layout.js`).
   - Dark mode: no sea glass (#a9cbc0) text; use cream (#f3ede2) or cream at 70%. Sea glass is for fills, edges and the ring only. #009688, #fdfbf7 and #6b7280 are banned (`palette.test.js`); switches always pass `thumbColor`/`activeThumbColor` tokens.
-  - Ground: stacked stones (`ground-stones`), left-aligned copy, step dots with the first filled. Onboarding: a flat borderless path over the wave, no crosshair (a quiet "Evenfaring" wordmark), Restore uses `c.title`.
+  - Ground: stacked stones (`ground-stones`), left-aligned copy, step dots with the first filled. Onboarding: a flat borderless path over the wave, no crosshair and no brand mark (brand work on hold; the space stays empty), Restore uses `c.title`.
   - Track: the Week / Month / All pill sits in the Track title row on Log; on Journal "+ New entry" is a compact 44pt button in that row. The 30-day dots are labelled "Last 30 days".
   - Tracker switcher: the selected tracker is one treatment in both modes, a solid `c.action` fill with `c.onAction` text plus a check. The drawer stays (opt-in): a "Trackers" header with a 44pt close, top safe-area padding, the panel absolutely positioned at left 0 with overflow hidden.
   - Ride it out (dark): Walk and Breathe share one surface (#24395c), edge and height, with cream text.

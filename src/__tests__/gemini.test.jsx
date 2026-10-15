@@ -129,7 +129,7 @@ describe('Track > Your walks range', () => {
 })
 
 describe('Onboarding welcome', () => {
-  test('true-circle scene (slice, not none), warmer light sun, a path, the words below the scene, and an Evenfaring mark', async () => {
+  test('true-circle scene (slice, not none), warmer light sun, a path, the words below the scene, and no brand mark (brand work on hold)', async () => {
     await render(<AppRoot storage={memoryStorage()} device={stubDevice()} clock={fakeClock()} scheme="light" />)
     const scene = screen.getByTestId('ob-scene', { includeHiddenElements: true })
     expect(scene.props.preserveAspectRatio).not.toBe('none')
@@ -141,7 +141,7 @@ describe('Onboarding welcome', () => {
     // the restore link is navy (palette token), not deep sea or sea glass
     expect(StyleSheet.flatten(within(screen.getByTestId('ob-restore')).getByText('Restore from a backup').props.style).color).toBe('#24395c')
     expect(screen.getByTestId('ob-words')).toHaveTextContent(/You’re here\./)
-    expect(screen.getByLabelText('Evenfaring')).toBeTruthy()
+    expect(screen.queryByLabelText('Evenfaring')).toBeNull(); expect(screen.queryByTestId('ob-emblem')).toBeNull(); expect(screen.queryByText(/evenfaring/i)).toBeNull()
   })
 })
 
