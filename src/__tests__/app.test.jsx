@@ -28,7 +28,7 @@ describe('Home', () => {
     expect(screen.getByTestId('hold-hint')).toHaveTextContent('Hold the center button for a quick walk')
     expect(screen.getByTestId('hero-days').props.children).toBe('163')
     expect(screen.getByLabelText('163 days clean')).toBeTruthy()
-    expect(screen.getByText(/to 6 months/)).toBeTruthy()
+    expect(screen.getByTestId('ms-next')).toHaveTextContent(/6 months/)
   })
   it('empty state (set up, no tracker): one sentence, add a start date, or restore', async () => {
     const storage = memoryStorage({ 'urgewalk.v1.profile': JSON.stringify({ version: 1, onboardedAt: '2030-05-01T12:00:00.000Z', skipped: false }) })
@@ -298,7 +298,7 @@ describe('Dynamic Type', () => {
     await renderApp()
     expect(screen.getByTestId('hero-days').props.maxFontSizeMultiplier).toBe(MAX_SCALE.ring)
     expect(MAX_SCALE.ring).toBeLessThanOrEqual(1.3)
-    expect(screen.getByTestId('ring-label').props.maxFontSizeMultiplier).toBe(2) // under the ring, free to grow
+    expect(screen.getByTestId('ms-next').children.length).toBeGreaterThan(0) // milestones moved to the fixed pair
     for (const el of screen.getAllByText('Ride it out', { exact: true })) expect(el.props.maxFontSizeMultiplier).toBeLessThanOrEqual(2)
     expect(screen.getByText(/^since /).props.maxFontSizeMultiplier).toBeLessThanOrEqual(1.3)
   })

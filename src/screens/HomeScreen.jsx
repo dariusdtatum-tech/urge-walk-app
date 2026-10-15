@@ -4,49 +4,52 @@ import { bannerDismissed, dismissBanner } from '../lib/calm.js'
 import { todayISO } from '../lib/cleanTime.js'
 import { undoableReset } from '../lib/homeIdeas.js'
 import { cleanDays, shortDate } from '../lib/homeStats.js'
-import { loadMilestones, ringLabel, ringSegment, saveMilestones, syncMilestones } from '../lib/milestones.js'
+import { loadMilestones, ringSegment, saveMilestones, syncMilestones } from '../lib/milestones.js'
 import { identityLine, loadProfile } from '../lib/profile.js'
 import { Button } from '../ui/Button.jsx'
 import { WaveIcon } from '../ui/Icons.jsx'
 import { Notice } from '../ui/Row.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { radius, size as sz, space, type, useTheme } from '../ui/theme.js'
+import { radius, space, type, useTheme } from '../ui/theme.js'
 import { HeroPager } from './home/HeroPager.jsx'
 import { MilestoneSheet } from './home/Milestones.jsx'
 import { CheckInCard } from './CheckInSheet.jsx'
 import { FirstWeekCard } from './home/FirstWeekCard.jsx'
 import { DrawerPeek, drawerWidth, TrackerDrawer, TrackerSheet } from './home/TrackerDrawer.jsx'
 import { loadSwitcher } from '../lib/switcher.js'
+import { loadWalks } from '../lib/walkStorage.js'
+import { MoneyCard, UrgeMapCard, WeekCard, WhyCard } from './home/HomeCards.jsx'
+import { useHomeReason } from './Reasons.jsx'
 import { useReducedMotion } from '../ui/motion.js'
 import { ReachOut } from './ReachOut.jsx'
 import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 
-// Home holds at most four things (Option C v2, written down in AGENTS.md and enforced by a test):
+// Fuller Home (approved Oct 15 2026; written down in AGENTS.md and enforced by tests):
 //   1. the title, a 44pt pill that is the tracker switcher (tap: bottom sheet by default, or the drawer
 //      if picked in You → Appearance and lock; swiping in from the left edge always opens the drawer)
-//   2. the ring (two pages: milestone ring with the next-milestone line under it / clean time
-//      + milestone cards), with the page dots and your reason in one card below it (dots alone if none)
-//   3. check-in
+//   2. the hero: ONLY the ring swipes (days clean / days and hours / Time back when estimated), page dots
+//      under it, then the fixed Last + Next milestone pair. Nothing milestone-related inside the ring.
+//   3. at most five cards, in HOME_CARDS order: your why · daily check-in · this week · Urge Map preview ·
+//      money kept (only when set up). A card with nothing honest to show hides itself.
 //   4. a quiet "Hold the center button for a quick walk" hint
-// Ride it out is the raised center tab button only (Gemini review: one trigger), always one tap.
-// Short-lived helpers (undo-reset banners, notices, the first-week card) come and go. There is no
-// rotating quote and no Your why line: reasons live in You and in Ride it out; money kept and time
-// back live in You → Progress. Add tracker lives in the switcher. Anything new must replace one of the
-// four or live in the switcher, Track or You.
+// Ride it out is the raised center tab button only, always one tap. 988 is not a Home card. Short-lived
+// helpers (undo-reset banners, notices, the first-week card) come and go.
 // Edge swipe: a narrow strip along the left edge (the screen's side padding, so it never sits on top
 // of Ride it out or any other control). It only takes over once the drag is clearly sideways and
 // rightward, so vertical scrolling and the ring pager (which is inset from the edge) keep working.
 export const EDGE_ZONE = space.screen
 export const edgeIntent = (dx, dy) => dx > 8 && Math.abs(dx) > 2 * Math.abs(dy)
 export const edgeOpens = (dx, vx, width) => dx > width * 0.35 || vx > 0.5
-export const HOME_ITEMS = ['home-title', 'hero', 'checkin-card', 'hold-hint']
-export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, onOpenBackup, onCheckIn = () => {}, onFirstWeek = () => {}, onOpenYou = () => {} }) {
+export const HOME_ITEMS = ['home-title', 'hero', 'home-cards', 'hold-hint']
+export function HomeScreen({ now, clock = Date.now, onOpenTrack = () => {}, onRide, liveWalk, onResume, onOpenBackup, onCheckIn = () => {}, onFirstWeek = () => {}, onOpenYou = () => {} }) {
   const storage = useStorage()
   const { c } = useTheme()
   const today = todayISO(new Date(now))
   const [profile] = useState(() => loadProfile(storage))
+  const [walks] = useState(() => loadWalks(storage).walks)
+  const reason = useHomeReason(profile)
   const [milestones, setMilestones] = useState(() => loadMilestones(storage))
   const storeMilestones = (next) => { saveMilestones(next, storage); setMilestones(next) }
   const editor = useTrackerEditor({ today, now: clock, onOpenBackup, onMilestones: storeMilestones })
@@ -124,7 +127,6 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
 
   const days = cleanDays(hero, today)
   const segment = ringSegment(days)
-  const label = ringLabel(days)
   const since = hero ? `${hero.startDate > today ? 'starts' : 'since'} ${shortDate(hero.startDate, today)}` : ''
   const celebration = celebrations[0]
   const celebrated = celebration && habits.find((h) => h.id === celebration.habitId)
@@ -171,7 +173,7 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
       ) : null}
 
       {hero ? (
-        <HeroPager hero={hero} days={days} since={since} segment={segment} label={label} milestones={milestones} today={today} profile={profile} now={now} onOpenReason={() => onOpenYou('why')} />
+        <HeroPager hero={hero} days={days} since={since} segment={segment} milestones={milestones} today={today} profile={profile} now={now} />
       ) : (
         <View style={{ alignItems: 'center', gap: 12, paddingVertical: 24 }} testID="home-empty">
           <T accessibilityRole="header" font="serif" size={28} color={c.title}>Every day counts</T>
@@ -182,7 +184,14 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
       )}
 
       <FirstWeekCard now={now} onStep={(id) => (id === 'start' ? setSheet({ mode: 'add' }) : onFirstWeek(id))} />
-      <CheckInCard today={today} onOpen={onCheckIn} />
+      {/* At most five cards, in HOME_CARDS order. */}
+      <View style={{ gap: 12 }} testID="home-cards">
+        <WhyCard reason={reason} onOpen={() => onOpenYou('why')} />
+        <CheckInCard today={today} onOpen={onCheckIn} />
+        <WeekCard walks={walks} today={today} />
+        <UrgeMapCard walks={walks} today={today} now={now} onSeeTrack={onOpenTrack} />
+        <MoneyCard profile={profile} hero={hero} walks={walks} today={today} />
+      </View>
       {!liveWalk ? (
         <T size={13} color={c.muted} testID="hold-hint" style={{ textAlign: 'center', marginTop: 8 }}>Hold the center button for a quick walk</T>
       ) : null}

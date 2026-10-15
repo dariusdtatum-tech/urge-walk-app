@@ -153,22 +153,22 @@ export function useHomeReason(profile) {
   return reason
 }
 
-export function HomeReason({ reason, onOpen }) {
+export function HomeReason({ reason, onOpen, align = 'center' }) {
   const device = useDevice()
   const { c } = useTheme()
   useEffect(() => () => device.stopPlaying(), [device])
   if (!reason) return null
   const label = reason.kind === 'photo' ? 'Your reason: a photo you saved' : reason.kind === 'voice' ? `Your reason: a voice note, ${formatVoiceLength(reason.durationMs)}` : `Your reason: ${reason.text}`
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, alignSelf: 'stretch' }} testID="home-reason">
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: align === 'left' ? 'space-between' : 'center', gap: 10, alignSelf: 'stretch' }} testID="home-reason">
       <Pressable onPress={onOpen} accessibilityRole="button" accessibilityLabel={label} accessibilityHint="Opens Your why in You" testID="home-reason-open"
-        style={{ minHeight: 44, flexShrink: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingHorizontal: 12 }}>
+        style={{ minHeight: 44, flexShrink: 1, flexDirection: 'row', alignItems: 'center', justifyContent: align === 'left' ? 'flex-start' : 'center', gap: 10, paddingHorizontal: align === 'left' ? 0 : 12 }}>
         {reason.kind === 'photo' ? (
           <Image source={{ uri: reason.uri }} testID="home-reason-photo" style={{ width: 64, height: 64, borderRadius: 14, backgroundColor: c.sand }} resizeMode="cover" />
         ) : reason.kind === 'voice' ? (
           <T size={15} color={c.textSoft} testID="home-reason-voice">Your voice note · {formatVoiceLength(reason.durationMs)}</T>
         ) : (
-          <T font="serifItalic" size={21} color={c.title} style={{ textAlign: 'center', flexShrink: 1 }} testID="home-reason-text">“{reason.text}”</T>
+          <T font="serifItalic" size={21} color={c.title} style={{ textAlign: align, flexShrink: 1 }} testID="home-reason-text">“{reason.text}”</T>
         )}
       </Pressable>
       {reason.kind === 'voice' ? (

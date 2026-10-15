@@ -273,7 +273,7 @@ describe('idea 4: money kept', () => {
     expect(logged.result).toBe('yes')
     expect(toast).toHaveTextContent(/\+\$12 kept/)
     await tab('You'); await tab('Home')
-    expect(screen.queryByTestId('money-card')).toBeNull() // not on Home; money lives in You → Progress
+    expect(screen.getByTestId('money-card')).toHaveTextContent(/\$12 kept/) // set up: Home shows the total too
     await tab('You')
     expect(screen.getByTestId('you-progress')).toHaveTextContent(/\$12 kept/)
     expect((await youEl(screen, fireEvent, 'kept-money'))).toHaveTextContent(/Money kept\$12/)

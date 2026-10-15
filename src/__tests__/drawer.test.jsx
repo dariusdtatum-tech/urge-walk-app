@@ -175,15 +175,23 @@ describe('tracker title and drawer', () => {
   })
 })
 
-describe('Home holds four things', () => {
-  it('title pill, ring, check-in and the hold hint; the old cards live elsewhere even with lots of data', async () => {
+describe('fuller Home: title, ring + milestones, at most five cards, the hold hint', () => {
+  it('cards come in HOME_CARDS order and never more than five; Money kept shows once it is set up', async () => {
     const walks = { 'urgewalk.v1.walks': JSON.stringify({ version: 1, walks: [walk(0), walk(1), walk(1, 'no'), walk(2), walk(3)] }) }
     const seed = { ...habitsSeed(), ...onboardedProfile({ timeBack: { hoursPerTime: 1, moneyPerTime: 10 }, before: { daysPerWeek: 7, timesPerDay: 1 } }), ...walks,
       'urgewalk.v1.backupMeta': JSON.stringify({ lastBackupAt: iso(T0 - 30 * DAY) }), 'urgewalk.v1.firstWeek': JSON.stringify({ done: true }) }
     await renderApp(seed)
-    expect(HOME_ITEMS).toEqual(['home-title', 'hero', 'checkin-card', 'hold-hint'])
+    expect(HOME_ITEMS).toEqual(['home-title', 'hero', 'home-cards', 'hold-hint'])
     for (const id of HOME_ITEMS) expect([id, Boolean(screen.queryByTestId(id))]).toEqual([id, true])
-    for (const id of ['pattern-card', 'money-card', 'walks-card', 'never-zero', 'backup-nudge', 'home-edit']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
+    const { HOME_CARDS, MAX_HOME_CARDS } = require('../screens/home/HomeCards.jsx')
+    expect(HOME_CARDS).toEqual(['why-card', 'checkin-card', 'week-card', 'urgemap-card', 'money-card'])
+    expect(HOME_CARDS.length).toBeLessThanOrEqual(MAX_HOME_CARDS)
+    const shown = screen.getByTestId('home-cards').children.map((k) => k.props?.testID).filter(Boolean)
+    expect(shown.length).toBeLessThanOrEqual(MAX_HOME_CARDS)
+    expect(shown).toEqual(HOME_CARDS.filter((id) => shown.includes(id))) // order holds
+    expect(shown).toEqual(['checkin-card', 'week-card', 'urgemap-card', 'money-card']) // no reason → no why card
+    for (const id of ['pattern-card', 'walks-card', 'never-zero', 'backup-nudge', 'home-edit', 'home-reach']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
+    expect(screen.queryByText(/988/)).toBeNull() // 988 is not a Home card
     await tab('Track')
     expect(screen.getByTestId('walks-card')).toBeTruthy()
     expect(screen.getByTestId('never-zero')).toBeTruthy()
@@ -198,10 +206,15 @@ describe('Home holds four things', () => {
 })
 
 describe('Home has no Your why line, quote or Add a habit; money and time live in You → Progress', () => {
-  it('none of the why pieces are on Home, even with reasons, a setup why and money set', async () => {
+  it('no old why line, quote or Add a habit; the why card shows the saved reason only (not the setup answer when a saved one exists)', async () => {
     await renderApp({ ...habitsSeed(), ...reasonsSeed(['First thing']), ...onboardedProfile({ why: 'A quiet example why', timeBack: { hoursPerTime: 1, moneyPerTime: 10 }, before: { daysPerWeek: 7, timesPerDay: 1 } }) })
-    for (const id of ['why-line', 'why-open', 'why-add-habit', 'daily-line', 'money-card', 'kept-card']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
-    expect(screen.queryByText(/your why|Add a reason|Add a habit|A quiet example why|Today ·/i)).toBeNull() // only the saved reason itself may show
+    for (const id of ['why-line', 'why-open', 'why-add-habit', 'daily-line', 'kept-card']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
+    expect(screen.queryByText(/Add a reason|Add a habit|A quiet example why|Today ·/i)).toBeNull()
+    expect(screen.getByTestId('money-card')).toBeTruthy()
+  })
+  it('Money kept stays off Home until it is set up', async () => {
+    await renderApp({ ...habitsSeed(), ...onboardedProfile({ before: { daysPerWeek: 7, timesPerDay: 1 } }) })
+    expect(screen.queryByTestId('money-card')).toBeNull()
   })
 
   it('Add tracker stays reachable from the drawer', async () => {
@@ -372,35 +385,61 @@ describe('You as six rows', () => {
 })
 
 describe('ring pager swipe, and how it shares Home with the edge swipe', () => {
+  const W = () => screen.getByTestId('hero-pager').props.snapToInterval
   const layoutAndScroll = async (x) => {
-    await fireEvent(screen.getByTestId('hero').children[0], 'layout', { nativeEvent: { layout: { width: 358, height: 200 } } })
-    await fireEvent.scroll(screen.getByTestId('hero-pager'), { nativeEvent: { contentOffset: { x, y: 0 }, contentSize: { width: 716, height: 200 }, layoutMeasurement: { width: 358, height: 200 } } })
+    await fireEvent.scroll(screen.getByTestId('hero-pager'), { nativeEvent: { contentOffset: { x, y: 0 }, contentSize: { width: W() * 3, height: 200 }, layoutMeasurement: { width: W(), height: 200 } } })
   }
+  const pageLabel = () => screen.getByTestId('hero-tabs').props.accessibilityLabel
   it('snaps to pages, one direction per drag, and the dots follow while dragging', async () => {
     await renderApp()
     const pager = screen.getByTestId('hero-pager')
     expect(pager.props.horizontal).toBe(true)
     expect(pager.props.directionalLockEnabled).toBe(true)
     expect(pager.props.pagingEnabled).toBe(true)
-    await layoutAndScroll(358)
-    expect(screen.getByTestId('hero-pager').props.snapToInterval).toBe(358)
-    expect(screen.getByTestId('pager-dot-1').props.accessibilityState.selected).toBe(true)
-    expect(screen.queryByTestId('ring-label')).toBeNull()
-    await layoutAndScroll(100) // dragging back past halfway shows page 1 again
-    expect(screen.getByTestId('pager-dot-0').props.accessibilityState.selected).toBe(true)
+    // ONLY the ring swipes: the pager is ring-sized, and the milestone pair and cards sit outside it.
+    expect(W()).toBeLessThan(300)
+    expect(within(screen.getByTestId('hero-pager')).queryByTestId('milestone-cards')).toBeNull()
+    expect(within(screen.getByTestId('hero-pager')).queryByTestId('home-cards')).toBeNull()
+    await layoutAndScroll(W())
+    expect(pageLabel()).toBe('Clean time, page 2 of 2')
+    await layoutAndScroll(W() * 0.3) // dragging back past halfway shows page 1 again
+    expect(pageLabel()).toBe('Clean time, page 1 of 2')
   })
 
   it('VoiceOver: swipe up/down on the dots moves between pages', async () => {
     await renderApp()
     await fireEvent(screen.getByTestId('hero-tabs'), 'accessibilityAction', { nativeEvent: { actionName: 'increment' } })
-    expect(screen.getByTestId('pager-dot-1').props.accessibilityState.selected).toBe(true)
+    expect(pageLabel()).toBe('Clean time, page 2 of 2')
+    await fireEvent(screen.getByTestId('hero-tabs'), 'accessibilityAction', { nativeEvent: { actionName: 'increment' } })
+    expect(pageLabel()).toBe('Clean time, page 2 of 2') // clamps
     await fireEvent(screen.getByTestId('hero-tabs'), 'accessibilityAction', { nativeEvent: { actionName: 'decrement' } })
-    expect(screen.getByTestId('pager-dot-0').props.accessibilityState.selected).toBe(true)
+    expect(pageLabel()).toBe('Clean time, page 1 of 2')
+  })
+
+  it('three pages when the time-back estimate is set: days, days + hours ("163d …h"), Time back hours', async () => {
+    await renderApp({ ...habitsSeed(), ...onboardedProfile({ before: { daysPerWeek: 7, timesPerDay: 1 } }) })
+    expect(pageLabel()).toBe('Clean time, page 1 of 3')
+    expect(screen.getByTestId('clean-time-value', { includeHiddenElements: true })).toHaveTextContent(/^163d \d+h$/)
+    expect(screen.getByTestId('ring-timeback-hours', { includeHiddenElements: true })).toHaveTextContent('160')
+    await press('pager-dot-2')
+    expect(pageLabel()).toBe('Clean time, page 3 of 3')
+  })
+
+  it('two pages without time back, and nothing milestone-related inside any ring page', async () => {
+    await renderApp()
+    expect(pageLabel()).toBe('Clean time, page 1 of 2')
+    expect(screen.queryByTestId('ring-timeback', { includeHiddenElements: true })).toBeNull()
+    const pager = screen.getByTestId('hero-pager')
+    expect(within(pager).queryByText(/milestone|days to|months|reached/i, { includeHiddenElements: true })).toBeNull()
+    expect(screen.getByTestId('ms-last')).toHaveTextContent(/Last milestone90 daysreached/)
+    expect(screen.getByTestId('ms-next')).toHaveTextContent(/Next6 monthsin 17 days/)
+    expect(screen.queryByTestId('ring-label')).toBeNull() // the old "X days to …" line is gone
   })
 
   it('pageAt clamps to the two pages', () => {
     const { pageAt } = require('../screens/home/HeroPager.jsx')
     expect([pageAt(0, 300), pageAt(140, 300), pageAt(160, 300), pageAt(900, 300), pageAt(-50, 300)]).toEqual([0, 0, 1, 1, 0])
+    expect([pageAt(900, 300, 3), pageAt(2000, 300, 3)]).toEqual([2, 2])
   })
 
   it('split: the edge strip owns drags that start in it, the ring pager is inset beyond it, vertical scroll can take the strip back', async () => {
@@ -433,34 +472,30 @@ describe('your reason on Home', () => {
     await renderApp()
     expect(screen.queryByTestId('home-reason')).toBeNull()
     expect(screen.queryByText(/reason/i)).toBeNull()
-    expect(screen.queryByTestId('hero-card')).toBeNull()
+    expect(screen.queryByTestId('why-card')).toBeNull()
     expect(screen.getByTestId('hero-tabs')).toBeTruthy()
   })
   it('regression: a "Your why" answer saved in setup shows in the card even with no reasons in the list', async () => {
     await renderApp({ ...habitsSeed(), ...onboardedProfile({ why: 'Setup words' }) })
-    expect(within(screen.getByTestId('hero-card')).getByTestId('home-reason-text')).toHaveTextContent('“Setup words”')
-    expect(within(screen.getByTestId('hero-card')).getByTestId('hero-tabs')).toBeTruthy()
+    expect(within(screen.getByTestId('why-card')).getByTestId('home-reason-text')).toHaveTextContent('“Setup words”')
+    expect(screen.getByTestId('why-card')).toHaveTextContent(/^Your why/)
+    expect(within(screen.getByTestId('why-card')).queryByTestId('hero-tabs')).toBeNull() // no dots inside
   })
   it('regression: a saved reason wins over the setup answer and shows in the card', async () => {
     await renderApp({ ...habitsSeed(), ...onboardedProfile({ why: 'Setup words' }), ...R([txt('a', 'Saved words', '2030-01-01T00:00:00.000Z')]) })
-    expect(within(screen.getByTestId('hero-card')).getByTestId('home-reason-text')).toHaveTextContent('“Saved words”')
+    expect(within(screen.getByTestId('why-card')).getByTestId('home-reason-text')).toHaveTextContent('“Saved words”')
   })
   it('locked reasons hide the setup answer on Home too', async () => {
     await renderApp({ ...habitsSeed(), ...onboardedProfile({ why: 'Setup words' }), ...R([], true) })
     expect(screen.queryByTestId('home-reason')).toBeNull()
-    expect(screen.queryByTestId('hero-card')).toBeNull()
+    expect(screen.queryByTestId('why-card')).toBeNull()
   })
-  it('shows the most recently added reason, fixed (not rotating, no "Today"), just above the next-milestone line', async () => {
+  it('shows the most recently added reason, fixed (not rotating, no "Today"), as the first card', async () => {
     await renderApp({ ...habitsSeed(), ...R([txt('a', 'Older words', '2030-01-01T00:00:00.000Z'), txt('b', 'Newest words', '2030-04-01T00:00:00.000Z'), txt('c', 'Middle words', '2030-02-01T00:00:00.000Z')]) })
     expect(screen.getByTestId('home-reason-text')).toHaveTextContent('“Newest words”')
     expect(screen.queryByText(/Today/)).toBeNull()
-    // Gemini layout: the reason sits in the card below the ring, with the page dots; the next-milestone line is inside the ring.
-    expect(within(screen.getByTestId('hero-card')).getByTestId('home-reason')).toBeTruthy()
-    expect(within(screen.getByTestId('hero-card')).getByTestId('hero-tabs')).toBeTruthy()
-    // The next-milestone line sits under the ring, never inside it (it clipped into the ring on iPhone).
-    expect(within(screen.getByTestId('hero-ring')).queryByTestId('ring-label')).toBeNull()
-    expect(within(screen.getByTestId('hero-ring')).queryByText(/days to/)).toBeNull()
-    expect(screen.getByTestId('ring-label')).toHaveTextContent(/days to/)
+    expect(screen.getByTestId('home-cards').children[0].props.testID).toBe('why-card')
+    expect(within(screen.getByTestId('hero-ring')).queryByText(/days to|milestone/)).toBeNull()
   })
   it('the same reason on another day', async () => {
     const seed = { ...habitsSeed(), ...R([txt('a', 'One', '2030-01-01T00:00:00.000Z'), txt('b', 'Two', '2030-03-01T00:00:00.000Z')]) }
@@ -490,9 +525,9 @@ describe('your reason on Home', () => {
     expect(screen.getByTestId('you-back')).toBeTruthy()
     expect(screen.getByTestId('reasons-row')).toBeTruthy()
   })
-  it('the Home limit still holds: the reason is a conditional part of the ring item', async () => {
+  it('the Home limit still holds: the reason is the first of the (at most five) cards', async () => {
     await renderApp({ ...habitsSeed(), ...R([txt('a', 'Some words', '2030-01-01T00:00:00.000Z')]) })
-    expect(HOME_ITEMS).toEqual(['home-title', 'hero', 'checkin-card', 'hold-hint'])
-    expect(within(screen.getByTestId('hero')).getByTestId('home-reason')).toBeTruthy()
+    expect(HOME_ITEMS).toEqual(['home-title', 'hero', 'home-cards', 'hold-hint'])
+    expect(within(screen.getByTestId('home-cards')).getByTestId('home-reason')).toBeTruthy()
   })
 })
