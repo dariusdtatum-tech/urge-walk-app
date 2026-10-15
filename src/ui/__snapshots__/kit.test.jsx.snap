@@ -594,7 +594,7 @@ exports[`component kit in dark Sheet matches its snapshot and uses only tokens a
             "backgroundColor": "#182b47",
             "borderTopLeftRadius": 24,
             "borderTopRightRadius": 24,
-            "maxHeight": "92%",
+            "maxHeight": 1294,
           }
         }
       >
@@ -1376,7 +1376,7 @@ exports[`component kit in light Sheet matches its snapshot and uses only tokens 
             "backgroundColor": "#fdfbf7",
             "borderTopLeftRadius": 24,
             "borderTopRightRadius": 24,
-            "maxHeight": "92%",
+            "maxHeight": 1294,
           }
         }
       >

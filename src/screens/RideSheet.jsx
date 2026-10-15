@@ -17,12 +17,17 @@ import { radius, size as sz, space, type, useTheme } from '../ui/theme.js'
 // "Ride it out": Walk (remembered length), Breathe (5 breaths) or Ground (5 senses, silent), plus a full-width "Just log it".
 // A typed note is never thrown away without asking: Back → Discard returns to the choices,
 // closing → Discard closes the sheet.
+// The sheet's cap comes from the window, not a percentage: a % maxHeight resolves
+// against the content-sized KeyboardAvoidingView and clipped the footer tip.
+export const sheetMaxHeight = (h, top = 0) => Math.round(h - Math.max(top, 24) - 16)
+
 export function RideSheet({ visible, onWalk, onBreathe, onGround, onLog, onClose }) {
   const storage = useStorage()
   const { c } = useTheme()
   const reduced = useReducedMotion()
   const insets = useSafeAreaInsets()
-  const stack = useWindowDimensions().fontScale > STACK_FONT_SCALE
+  const win = useWindowDimensions()
+  const stack = win.fontScale > STACK_FONT_SCALE
   const [logging, setLogging] = useState(false)
   const [tags, setTags] = useState([])
   const [note, setNote] = useState('')
@@ -43,7 +48,7 @@ export function RideSheet({ visible, onWalk, onBreathe, onGround, onLog, onClose
         <Pressable style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.overlay }}
           onPress={close} accessibilityLabel="Close" accessibilityRole="button" testID="ride-backdrop" />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-          <View testID="ride-sheet" accessibilityViewIsModal style={{ backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: '92%' }}>
+          <View testID="ride-sheet" accessibilityViewIsModal style={{ backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: sheetMaxHeight(win.height, insets.top) }}>
             <ScrollView contentContainerStyle={{ padding: space.sheet, paddingBottom: 34 + insets.bottom, gap: space.section }} keyboardShouldPersistTaps="handled">
               <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: c.grab }} />
               <T accessibilityRole="header" font="serif" size={type.rideSheetTitle} color={c.title}>Ride it out</T>
