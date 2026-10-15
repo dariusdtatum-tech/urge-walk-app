@@ -31,6 +31,8 @@ import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 import { CRISIS, CrisisSheet } from './Crisis.jsx'
 import { ContactsSheet, ReachOut } from './ReachOut.jsx'
 import { ReasonsSheet } from './Reasons.jsx'
+import { DailyVerseCard } from './DailyVerse.jsx'
+import { loadVerseEnabled, saveVerseEnabled } from '../lib/verse.js'
 import { MoneySheet } from './MoneySheet.jsx'
 import { fmtMoney, loadGoal, moneyOn, moneyPerTime } from '../lib/money.js'
 import { loadReasons } from '../lib/reasons.js'
@@ -78,6 +80,8 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [showContacts, setShowContacts] = useState(false)
   const [showReasons, setShowReasons] = useState(false)
   const [showMoney, setShowMoney] = useState(false)
+  const [verseOn, setVerseOn] = useState(() => loadVerseEnabled(storage))
+  const [verseFade, setVerseFade] = useState(false)
   const reasonCount = loadReasons(storage).length
   const [contactsVer, setContactsVer] = useState(0)
   const people = loadContacts(storage)
@@ -143,6 +147,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
         <Notice text={notice} onDismiss={() => setNotice('')} />
         <ResetToast editor={editor} />
 
+        {verseOn ? <DailyVerseCard date={new Date(now)} fadeIn={verseFade} /> : null}
         <GroupTitle>Help now</GroupTitle>
         <Row title="Crisis resources" sub="988, SAMHSA helpline, 911" testID="crisis-row" onPress={() => setShowCrisis(true)} />
         <Card><ReachOut key={contactsVer} testID="you-reach" title={null} onSetup={() => setShowContacts(true)} /></Card>
@@ -179,6 +184,8 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
 
         <GroupTitle>Appearance</GroupTitle>
         <Seg items={THEMES} value={theme} onChange={onTheme} label="Appearance" testID="theme" />
+        <ToggleRow title="Daily verse" sub="One short verse a day on endurance and freedom." value={verseOn} testID="verse-toggle"
+          onChange={(on) => { saveVerseEnabled(on, storage); setVerseFade(on); setVerseOn(on) }} />
 
         <GroupTitle>Your data</GroupTitle>
         <Row title="Backup & restore" sub={lastBackupLabel(loadBackupMeta(storage), now)} testID="backup-row" onPress={onOpenBackup} />

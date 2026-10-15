@@ -380,3 +380,39 @@ describe('phase 1 follow-ups', () => {
     expect(loadWalks(storage).walks.find((w) => w.tags)?.tags).toEqual(['home', 'stressed'])
   })
 })
+
+describe('daily verse (You, opt-in)', () => {
+  test('off by default: no card on You or Home', async () => {
+    await renderApp()
+    expect(screen.queryByTestId('daily-verse')).toBeNull()
+    await tab('You')
+    expect(screen.queryByTestId('daily-verse')).toBeNull()
+    expect(screen.getByTestId('verse-toggle').props.value).toBe(false)
+  })
+
+  test('toggle on: card at the top of You with one combined label; never on Home or Ride it out', async () => {
+    const { storage } = await renderApp()
+    await tab('You')
+    await fireEvent(screen.getByTestId('verse-toggle'), 'valueChange', true)
+    const card = screen.getByTestId('daily-verse')
+    const { verseFor, verseLabel, refLine } = require('../lib/verse.js')
+    const v = verseFor(new Date(T0))
+    expect(card.props.accessibilityLabel).toBe(verseLabel(v))
+    expect(card.props.accessible).toBe(true)
+    expect(screen.getByTestId('daily-verse-text')).toHaveTextContent(v.text)
+    expect(screen.getByTestId('daily-verse-ref')).toHaveTextContent(refLine(v))
+    expect(JSON.parse(storage.getItem('urgewalk.v1.versePrefs'))).toEqual({ enabled: true })
+    await tab('Home')
+    expect(screen.queryByTestId('daily-verse')).toBeNull()
+    await press('ride-button')
+    expect(screen.queryByTestId('daily-verse')).toBeNull()
+  })
+
+  test('toggle off hides it', async () => {
+    await renderApp({ storage: memoryStorage({ ...habitsSeed(), ...onboardedProfile(), 'urgewalk.v1.versePrefs': JSON.stringify({ enabled: true }) }) })
+    await tab('You')
+    expect(screen.getByTestId('daily-verse')).toBeTruthy()
+    await fireEvent(screen.getByTestId('verse-toggle'), 'valueChange', false)
+    expect(screen.queryByTestId('daily-verse')).toBeNull()
+  })
+})
