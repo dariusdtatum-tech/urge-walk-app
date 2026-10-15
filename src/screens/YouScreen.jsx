@@ -17,6 +17,7 @@ import { Notice } from '../ui/Row.jsx'
 import { HairlineRow as Row, HeroStat, RowGroup, SectionLabel } from '../ui/kit.jsx'
 import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { useStorage } from '../ui/StorageContext.js'
+import { useBottomSpace } from '../ui/layout.js'
 import { T } from '../ui/Text.jsx'
 import { space, type, useTheme } from '../ui/theme.js'
 import { MilestonesList } from './home/Milestones.jsx'
@@ -71,6 +72,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const storage = useStorage()
   const device = useDevice()
   const { c } = useTheme()
+  const bottom = useBottomSpace()
   const today = todayISO(new Date(now))
   const [milestones, setMilestones] = useState(() => loadMilestones(storage))
   const editor = useTrackerEditor({ today, now: clock, onOpenBackup, onMilestones: (next) => { saveMilestones(next, storage); setMilestones(next) } })
@@ -182,7 +184,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: 10 }} testID="you">
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: bottom, gap: 10 }} testID="you">
         {Section ? (
           <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -8 }}>
             <HeaderButton label="‹ You" accessibilityLabel="Back to You" onPress={() => setSection(null)} testID="you-back" />

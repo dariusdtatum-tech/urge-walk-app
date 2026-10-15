@@ -23,5 +23,7 @@ export const size = {
   rideBar: 56, rideBarIcon: 32, rideTile: 96,
   ring: 164, ringStroke: 8,
   tabCenter: 56, tabWave: 26,
+  // The tab bar's drawn height above the safe area, including the raised Ride it out button (26pt lift).
+  tabBar: 84,
 }
 export const radius = { card: 16, row: 14, button: 12 }

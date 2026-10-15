@@ -143,3 +143,14 @@ test('no emoji in user-facing source: screens, copy, notifications, verses', () 
   const hits = files('src').concat('app.json').flatMap((f) => readFileSync(f, 'utf8').split('\n').map((l, i) => (EMOJI.test(l) ? `${f}:${i + 1}` : null)).filter(Boolean))
   expect(hits).toEqual([])
 })
+
+test('Progress, Track Log and Journal pad the bottom by tab bar + safe area + 24', async () => {
+  const { bottomSpace } = require('../ui/layout.js')
+  const { size } = require('../ui/tokens.js')
+  expect(bottomSpace(34)).toBe(size.tabBar + 34 + 24)
+  const pad = (id) => StyleSheet.flatten(screen.getByTestId(id).props.contentContainerStyle).paddingBottom
+  await renderApp('light', { ...habitsSeed(), 'urgewalk.v1.walks': JSON.stringify({ version: 1, walks: [buildLoggedRecord({ id: 'w', at: T0, note: '', result: 'yes' })] }) })
+  await tab('Track'); expect(pad('log')).toBe(bottomSpace(0))
+  await press('track-journal'); expect(pad('journal')).toBe(bottomSpace(0))
+  await tab('You'); await press('you-progress'); expect(pad('you')).toBe(bottomSpace(0))
+})

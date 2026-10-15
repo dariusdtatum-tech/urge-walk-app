@@ -15,6 +15,7 @@ import { Notice } from '../ui/Row.jsx'
 import { LeafIcon, PathIcon, WaveIcon } from '../ui/Icons.jsx'
 import { MoodDot, RowGroup, SectionLabel } from '../ui/kit.jsx'
 import { useStorage } from '../ui/StorageContext.js'
+import { useBottomSpace } from '../ui/layout.js'
 import { T } from '../ui/Text.jsx'
 import { size as sz, space, type, useTheme } from '../ui/theme.js'
 import { ResultWord } from './LogScreen.jsx'
@@ -28,6 +29,7 @@ const NOTE_ICONS = { walk: PathIcon, breathe: WaveIcon, ground: LeafIcon, logged
 export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChange = () => {}, header = null }) {
   const storage = useStorage()
   const { c, fonts } = useTheme()
+  const bottom = useBottomSpace()
   const today = todayISO(new Date(now))
   const [initial] = useState(() => ({ ...loadJournal(storage), walks: loadWalks(storage).walks, draft: loadDraft(storage) }))
   const [entries, setEntries] = useState(initial.entries)
@@ -60,7 +62,7 @@ export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChan
   const groups = groupByDay(shown, today, (item) => item.time)
 
   return (
-    <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: 14 }} testID="journal" keyboardShouldPersistTaps="handled">
+    <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: bottom, gap: 14 }} testID="journal" keyboardShouldPersistTaps="handled">
       {header ?? <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Journal</T>}
       <Notice text={notice} onDismiss={() => setNotice('')} />
       {feed.length === 0 ? (

@@ -18,6 +18,7 @@ import { Notice } from '../ui/Row.jsx'
 import { RowGroup, SectionLabel } from '../ui/kit.jsx'
 import { Sheet } from '../ui/Sheet.jsx'
 import { useStorage } from '../ui/StorageContext.js'
+import { useBottomSpace } from '../ui/layout.js'
 import { T } from '../ui/Text.jsx'
 import { size as sz, space, type, useTheme } from '../ui/theme.js'
 
@@ -69,6 +70,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
   const storage = useStorage()
   const device = useDevice()
   const { c } = useTheme()
+  const bottom = useBottomSpace()
   const colors = useOutcomeColors()
   const today = todayISO(new Date(now))
   const [initial] = useState(() => loadWalks(storage))
@@ -85,7 +87,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
 
   if (walks.length === 0) {
     return (
-      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="log">
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: bottom, gap: space.section }} testID="log">
         {header ?? <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Log</T>}
         {insights}
         <Notice text={notice} onDismiss={() => setNotice('')} />
@@ -105,7 +107,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="log">
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: bottom, gap: space.section }} testID="log">
         {header ?? <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Log</T>}
         <Notice text={notice} onDismiss={() => setNotice('')} />
         <View testID="summary" style={{ gap: 6 }}>
