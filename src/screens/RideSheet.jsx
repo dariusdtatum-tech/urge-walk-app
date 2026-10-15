@@ -14,7 +14,7 @@ import { ReachOut } from './ReachOut.jsx'
 import { T } from '../ui/Text.jsx'
 import { radius, size as sz, space, type, useTheme } from '../ui/theme.js'
 
-// "Ride it out": Walk (remembered length), Breathe (1 min) or Ground (5 senses, silent), plus a full-width "Just log it".
+// "Ride it out": Walk (remembered length), Breathe (5 breaths) or Ground (5 senses, silent), plus a full-width "Just log it".
 // A typed note is never thrown away without asking: Back → Discard returns to the choices,
 // closing → Discard closes the sheet.
 export function RideSheet({ visible, onWalk, onBreathe, onGround, onLog, onClose }) {
@@ -59,12 +59,12 @@ export function RideSheet({ visible, onWalk, onBreathe, onGround, onLog, onClose
                         <T size={14} color={c.onActionSoft}>{walkLabel}</T>
                       </View>
                     </Pressable>
-                    <Pressable onPress={onBreathe} testID="ride-breathe" accessibilityRole="button" accessibilityLabel="Breathe for 1 minute"
+                    <Pressable onPress={onBreathe} testID="ride-breathe" accessibilityRole="button" accessibilityLabel="Breathe, 5 slow breaths"
                       style={{ flex: 1, minHeight: sz.rideTile, borderRadius: radius.card, backgroundColor: c.tileAlt, padding: space.card, justifyContent: 'space-between' }}>
                       <WaveIcon color={c.onTileAlt} size={type.rideTileIcon} />
                       <View>
                         <T font="bold" size={type.rideTile} color={c.onTileAlt}>Breathe</T>
-                        <T size={14} color={c.onTileAlt}>1 min</T>
+                        <T size={14} color={c.onTileAlt}>5 breaths</T>
                       </View>
                     </Pressable>
                   </View>

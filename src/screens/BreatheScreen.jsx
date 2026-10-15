@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { Animated, Easing, ScrollView, View } from 'react-native'
 import { useKeepAwake } from 'expo-keep-awake'
-import TOOLS from '../content/tools.json'
 import { BREATH, breathPhase } from '../lib/breathe.js'
 import { BREATHE_LINES } from '../lib/encouragement.js'
 import { loadProfile } from '../lib/profile.js'
@@ -16,7 +15,8 @@ import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
 import { MAX_SCALE, space, type, useTheme } from '../ui/theme.js'
 
-export const PHASE_WORDS = TOOLS.breathe.words
+// The phase words are the app's own (tools.json carries timing only).
+export const PHASE_WORDS = { in: 'Breathe in', hold: 'Hold', out: 'Breathe out' }
 const ORB = 220
 const SMALL = 0.577
 
@@ -25,7 +25,7 @@ function KeepAwake() {
   return null
 }
 
-// One minute of guided breathing: in 4s, hold 3s, out 6s. A light haptic when the breath turns
+// Five guided breaths (about a minute): in 4s, hold 3s, out 6s, from tools.json. A light haptic when the breath turns
 // (in / out), never on the hold. Its own breath-only lines. Then the same check-in as a walk.
 export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
   const storage = useStorage()

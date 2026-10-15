@@ -2,7 +2,10 @@
 // Timing lives in content/tools.json, shared with the website's /breathe page.
 import TOOLS from '../content/tools.json'
 
-export const BREATH = { inMs: TOOLS.breathe.inMs, holdMs: TOOLS.breathe.holdMs, outMs: TOOLS.breathe.outMs }
+export const BREATH = { inMs: TOOLS.breathe.inhale * 1000, holdMs: TOOLS.breathe.hold * 1000, outMs: TOOLS.breathe.exhale * 1000 }
+export const BREATH_CYCLES = TOOLS.breathe.cycles
+// One session = `cycles` full breaths (5 × 13s = 65s).
+export const BREATHE_SESSION_SECONDS = BREATH_CYCLES * (TOOLS.breathe.inhale + TOOLS.breathe.hold + TOOLS.breathe.exhale)
 const CYCLE = BREATH.inMs + BREATH.holdMs + BREATH.outMs
 
 // Where we are in the breath after `ms`: 'in' (growing), 'hold' (full, still) or 'out' (shrinking).

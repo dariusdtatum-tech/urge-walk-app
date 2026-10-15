@@ -1,0 +1,15 @@
+{
+  "version": 1,
+  "breathe": { "inhale": 4, "hold": 3, "exhale": 6, "cycles": 5 },
+  "ground": {
+    "intro": "Let’s come back to right here. Five small steps, one at a time. Go as slowly as you like.",
+    "steps": [
+      { "count": 5, "sense": "see", "line": "5 things you can see", "prompt": "Look around slowly. Name five things you can see, big or small." },
+      { "count": 4, "sense": "touch", "line": "4 things you can touch", "prompt": "Notice four things you can feel: your feet on the floor, your clothes, the chair, the air." },
+      { "count": 3, "sense": "hear", "line": "3 things you can hear", "prompt": "Listen for three sounds, near or far. Let them be whatever they are." },
+      { "count": 2, "sense": "smell", "line": "2 things you can smell", "prompt": "Find two smells. If nothing comes, just notice the air as you breathe in." },
+      { "count": 1, "sense": "taste", "line": "1 thing you can taste", "prompt": "Notice one taste in your mouth right now, or take a sip of water." }
+    ],
+    "finish": "You’re here, right now. Notice how you feel."
+  }
+}

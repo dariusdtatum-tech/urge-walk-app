@@ -7,7 +7,7 @@
     { "id": "ride-ground", "label": "Ride it out: Ground" },
     { "id": "log-urge", "label": "Logging urges (Just log it)" },
     { "id": "counters", "label": "Day counters and milestones" },
-    { "id": "urge-map", "label": "The Urge Map" },
+    { "id": "urge-map", "label": "The weekly Urge Map" },
     { "id": "check-in", "label": "Daily check-in" },
     { "id": "follow-up", "label": "“How did it go?” follow-up" },
     { "id": "reasons", "label": "Your reasons" },

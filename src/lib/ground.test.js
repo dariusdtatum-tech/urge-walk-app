@@ -4,21 +4,22 @@ import { BREATH } from './breathe.js'
 import { GROUND, GROUND_LINES } from './ground.js'
 import { BREATHE_SECONDS, buildGroundRecord, sanitizeWalks } from './walkStorage.js'
 
-const NO_MOTION = /walk|step|mov|going on|keep going|run|stride|pace/i
+// No walking or motion words. ("step" is allowed here: the site's intro says "Five small steps", meaning parts of the exercise.)
+const NO_MOTION = /walk|mov|going on|keep going|\brun|stride|pace|footstep|step (out|outside)/i
 
 describe('shared tools.json', () => {
-  it('Breathe timing comes from tools.json: in 4, hold 3, out 6, one minute', () => {
+  it('Breathe timing comes from tools.json: in 4, hold 3, out 6, five cycles', () => {
     expect(BREATH).toEqual({ inMs: 4000, holdMs: 3000, outMs: 6000 })
-    expect(TOOLS.breathe.seconds).toBe(60)
-    expect(BREATHE_SECONDS).toBe(60)
+    expect(TOOLS.breathe.cycles).toBe(5)
+    expect(BREATHE_SECONDS).toBe(65)
   })
   it('Ground is 5-4-3-2-1 across the five senses', () => {
     expect(GROUND.steps.map((s) => s.count)).toEqual([5, 4, 3, 2, 1])
     expect(GROUND.steps.map((s) => s.sense)).toEqual(['see', 'touch', 'hear', 'smell', 'taste'])
-    for (const s of GROUND.steps) expect(s.line).toMatch(new RegExp(`^Name ${s.count} thing`))
+    for (const s of GROUND.steps) { expect(s.line).toMatch(new RegExp(`^${s.count} thing`)); expect(s.prompt.length).toBeGreaterThan(10) }
   })
   it('no Ground or Breathe words mention walking or motion', () => {
-    const all = [GROUND.intro, GROUND.outro, GROUND.title, GROUND.notePlaceholder, GROUND.noteHelp, ...GROUND.steps.flatMap((s) => [s.line, s.hint]), ...Object.values(TOOLS.breathe.words)]
+    const all = [GROUND.intro, GROUND.finish, GROUND.title, GROUND.notePlaceholder, GROUND.noteHelp, ...GROUND.steps.flatMap((s) => [s.line, s.prompt]), 'Breathe in', 'Hold', 'Breathe out']
     for (const l of all) expect(l).not.toMatch(NO_MOTION)
   })
   it('one line per screen: intro, five senses, outro', () => {

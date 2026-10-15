@@ -105,7 +105,7 @@ export function plannedLabel(w) {
 // "Finished" field in the details sheet.
 export function finishedLabel(w) {
   if (kindOf(w) === 'logged') return 'Rode it out'
-  if (kindOf(w) === 'breathe') return w.endedEarly ? 'Ended early' : 'Full minute'
+  if (kindOf(w) === 'breathe') return w.endedEarly ? 'Ended early' : 'All 5 breaths'
   if (kindOf(w) === 'ground') return w.endedEarly ? 'Ended early' : 'All five senses'
   if (w.plannedMinutes == null) return 'Open walk'
   return w.endedEarly ? 'Ended early' : 'Full walk'

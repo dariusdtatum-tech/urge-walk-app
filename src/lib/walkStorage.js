@@ -14,7 +14,7 @@ export const RESULTS = ['yes', 'kinda', 'no']
 // What kind of urge record: a walk, a minute of breathing, a Ground (5-4-3-2-1 senses), or an urge just logged as ridden out.
 // Records saved before kinds existed have no `kind` and are all walks.
 export const KINDS = ['walk', 'breathe', 'ground', 'logged']
-export const BREATHE_SECONDS = TOOLS.breathe.seconds
+export const BREATHE_SECONDS = TOOLS.breathe.cycles * (TOOLS.breathe.inhale + TOOLS.breathe.hold + TOOLS.breathe.exhale)
 export const MAX_NOTE_LENGTH = 280
 export const FOLLOWUP_VALUES = ['passed', 'tough', 'skip']
 
@@ -66,7 +66,7 @@ function breatheRecord({ id, startedAt, endedAt, result, note }) {
     startedAt: new Date(startedAt).toISOString(),
     endedAt: new Date(endedAt).toISOString(),
     mode: 'timed',
-    plannedMinutes: BREATHE_SECONDS / 60,
+    plannedMinutes: Math.round(BREATHE_SECONDS / 60),
     actualSeconds,
     endedEarly: actualSeconds < BREATHE_SECONDS,
     result: RESULTS.includes(result) ? result : null,

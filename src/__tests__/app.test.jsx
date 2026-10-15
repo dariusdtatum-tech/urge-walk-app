@@ -239,11 +239,11 @@ describe('Ground', () => {
     await fireEvent.changeText(screen.getByTestId('ground-note'), 'lamp')
     for (let i = 0; i < 5; i++) { clock.advance(20000); await fireEvent.press(screen.getByTestId('ground-next')); if (screen.queryByTestId('ground-text')) seen.push(screen.getByTestId('ground-text').props.children) }
     expect(seen).toEqual([
-      'Let’s notice what’s around you, one sense at a time. Tap to continue.',
-      'Name 5 things you can see.', 'Name 4 things you can feel.', 'Name 3 things you can hear.',
-      'Name 2 things you can smell.', 'Name 1 thing you can taste.', 'You’re here. Take your time.',
+      'Let’s come back to right here. Five small steps, one at a time. Go as slowly as you like.',
+      '5 things you can see', '4 things you can touch', '3 things you can hear',
+      '2 things you can smell', '1 thing you can taste', 'You’re here, right now. Notice how you feel.',
     ])
-    for (const l of seen) expect(l).not.toMatch(/walk|step|mov|keep going|pace/i)
+    for (const l of seen) expect(l).not.toMatch(/walk|mov|keep going|pace|stride/i)
     expect(screen.getByTestId('ground-next')).toHaveTextContent('Done')
     await fireEvent.press(screen.getByTestId('ground-next'))
     expect(screen.getByTestId('ground-done')).toBeTruthy()

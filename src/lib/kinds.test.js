@@ -43,9 +43,9 @@ describe('kinds on saved records', () => {
     const w = finishWalk(startWalk(10, 0, { id: 'a', messageOffset: 0 }), 600_000)
     expect(buildWalkRecord(w).kind).toBe('walk')
   })
-  it('breathe records: 1 minute, timed, clamped, outcome kept', () => {
-    const full = buildBreatheRecord({ id: 'b', startedAt: 0, endedAt: 60_000, result: 'kinda', note: ' slow ' })
-    expect(full).toMatchObject({ id: 'b', kind: 'breathe', mode: 'timed', plannedMinutes: 1, actualSeconds: 60, endedEarly: false, result: 'kinda', note: 'slow' })
+  it('breathe records: 5 breaths (65s), timed, clamped, outcome kept', () => {
+    const full = buildBreatheRecord({ id: 'b', startedAt: 0, endedAt: 65_000, result: 'kinda', note: ' slow ' })
+    expect(full).toMatchObject({ id: 'b', kind: 'breathe', mode: 'timed', plannedMinutes: 1, actualSeconds: 65, endedEarly: false, result: 'kinda', note: 'slow' })
     const early = buildBreatheRecord({ startedAt: 0, endedAt: 20_400 })
     expect(early).toMatchObject({ actualSeconds: 20, endedEarly: true, result: null })
     expect(buildBreatheRecord({ startedAt: 0, endedAt: 999_000 }).actualSeconds).toBe(BREATHE_SECONDS)
@@ -84,10 +84,10 @@ describe('stats count urges ridden out separately from walks', () => {
   it('list labels per kind', () => {
     const [walk, breathe, logged] = [list[0], list[1], list[2]]
     expect(walkSummaryLabel(walk)).toBe('10 min walk')
-    expect(walkSummaryLabel(breathe)).toBe('Breathed · 1 min')
+    expect(walkSummaryLabel(breathe)).toBe('Breathed · 1 min 5 sec')
     expect(walkSummaryLabel(logged)).toBe('Rode it out · logged')
     expect([plannedLabel(logged), finishedLabel(logged)]).toEqual(['Just logged', 'Rode it out'])
-    expect(finishedLabel(breathe)).toBe('Full minute')
+    expect(finishedLabel(breathe)).toBe('All 5 breaths')
     expect(finishedLabel({ ...breathe, endedEarly: true })).toBe('Ended early')
   })
 })
@@ -126,8 +126,8 @@ describe('breathing timing', () => {
     expect(BREATH).toEqual({ inMs: 4000, holdMs: 3000, outMs: 6000 })
     expect([0, 3999, 4000, 5500, 6999, 7000, 12999, 13000].map(breathPhase)).toEqual(['in', 'in', 'hold', 'hold', 'hold', 'out', 'out', 'in'])
   })
-  it('about 5.5 breaths in the minute', () => {
-    expect(60_000 / (BREATH.inMs + BREATH.holdMs + BREATH.outMs)).toBeCloseTo(4.62, 1)
+  it('five full breaths make one session (65s)', () => {
+    expect(BREATHE_SECONDS * 1000 / (BREATH.inMs + BREATH.holdMs + BREATH.outMs)).toBe(5)
   })
 })
 
