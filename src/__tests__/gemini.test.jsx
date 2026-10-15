@@ -106,3 +106,17 @@ describe('top inset', () => {
     expect(topInset(0, 'web')).toBe(59)
   })
 })
+
+describe('Track > Your walks range', () => {
+  test('a compact right-aligned pill (Week / Month / All), each segment still 44pt', async () => {
+    await renderApp()
+    await tab('track')
+    const st = StyleSheet.flatten(screen.getByTestId('range').props.style)
+    expect(st.alignSelf).toBe('flex-end')
+    expect(screen.getByTestId('range-all')).toHaveTextContent('All')
+    expect(screen.getByTestId('range-all').props.accessibilityLabel).toBe('All time')
+    expect(StyleSheet.flatten(screen.getByTestId('range-week').props.style).minHeight).toBe(44)
+    expect(screen.getByTestId('chip-avg')).toHaveTextContent(/Avg walk/)
+    expect(screen.queryByText(/Streak/)).toBeNull()
+  })
+})

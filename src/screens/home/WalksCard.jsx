@@ -31,8 +31,10 @@ export function WalksCard({ walks, range, onRange, now, since }) {
   ]
   return (
     <Card testID="walks-card">
-      <T accessibilityRole="header" font="serif" size={24} color={c.title}>Your walks</T>
-      <Seg items={RANGE_IDS.map((id) => ({ id, label: RANGES[id].name }))} value={range} onChange={onRange} label="Walks range" testID="range" small />
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+        <T accessibilityRole="header" font="serif" size={24} color={c.title} style={{ flex: 1, minWidth: 120 }}>Your walks</T>
+        <Seg items={RANGE_IDS.map((id) => ({ id, label: id === 'all' ? 'All' : RANGES[id].name, a11y: RANGES[id].name }))} value={range} onChange={onRange} label="Walks range" testID="range" compact />
+      </View>
       <View style={{ flexDirection: 'row', gap: 8 }}>
         {chips.map((ch) => (
           <View key={ch.id} testID={`chip-${ch.id}`} accessible accessibilityLabel={ch.a11y ?? `${ch.n} ${ch.label}${ch.sub ? `, ${ch.sub}` : ''}`}

@@ -3,20 +3,22 @@ import { T } from './Text.jsx'
 import { MAX_SCALE, useTheme } from './theme.js'
 
 // Segmented choice (Week / Month / All time, System / Light / Dark…). Each segment is 44pt.
-export function Seg({ items, value, onChange, label, testID, small = false }) {
+// `compact`: a small right-aligned header pill (Track → Your walks range) that doesn't compete with the
+// screen's own switcher. Still 44pt tall per segment.
+export function Seg({ items, value, onChange, label, testID, small = false, compact = false }) {
   const { c } = useTheme()
   // 4+ segments share one row: cap text growth like the tab bar so labels don't clip at 2x.
   const max = items.length >= 4 ? MAX_SCALE.tab : undefined
   return (
     <View accessibilityRole="radiogroup" accessibilityLabel={label} testID={testID}
-      style={{ flexDirection: 'row', backgroundColor: c.seg, borderRadius: 14, padding: 4, gap: 4 }}>
+      style={{ flexDirection: 'row', backgroundColor: c.seg, borderRadius: compact ? 24 : 14, padding: compact ? 2 : 4, gap: compact ? 2 : 4, alignSelf: compact ? 'flex-end' : 'stretch' }}>
       {items.map((it) => {
         const on = value === it.id
         return (
           <Pressable key={String(it.id)} onPress={() => onChange(it.id)} accessibilityRole="radio" accessibilityState={{ checked: on }}
             accessibilityLabel={it.a11y ?? it.label} testID={testID ? `${testID}-${it.id}` : undefined}
-            style={{ flex: 1, minHeight: 44, paddingHorizontal: 6, borderRadius: 10, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? c.action : 'transparent' }}>
-            <T font="semibold" size={small ? 14 : 15} max={max} color={on ? c.onAction : c.mutedSand}>{it.label}</T>
+            style={{ flex: compact ? 0 : 1, minHeight: 44, paddingHorizontal: compact ? 12 : 6, borderRadius: compact ? 22 : 10, alignItems: 'center', justifyContent: 'center', backgroundColor: on ? c.action : 'transparent' }}>
+            <T font="semibold" size={compact ? 13 : small ? 14 : 15} max={max} color={on ? c.onAction : c.mutedSand}>{it.label}</T>
             {it.sub ? <T size={12} max={max} color={on ? c.onActionSoft : c.mutedSand}>{it.sub}</T> : null}
           </Pressable>
         )
