@@ -69,7 +69,7 @@ function answers(p) {
 
 // You: help now, trackers + milestones, walk length, time back, your answers + Redo setup,
 // Appearance, Backup & restore, a safe Reset, and the Privacy / Terms / Support links.
-export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup, onRedo, onErased, onAppLock = () => {} }) {
+export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup, onRedo, onErased, onAppLock = () => {}, health = [] }) {
   const storage = useStorage()
   const device = useDevice()
   const { c } = useTheme()
@@ -164,6 +164,11 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
       <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: 10 }} testID="you">
         <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>You</T>
         <Notice text={notice} onDismiss={() => setNotice('')} />
+        {health.map((h) => (
+          <Row key={h.id} title={h.title} sub={h.action ? `${h.sub} ${h.action}.` : h.sub} testID={`health-${h.id}`}
+            chevron={h.action ? '›' : ''} accessibilityRole={h.action ? 'button' : 'text'}
+            onPress={h.action ? () => device.openSettings() : undefined} />
+        ))}
         <ResetToast editor={editor} />
 
         {verseOn ? <DailyVerseCard date={new Date(now)} fadeIn={verseFade} /> : null}

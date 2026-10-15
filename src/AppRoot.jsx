@@ -19,6 +19,9 @@ import { loadProfile } from './lib/profile.js'
 import { LOCK_ERRORS, loadAppLock, lockView } from './lib/appLock.js'
 import { LockCover } from './screens/LockCover.jsx'
 import { BreatheScreen } from './screens/BreatheScreen.jsx'
+import { loadReminder } from './lib/checkin.js'
+import { planSelfCheck, probeStorage } from './lib/selfCheck.js'
+import { ScreenBoundary } from './ui/ScreenBoundary.jsx'
 import { GroundScreen } from './screens/GroundScreen.jsx'
 import { BackupScreen } from './screens/BackupScreen.jsx'
 import { HomeScreen } from './screens/HomeScreen.jsx'
@@ -125,6 +128,21 @@ function Shell({ clock, theme, onTheme }) {
 
   const goTo = useCallback((t) => { setFocusWalkId(null); setBackup(false); setTab(t); setNow(clock()); setDataVer((v) => v + 1) }, [clock])
   const backHome = useCallback(() => { setScreen('tabs'); goTo('home') }, [goTo])
+  // Launch self-check: at launch and each time the app comes back. Quiet: fixes what it can, shows one calm row in You otherwise.
+  const [health, setHealth] = useState([])
+  const runSelfCheck = useCallback(async () => {
+    const storageOk = probeStorage(storage, clock())
+    const reminder = loadReminder(storage)
+    const status = await device.notificationStatus().catch(() => null)
+    const plan = planSelfCheck({ reminder, status, storageOk })
+    if (plan.reschedule) device.syncCheckinReminder(reminder)
+    setHealth(plan.issues)
+  }, [storage, clock, device])
+  useEffect(() => {
+    runSelfCheck()
+    const sub = AppState.addEventListener?.('change', (s) => { if (s === 'active') runSelfCheck() })
+    return () => sub?.remove?.()
+  }, [runSelfCheck])
   const exitWalk = useCallback(() => setScreen((s) => (s === 'walk' ? 'tabs' : s)), [])
 
   function startWalk() {
@@ -237,7 +255,7 @@ function Shell({ clock, theme, onTheme }) {
   else {
     body = (
       <YouScreen key={dataVer} now={now} clock={clock} theme={theme} onTheme={onTheme} onOpenBackup={openBackup}
-        onRedo={() => setOnboarding('redo')} onAppLock={setLockOn}
+        onRedo={() => setOnboarding('redo')} onAppLock={setLockOn} health={health}
         onErased={() => { onTheme('system'); setToast(null); setScreen('tabs'); setTab('home'); setBackup(false); setOnboarding('new') }} />
     )
   }
@@ -246,7 +264,7 @@ function Shell({ clock, theme, onTheme }) {
   return (
     <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-      <View style={{ flex: 1 }}>{body}</View>
+      <View style={{ flex: 1 }}><ScreenBoundary key={`${screen}-${tab}-${backup}`} onHome={() => { setBackup(false); backHome() }}>{body}</ScreenBoundary></View>
       {toast && screen === 'tabs' && (
         <View testID="toast" accessibilityLiveRegion="polite" style={{ position: 'absolute', left: 16, right: 16, bottom: 100 + insets.bottom, backgroundColor: c.toastBg, borderRadius: 14, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>
           <T size={15} color={c.toastText} style={{ flex: 1 }}>{toast.text}</T>
