@@ -7,6 +7,7 @@ import { cleanDays, shortDate } from '../lib/homeStats.js'
 import { loadMilestones, ringLabel, ringSegment, saveMilestones, syncMilestones } from '../lib/milestones.js'
 import { identityLine, loadProfile } from '../lib/profile.js'
 import { loadWalks } from '../lib/walkStorage.js'
+import { loadVerseEnabled } from '../lib/verse.js'
 import { Button } from '../ui/Button.jsx'
 import { WaveIcon } from '../ui/Icons.jsx'
 import { Notice } from '../ui/Row.jsx'
@@ -28,7 +29,7 @@ import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 //   1. the title, which is the tracker switcher (opens the left drawer)
 //   2. Ride it out
 //   3. the ring (two-page hero with the daily line / clean time + milestone cards)
-//   4. the "Your why" area: the why line and "+ Add a habit" while there's one tracker
+//   4. the "Your why" area: the why line, the daily verse when it's on, and "+ Add a habit" while there's one tracker
 //   5. check-in
 // Short-lived helpers (undo-reset banners, notices, the first-week card) come and go; anything new
 // must replace one of the five or live in the drawer, Track or You.
@@ -44,6 +45,7 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
   const editor = useTrackerEditor({ today, now: clock, onOpenBackup, onMilestones: storeMilestones })
   const { habits, notice, setNotice, sheet, setSheet, hero, activeId, setActive } = editor
   const [celebrations, setCelebrations] = useState([])
+  const [verseOn] = useState(() => loadVerseEnabled(storage))
   const [drawer, setDrawer] = useState(false)
   const [panel, setPanel] = useState(null) // 'why' | 'reasons' | 'reach'
   const [, setTick] = useState(0)
@@ -129,7 +131,7 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
       )}
 
       {hero ? (
-        <WhyLine today={today} onOpen={() => setPanel('why')} onAddHabit={habits.length === 1 ? () => setSheet({ mode: 'add' }) : null} />
+        <WhyLine today={today} now={now} verse={verseOn} onOpen={() => setPanel('why')} onAddHabit={habits.length === 1 ? () => setSheet({ mode: 'add' }) : null} />
       ) : null}
       <FirstWeekCard now={now} onStep={(id) => (id === 'start' ? setSheet({ mode: 'add' }) : onFirstWeek(id))} />
       <CheckInCard today={today} onOpen={onCheckIn} />

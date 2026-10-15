@@ -7,6 +7,7 @@ import { dayNumber, timeBack } from '../../lib/homeIdeas.js'
 import { fmtMoney, goalProgress, loadGoal, moneyKept } from '../../lib/money.js'
 import { loadProfile } from '../../lib/profile.js'
 import { whyReasons } from '../../lib/reasons.js'
+import { DailyVerseCard } from '../DailyVerse.jsx'
 import { Card } from '../../ui/Row.jsx'
 import { HeaderButton, Sheet } from '../../ui/Sheet.jsx'
 import { useStorage } from '../../ui/StorageContext.js'
@@ -22,7 +23,7 @@ export function reasonOfDay(reasons, today) {
   return pool[((dayNumber(today) % pool.length) + pool.length) % pool.length]
 }
 
-export function WhyLine({ today, onOpen, onAddHabit = null }) {
+export function WhyLine({ today, onOpen, onAddHabit = null, verse = false, now = Date.now() }) {
   const storage = useStorage()
   const { c } = useTheme()
   const [reason] = useState(() => reasonOfDay(whyReasons(storage, loadProfile(storage)), today))
@@ -36,6 +37,7 @@ export function WhyLine({ today, onOpen, onAddHabit = null }) {
           {reason ? `“${reasonText(reason)}”` : 'Add a reason ›'}
         </T>
       </Pressable>
+      {verse ? <View style={{ alignSelf: 'stretch' }}><DailyVerseCard date={new Date(now)} /></View> : null}
       {onAddHabit ? (
         <Pressable onPress={onAddHabit} testID="why-add-habit" accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 12 }}>
           <T font="semibold" size={15} color={c.accent}>+ Add a habit</T>

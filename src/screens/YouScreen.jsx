@@ -155,10 +155,10 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   // Live status lines for the six rows.
   const status = {
     support: `988 · ${people.length ? people.map((p) => p.name).join(' · ') : 'No trusted contacts yet'}`,
-    why: [reasonCount ? `${reasonCount} ${reasonCount === 1 ? 'reason' : 'reasons'}` : 'No reasons yet', moneyOn(profile) ? 'money kept on' : null].filter(Boolean).join(' · '),
+    why: [reasonCount ? `${reasonCount} ${reasonCount === 1 ? 'reason' : 'reasons'}` : 'No reasons yet', verseOn ? 'daily verse on' : null, moneyOn(profile) ? 'money kept on' : null].filter(Boolean).join(' · '),
     progress: hero ? `${hero.name} · ${days.toLocaleString()} ${days === 1 ? 'day' : 'days'}${habits.length > 1 ? ` · ${habits.length} trackers` : ''}` : 'Add the date you started',
     reminders: `${reminder ? `Check-in ${reminderLabel(reminder)}` : 'Check-in reminder off'} · follow-up ${followUpOn ? 'on' : 'off'}`,
-    appearance: [themeLabel, appLock ? 'App lock on' : null, verseOn ? 'Daily verse on' : null].filter(Boolean).join(' · '),
+    appearance: [themeLabel, appLock ? 'App lock on' : null].filter(Boolean).join(' · '),
     data: lastBackupLabel(loadBackupMeta(storage), now),
   }
   const props = {
