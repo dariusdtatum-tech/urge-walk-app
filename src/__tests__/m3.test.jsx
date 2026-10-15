@@ -172,7 +172,7 @@ describe('Journal', () => {
     const seed = { ...habitsSeed(), ...walksSeed([logged(0, 'yes', 'Sea air helped', 'n1')]) }
     await renderApp({ storage: memoryStorage(seed) })
     await tab('Journal')
-    expect(screen.getByText('🌊 Urge note')).toBeTruthy()
+    expect(screen.getByText('Urge note')).toBeTruthy()
     await fireEvent.press(screen.getByTestId('journal-item'))
     expect(screen.getByTestId('walk-detail')).toBeTruthy()
     expect(screen.getByTestId('detail-note').props.value).toBe('Sea air helped')

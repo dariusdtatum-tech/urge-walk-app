@@ -79,7 +79,7 @@ export function BackupScreen({ onBack, backLabel = 'Home', onRestored, clock = D
       <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="backup">
         <Button kind="quiet" label={`‹ ${backLabel}`} onPress={onBack} testID="backup-back" style={{ alignSelf: 'flex-start', paddingHorizontal: 4 }} />
         <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Backup</T>
-        <T size={15} color={c.text}>🔒 Your backup file holds everything in the app, including your private journal. Keep it somewhere safe, like iCloud Drive or the Files app, and don’t share it.</T>
+        <T size={15} color={c.text}>Your backup file holds everything in the app, including your private journal. Keep it somewhere safe, like iCloud Drive or the Files app, and don’t share it.</T>
         {message ? (
           <T size={15} color={message.kind === 'ok' ? c.accent : c.error} accessibilityRole={message.kind === 'ok' ? undefined : 'alert'}
             accessibilityLiveRegion="polite" testID="backup-msg">{message.text}</T>

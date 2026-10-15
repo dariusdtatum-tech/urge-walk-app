@@ -12,13 +12,16 @@ import { loadWalks } from '../lib/walkStorage.js'
 import { Button } from '../ui/Button.jsx'
 import { Confirm } from '../ui/Confirm.jsx'
 import { Notice } from '../ui/Row.jsx'
+import { LeafIcon, PathIcon, WaveIcon } from '../ui/Icons.jsx'
 import { MoodDot, RowGroup, SectionLabel } from '../ui/kit.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
 import { size as sz, space, type, useTheme } from '../ui/theme.js'
 import { ResultWord } from './LogScreen.jsx'
 
-const NOTE_TAGS = { walk: '🚶 Walk note', breathe: '🌬️ Breathe note', ground: '🌿 Ground note', logged: '🌊 Urge note' }
+// Note tags: a 12pt line icon (the same ones as Ride it out) in the tag's text colour, then the word. No emoji.
+const NOTE_TAGS = { walk: 'Walk note', breathe: 'Breathe note', ground: 'Ground note', logged: 'Urge note' }
+const NOTE_ICONS = { walk: PathIcon, breathe: WaveIcon, ground: LeafIcon, logged: WaveIcon }
 
 // Journal: your entries plus notes from walks / breaths / logs, newest first, with search.
 // The editor autosaves a draft on every keystroke; an unfinished draft reopens next time.
@@ -99,7 +102,10 @@ export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChan
                     <>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                         <T font="semibold" size={14} color={c.muted}>{formatTimeOfDay(item.time)}</T>
-                        <T size={13} color={c.mutedSand} style={{ backgroundColor: c.sand, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 }}>{NOTE_TAGS[kindOf(item.walk)]}</T>
+                        <View testID="note-tag" style={{ flexDirection: 'row', alignItems: 'center', gap: 4, backgroundColor: c.sand, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 }}>
+                          {(() => { const Icon = NOTE_ICONS[kindOf(item.walk)]; return <Icon color={c.mutedSand} size={12} /> })()}
+                          <T size={13} color={c.mutedSand}>{NOTE_TAGS[kindOf(item.walk)]}</T>
+                        </View>
                         <View style={{ flex: 1 }} />
                         <ResultWord result={item.walk.result} />
                       </View>
@@ -149,7 +155,7 @@ function JournalEditor({ draft, entries, restored, onChange, onDone, onDiscard, 
               <Pressable style={{ flex: 1, minHeight: 44, justifyContent: 'center', paddingVertical: 8 }} accessibilityRole="button"
                 accessibilityLabel={`Use prompt: ${PROMPTS[promptIndex]}`} testID="prompt"
                 onPress={() => { change({ body: insertPrompt(draft.body, PROMPTS[promptIndex]) }); setShowPrompt(false) }}>
-                <T size={15} color={c.text}>💡 {PROMPTS[promptIndex]}</T>
+                <T size={15} color={c.text}>{PROMPTS[promptIndex]}</T>
               </Pressable>
               <Pressable onPress={() => setPromptIndex((i) => (i + 1) % PROMPTS.length)} accessibilityRole="button" accessibilityLabel="Another prompt" testID="prompt-next"
                 style={{ minWidth: 44, minHeight: 44, alignItems: 'center', justifyContent: 'center' }}><T size={18} color={c.mutedSand}>↻</T></Pressable>

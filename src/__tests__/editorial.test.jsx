@@ -109,3 +109,37 @@ test('Journal rows show the mood word and a dot, never an emoji; old moods map (
   expect(moods.map((m) => m.props.accessibilityLabel).sort()).toEqual(['Mood: Good', 'Mood: Steady'])
   expect(JSON.stringify(screen.toJSON())).not.toMatch(/[\u{1F600}-\u{1F64F}]/u)
 })
+
+// No emoji anywhere in the product (DESIGN-RULES.md). Plain marks like ✓ ✕ ↻ are text glyphs, not emoji.
+const EMOJI = /\p{Emoji_Presentation}|\uFE0F/u
+const strings = (node, out = []) => {
+  if (node == null) return out
+  if (typeof node === 'string') { out.push(node); return out }
+  if (Array.isArray(node)) { node.forEach((n) => strings(n, out)); return out }
+  if (typeof node === 'object') { for (const k of ['accessibilityLabel', 'placeholder']) if (typeof node.props?.[k] === 'string') out.push(node.props[k]); strings(node.children, out) }
+  return out
+}
+test('no emoji in rendered UI strings across the main screens', async () => {
+  const at = new Date(T0).toISOString()
+  const walks = ['walk', 'breathe', 'ground', 'logged'].map((kind, i) => ({ ...buildLoggedRecord({ id: `w${i}`, at: T0 - i * 3600000, note: 'A note', result: 'yes' }), kind }))
+  await renderApp('light', { ...habitsSeed(), 'urgewalk.v1.walks': JSON.stringify({ version: 1, walks }),
+    'urgewalk.v1.journal': JSON.stringify({ version: 1, entries: [{ id: 'a', createdAt: at, title: 'One', body: 'x', mood: 'great' }] }) })
+  const seen = []
+  const grab = () => seen.push(...strings(screen.toJSON()))
+  grab()
+  await tab('Track'); grab()
+  await fireEvent.press(screen.getByTestId('track-journal')); grab()
+  expect(screen.getAllByTestId('note-tag').length).toBeGreaterThan(0)
+  await tab('You'); grab()
+  for (const id of SECTION_ORDER) { await press(`you-${id}`); grab(); await press('you-back') }
+  expect(seen.length).toBeGreaterThan(50)
+  expect(seen.filter((s) => EMOJI.test(s))).toEqual([])
+})
+
+test('no emoji in user-facing source: screens, copy, notifications, verses', () => {
+  const { readdirSync, readFileSync, statSync } = require('fs')
+  const { join } = require('path')
+  const files = (d) => readdirSync(d).flatMap((n) => { const p = join(d, n); return statSync(p).isDirectory() ? (n === '__tests__' ? [] : files(p)) : /\.(jsx?|json)$/.test(n) && !/\.test\./.test(n) ? [p] : [] })
+  const hits = files('src').concat('app.json').flatMap((f) => readFileSync(f, 'utf8').split('\n').map((l, i) => (EMOJI.test(l) ? `${f}:${i + 1}` : null)).filter(Boolean))
+  expect(hits).toEqual([])
+})
