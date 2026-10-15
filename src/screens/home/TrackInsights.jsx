@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { View } from 'react-native'
 import { recentlySaved } from '../../lib/calm.js'
 import { todayISO } from '../../lib/cleanTime.js'
-import { cleanDays, heroHabit, loadRange, saveRange } from '../../lib/homeStats.js'
+import { heroHabit, loadRange, saveRange } from '../../lib/homeStats.js'
 import { loadActiveTrackerId } from '../../lib/activeTracker.js'
 import { loadHabits } from '../../lib/storage.js'
 import { loadWalks } from '../../lib/walkStorage.js'
@@ -28,7 +28,7 @@ export function TrackInsights({ now }) {
     <View style={{ gap: space.section }} testID="track-insights">
       <PatternCard walks={walks} now={now} />
       {hero ? <NeverZero hero={hero} walks={walks} today={today} highlight={highlight} /> : null}
-      <WalksCard walks={walks} range={range} onRange={(id) => { setRange(id); saveRange(id, storage) }} streak={hero ? cleanDays(hero, today) : null} now={now} since={since} />
+      <WalksCard walks={walks} range={range} onRange={(id) => { setRange(id); saveRange(id, storage) }} now={now} since={since} />
     </View>
   )
 }

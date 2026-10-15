@@ -86,7 +86,7 @@ export function rangeBuckets(rangeId, now = Date.now(), since = null) {
     }))
   }
   return dayBuckets(today, 7, 1).map((b) => ({
-    ...b, label: b.first.toLocaleDateString(undefined, { weekday: 'short' }), showLabel: true,
+    ...b, label: b.first.toLocaleDateString(undefined, { weekday: 'narrow' }), name: b.first.toLocaleDateString(undefined, { weekday: 'long' }), showLabel: true,
   }))
 }
 
@@ -110,7 +110,7 @@ export function threeDayAverage(counts) {
 }
 
 // Numbers for the chips. walked = walks only; riddenOut = every urge record (walks, breathing, logged);
-// passed = any kind that passed. All time counts everything.
+// passed = any kind that passed. All time counts everything. avgWalkSeconds = mean timed walk length.
 export function rangeStats(walks, rangeId, now = Date.now()) {
   let from = -Infinity
   let to = Infinity
@@ -122,15 +122,21 @@ export function rangeStats(walks, rangeId, now = Date.now()) {
   let walked = 0
   let passed = 0
   let riddenOut = 0
+  let walkSecs = 0
+  let timed = 0
   for (const w of walks) {
     const t = Date.parse(w.startedAt)
     if (t >= from && t < to) {
       riddenOut += 1
-      if (w.kind == null || w.kind === 'walk') walked += 1
+      if (w.kind == null || w.kind === 'walk') {
+        walked += 1
+        if (w.actualSeconds > 0) { walkSecs += w.actualSeconds; timed += 1 }
+      }
       if (w.result === 'yes') passed += 1
     }
   }
-  return { walked, passed, riddenOut }
+  // avgWalkSeconds: mean length of timed walks in the range (null when there are none).
+  return { walked, passed, riddenOut, avgWalkSeconds: timed ? walkSecs / timed : null }
 }
 
 // Remembered card range (default Week).

@@ -36,7 +36,7 @@ describe('clean days', () => {
     const habit = { startDate: '2026-04-27' }
     const before = cleanDays(habit, '2026-10-06')
     const walks = [walk('2026-10-06T12:00:00.000Z', 'no'), walk('2026-10-06T14:00:00.000Z', 'no')]
-    expect(rangeStats(walks, 'D', new Date(2026, 9, 6, 20).getTime())).toEqual({ walked: 2, passed: 0, riddenOut: 2 })
+    expect(rangeStats(walks, 'D', new Date(2026, 9, 6, 20).getTime())).toMatchObject({ walked: 2, passed: 0, riddenOut: 2 })
     expect(cleanDays(habit, '2026-10-06')).toBe(before)
   })
 })
@@ -52,7 +52,8 @@ describe('shortDate', () => {
 describe('Week / Month / All time ranges', () => {
   it('Week = the last 7 days ending today, Fri..Thu, today highlighted', () => {
     const b = rangeBuckets('week', NOW)
-    expect(b.map((x) => x.label)).toEqual(['Fri', 'Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu'])
+    expect(b.map((x) => x.label)).toEqual(['F', 'S', 'S', 'M', 'T', 'W', 'T'])
+    expect(b.map((x) => x.name)).toEqual(['Friday', 'Saturday', 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday'])
     expect(b.map((x) => x.current)).toEqual([false, false, false, false, false, false, true])
     expect(b[0].start).toBe(new Date(2026, 9, 2).getTime())
     expect(b[6].end).toBe(new Date(2026, 9, 9).getTime())
@@ -113,11 +114,11 @@ describe('chips and chart numbers', () => {
     walk('2025-12-31T03:00:00.000Z', null),
   ]
   it('Week: 3 walked, 1 passed', () => {
-    expect(rangeStats(walks, 'week', NOW)).toEqual({ walked: 3, passed: 1, riddenOut: 3 })
+    expect(rangeStats(walks, 'week', NOW)).toMatchObject({ walked: 3, passed: 1, riddenOut: 3 })
   })
   it('Month and All time change only these numbers', () => {
-    expect(rangeStats(walks, 'month', NOW)).toEqual({ walked: 4, passed: 2, riddenOut: 4 })
-    expect(rangeStats(walks, 'all', NOW)).toEqual({ walked: 5, passed: 2, riddenOut: 5 })
+    expect(rangeStats(walks, 'month', NOW)).toMatchObject({ walked: 4, passed: 2, riddenOut: 4 })
+    expect(rangeStats(walks, 'all', NOW)).toMatchObject({ walked: 5, passed: 2, riddenOut: 5 })
   })
   it('weekly line: Fri-Tue 0, Wed 1, Thu 2', () => {
     expect(bucketCounts(walks, rangeBuckets('week', NOW))).toEqual([0, 0, 0, 0, 0, 1, 2])
@@ -158,5 +159,20 @@ describe('chart geometry', () => {
   it('handles 0 or 1 point', () => {
     expect(smoothPath([])).toBe('')
     expect(smoothPath([{ x: 5, y: 6 }])).toBe('M5,6')
+  })
+})
+
+describe('rangeStats avgWalkSeconds', () => {
+  it('averages timed walks only and is null without any', async () => {
+    const { rangeStats } = await import('./homeStats.js')
+    const at = new Date(Date.now() - 3600e3).toISOString()
+    const walks = [
+      { startedAt: at, kind: 'walk', actualSeconds: 300, result: 'yes' },
+      { startedAt: at, kind: 'walk', actualSeconds: 600, result: 'no' },
+      { startedAt: at, kind: 'breathe', actualSeconds: 60, result: 'yes' },
+      { startedAt: at, kind: 'logged', result: 'yes' },
+    ]
+    expect(rangeStats(walks, 'all').avgWalkSeconds).toBe(450)
+    expect(rangeStats(walks.slice(2), 'all').avgWalkSeconds).toBeNull()
   })
 })

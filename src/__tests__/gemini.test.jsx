@@ -2,6 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet } from 'react-native'
 import { AppRoot } from '../AppRoot.jsx'
 import { sheetMaxHeight } from '../screens/RideSheet.jsx'
+import { avgChip } from '../screens/home/WalksCard.jsx'
 import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0 } from './helpers.js'
 
 const renderApp = async (extra = {}, scheme = 'light') => {
@@ -23,5 +24,13 @@ describe('Ride it out sheet', () => {
   test('sheetMaxHeight leaves room for the top inset', () => {
     expect(sheetMaxHeight(844, 47)).toBe(844 - 47 - 16)
     expect(sheetMaxHeight(844, 0)).toBe(844 - 24 - 16)
+  })
+})
+
+describe('Your walks', () => {
+  test('avgChip: minutes, singular, and an empty dash', async () => {
+    expect(avgChip(450)).toMatchObject({ n: 8, label: 'Avg walk', sub: 'minutes', a11y: 'Average walk 8 minutes' })
+    expect(avgChip(20)).toMatchObject({ n: 1, sub: 'minute' })
+    expect(avgChip(null)).toMatchObject({ n: '–', label: 'Avg walk' })
   })
 })

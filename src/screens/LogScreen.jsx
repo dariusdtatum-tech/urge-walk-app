@@ -82,7 +82,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
 
   if (walks.length === 0) {
     return (
-      <ScrollView contentContainerStyle={{ padding: space.screen, gap: space.section }} testID="log">
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="log">
         {header ?? <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Log</T>}
         <Notice text={notice} onDismiss={() => setNotice('')} />
         <View style={{ alignItems: 'center', gap: 12, paddingVertical: 32 }} testID="log-empty">

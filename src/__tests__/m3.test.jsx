@@ -89,7 +89,9 @@ describe('Your walks card (Week / Month / All time) with the calm Week total', (
     expect(screen.getByTestId('week-passed-days')).toHaveTextContent('3days with an urge passed')
     expect(screen.getByTestId('week-passed-days').props.accessibilityLabel).toBe('3 days with an urge passed this week')
     expect(screen.getByTestId('chip-passed')).toHaveTextContent(/^3/)
-    expect(screen.getByTestId('chip-streak')).toHaveTextContent(/163/)
+    expect(screen.queryByTestId('chip-streak')).toBeNull() // no streak wording on Track
+    expect(screen.getByTestId('chip-avg')).toHaveTextContent(/Avg walk/)
+    expect(screen.queryByText(/Streak/)).toBeNull()
     await fireEvent.press(screen.getByTestId('range-month'))
     expect(screen.queryByTestId('week-passed-days')).toBeNull()
     expect(screen.getByText('3-day avg · urges ridden out')).toBeTruthy()

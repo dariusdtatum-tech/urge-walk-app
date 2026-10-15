@@ -14,8 +14,8 @@ const PAD_TOP = 10
 const PAD_BOTTOM = 6
 
 // "Your walks": Week / Month / All time switches only what's inside this card.
-// The Streak chip is the clean-day streak and never changes with the range.
-export function WalksCard({ walks, range, onRange, streak, now, since }) {
+// The third chip is the average walk length in the range (no streak wording here).
+export function WalksCard({ walks, range, onRange, now, since }) {
   const { c } = useTheme()
   const stats = rangeStats(walks, range, now)
   const buckets = rangeBuckets(range, now, since)
@@ -27,7 +27,7 @@ export function WalksCard({ walks, range, onRange, streak, now, since }) {
   const chips = [
     { id: 'walked', n: stats.walked, label: 'Walked', sub: stats.riddenOut > stats.walked ? `${stats.riddenOut} ridden out` : null },
     { id: 'passed', n: stats.passed, label: 'Passed' },
-    ...(streak != null ? [{ id: 'streak', n: streak, label: 'Streak' }] : []),
+    avgChip(stats.avgWalkSeconds),
   ]
   return (
     <Card testID="walks-card">
@@ -35,7 +35,7 @@ export function WalksCard({ walks, range, onRange, streak, now, since }) {
       <Seg items={RANGE_IDS.map((id) => ({ id, label: RANGES[id].name }))} value={range} onChange={onRange} label="Walks range" testID="range" small />
       <View style={{ flexDirection: 'row', gap: 8 }}>
         {chips.map((ch) => (
-          <View key={ch.id} testID={`chip-${ch.id}`} accessible accessibilityLabel={`${ch.n} ${ch.label}${ch.sub ? `, ${ch.sub}` : ''}`}
+          <View key={ch.id} testID={`chip-${ch.id}`} accessible accessibilityLabel={ch.a11y ?? `${ch.n} ${ch.label}${ch.sub ? `, ${ch.sub}` : ''}`}
             style={{ flex: 1, backgroundColor: c.sand, borderRadius: 14, padding: 10, gap: 2 }}>
             <T font="serif" size={28} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{ch.n.toLocaleString()}</T>
             <T font="semibold" size={13} color={c.mutedSand}>{ch.label}</T>
@@ -54,6 +54,13 @@ export function WalksCard({ walks, range, onRange, streak, now, since }) {
       {caption ? <T size={13} color={c.muted}>{caption}</T> : null}
     </Card>
   )
+}
+
+// Average walk, in whole minutes (at least 1 once there's a timed walk).
+export function avgChip(secs) {
+  if (secs == null) return { id: 'avg', n: '–', label: 'Avg walk', a11y: 'Average walk: no timed walks yet' }
+  const m = Math.max(1, Math.round(secs / 60))
+  return { id: 'avg', n: m, label: 'Avg walk', sub: m === 1 ? 'minute' : 'minutes', a11y: `Average walk ${m} ${m === 1 ? 'minute' : 'minutes'}` }
 }
 
 // The line chart. No run brackets: an empty day is just a low point, never a gap.
