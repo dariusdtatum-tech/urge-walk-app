@@ -13,6 +13,7 @@ import * as Notifications from 'expo-notifications'
 import { pickBackupFile, shareBackup } from './backupFile.js'
 import { syncWalkAlert } from './walkAlert.js'
 import { ensureChannel } from './channel.js'
+import { authenticateApp } from './appAuth.js'
 import { listenCheckin, syncCheckinReminder } from './checkinReminder.js'
 import { cancelFollowUp, listenFollowUp, scheduleFollowUp } from './followUpNotify.js'
 
@@ -58,6 +59,8 @@ export const device = {
   stopPlaying() { voice.stopPlaying() },
   deleteReasonFile(uri) { if (native) deleteFile(FS, uri) },
   deleteAllReasonFiles() { if (native) deleteAllFiles(FS) },
+  // Whole-app lock (Face ID / passcode). Web preview: always unlocks.
+  authenticateApp() { return native ? authenticateApp(LocalAuthentication) : Promise.resolve({ ok: true }) },
   unlockReasons() { return native ? unlock(LocalAuthentication) : Promise.resolve(true) },
   shareBackup,
   pickBackupFile,

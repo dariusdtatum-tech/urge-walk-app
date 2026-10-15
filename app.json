@@ -79,7 +79,7 @@
       [
         "expo-local-authentication",
         {
-          "faceIDPermission": "Urge Walk can keep Your reasons covered until you unlock them with Face ID."
+          "faceIDPermission": "Urge Walk uses Face ID only if you turn on App lock or the Your reasons lock."
         }
       ],
       "expo-notifications",

@@ -14,8 +14,8 @@ export function fakeClock(start = T0) {
   clock.advance = (ms) => { t += ms }
   return clock
 }
-export function stubDevice({ share = 'shared', file = null, picked = null, photo = null, voice = null, unlocked = true } = {}) {
-  const calls = { texts: [], reminders: [], followUps: [], followUpCancels: 0, tap: 0, press: 0, breathTurn: 0, done: 0, alerts: [], shared: [], urls: [], picks: 0, played: [], deleted: [], unlocks: 0, wiped: 0 }
+export function stubDevice({ share = 'shared', file = null, picked = null, photo = null, voice = null, unlocked = true, appAuth = { ok: true } } = {}) {
+  const calls = { texts: [], reminders: [], followUps: [], followUpCancels: 0, tap: 0, press: 0, breathTurn: 0, done: 0, alerts: [], shared: [], urls: [], picks: 0, played: [], deleted: [], unlocks: 0, wiped: 0, appAuths: 0 }
   let followUpCb = null
   let checkinCb = null
   return {
@@ -33,6 +33,7 @@ export function stubDevice({ share = 'shared', file = null, picked = null, photo
     stopPlaying() {},
     deleteReasonFile(uri) { calls.deleted.push(uri) },
     deleteAllReasonFiles() { calls.wiped++ },
+    authenticateApp() { calls.appAuths++; return Promise.resolve(typeof appAuth === 'function' ? appAuth() : appAuth) },
     unlockReasons() { calls.unlocks++; return Promise.resolve(unlocked) },
     syncCheckinReminder(r) { calls.reminders.push(r); return Promise.resolve(true) },
     onCheckinReminder(cb) { checkinCb = cb; return () => { checkinCb = null } },
