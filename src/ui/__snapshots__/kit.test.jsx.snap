@@ -237,7 +237,7 @@ exports[`component kit in dark EmptyState matches its snapshot and uses only tok
       style={
         [
           {
-            "color": "#a9cbc0",
+            "color": "#f3ede2",
             "fontFamily": "Jakarta-SemiBold",
             "fontSize": 14,
           },
@@ -450,6 +450,7 @@ exports[`component kit in dark HairlineRows matches its snapshot and uses only t
     <RCTSwitch
       accessibilityLabel="Toggle"
       accessibilityRole="switch"
+      activeThumbColor="#0f1d33"
       onChange={[Function]}
       onResponderTerminationRequest={[Function]}
       onStartShouldSetResponder={[Function]}
@@ -465,7 +466,7 @@ exports[`component kit in dark HairlineRows matches its snapshot and uses only t
           },
         ]
       }
-      thumbTintColor="#182b47"
+      thumbTintColor="#0f1d33"
       tintColor="#6b7d99"
       value={true}
     />
@@ -685,7 +686,7 @@ exports[`component kit in dark QuietLink matches its snapshot and uses only toke
     style={
       [
         {
-          "color": "#a9cbc0",
+          "color": "#f3ede2",
           "fontFamily": "Jakarta-SemiBold",
           "fontSize": 14,
         },
@@ -1182,6 +1183,7 @@ exports[`component kit in dark ToggleRow matches its snapshot and uses only toke
   <RCTSwitch
     accessibilityLabel="Toggle"
     accessibilityRole="switch"
+    activeThumbColor="#0f1d33"
     onChange={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
@@ -1197,7 +1199,7 @@ exports[`component kit in dark ToggleRow matches its snapshot and uses only toke
         },
       ]
     }
-    thumbTintColor="#182b47"
+    thumbTintColor="#0f1d33"
     tintColor="#6b7d99"
     value={true}
   />
@@ -1209,7 +1211,7 @@ exports[`component kit in light Card matches its snapshot and uses only tokens a
   style={
     [
       {
-        "backgroundColor": "#fdfbf7",
+        "backgroundColor": "#faf7f1",
         "borderColor": "#e4dccd",
         "borderRadius": 16,
         "borderWidth": 1,
@@ -1315,7 +1317,7 @@ exports[`component kit in light Chart matches its snapshot and uses only tokens 
       style={
         [
           {
-            "color": "#6b7280",
+            "color": "#647289",
             "fontFamily": "Jakarta-Regular",
             "fontSize": 12,
           },
@@ -1333,7 +1335,7 @@ exports[`component kit in light Chart matches its snapshot and uses only tokens 
       style={
         [
           {
-            "color": "#6b7280",
+            "color": "#647289",
             "fontFamily": "Jakarta-Regular",
             "fontSize": 12,
           },
@@ -1588,7 +1590,7 @@ exports[`component kit in light HairlineRows matches its snapshot and uses only 
       style={
         [
           {
-            "color": "#6b7280",
+            "color": "#647289",
             "fontFamily": "Jakarta-Regular",
             "fontSize": 20,
           },
@@ -1654,6 +1656,7 @@ exports[`component kit in light HairlineRows matches its snapshot and uses only 
     <RCTSwitch
       accessibilityLabel="Toggle"
       accessibilityRole="switch"
+      activeThumbColor="#faf7f1"
       onChange={[Function]}
       onResponderTerminationRequest={[Function]}
       onStartShouldSetResponder={[Function]}
@@ -1669,7 +1672,7 @@ exports[`component kit in light HairlineRows matches its snapshot and uses only 
           },
         ]
       }
-      thumbTintColor="#fdfbf7"
+      thumbTintColor="#faf7f1"
       tintColor="#8d8778"
       value={true}
     />
@@ -1939,7 +1942,7 @@ exports[`component kit in light Row matches its snapshot and uses only tokens an
   style={
     {
       "alignItems": "center",
-      "backgroundColor": "#fdfbf7",
+      "backgroundColor": "#faf7f1",
       "borderColor": "#e4dccd",
       "borderRadius": 14,
       "borderWidth": 1,
@@ -1998,7 +2001,7 @@ exports[`component kit in light Row matches its snapshot and uses only tokens an
     style={
       [
         {
-          "color": "#6b7280",
+          "color": "#647289",
           "fontFamily": "Jakarta-Regular",
           "fontSize": 20,
         },
@@ -2105,7 +2108,7 @@ exports[`component kit in light Sheet matches its snapshot and uses only tokens 
         accessibilityViewIsModal={true}
         style={
           {
-            "backgroundColor": "#fdfbf7",
+            "backgroundColor": "#faf7f1",
             "borderTopLeftRadius": 24,
             "borderTopRightRadius": 24,
             "maxHeight": 1294,
@@ -2332,7 +2335,7 @@ exports[`component kit in light ToggleRow matches its snapshot and uses only tok
   style={
     {
       "alignItems": "center",
-      "backgroundColor": "#fdfbf7",
+      "backgroundColor": "#faf7f1",
       "borderColor": "#e4dccd",
       "borderRadius": 14,
       "borderWidth": 1,
@@ -2386,6 +2389,7 @@ exports[`component kit in light ToggleRow matches its snapshot and uses only tok
   <RCTSwitch
     accessibilityLabel="Toggle"
     accessibilityRole="switch"
+    activeThumbColor="#faf7f1"
     onChange={[Function]}
     onResponderTerminationRequest={[Function]}
     onStartShouldSetResponder={[Function]}
@@ -2401,7 +2405,7 @@ exports[`component kit in light ToggleRow matches its snapshot and uses only tok
         },
       ]
     }
-    thumbTintColor="#fdfbf7"
+    thumbTintColor="#faf7f1"
     tintColor="#8d8778"
     value={true}
   />

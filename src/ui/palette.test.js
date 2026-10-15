@@ -77,3 +77,25 @@ it('the before colours really failed (kept as a record of the fix)', () => {
   expect(ratio(palette.dark.tileAlt, palette.dark.surface)).toBeLessThan(3) // Breathe fill alone, 1.23:1
   expect(ratio(palette.dark.sand, palette.dark.card)).toBeLessThan(3) // empty cell fill alone, 1.09:1
 })
+
+// Gemini review 2: off-palette colours are banned outside the palette, and the palette itself no longer
+// uses them (#009688 was react-native-web's default switch thumb; #fdfbf7 an off-brand near-white;
+// #6b7280 a stock cool grey). Snapshots are generated output and skipped.
+it('bans #009688, #fdfbf7 and #6b7280 everywhere in src (and in the palette)', async () => {
+  const { readdirSync, readFileSync, statSync } = await import('node:fs')
+  const { join } = await import('node:path')
+  const files = (d) => readdirSync(d).flatMap((n) => { const p = join(d, n); return statSync(p).isDirectory() ? (n === '__snapshots__' ? [] : files(p)) : /\.(jsx?|json)$/.test(n) && !n.endsWith('.test.js') ? [p] : [] })
+  const hits = files('src').flatMap((f) => readFileSync(f, 'utf8').split('\n').map((l, i) => (/#(009688|fdfbf7|6b7280)\b/i.test(l) ? `${f}:${i + 1}` : null)).filter(Boolean))
+  expect(hits).toEqual([])
+})
+
+it('no sea glass text at night: every dark text colour is cream (or cream at 70%)', () => {
+  for (const k of ['text', 'textSoft', 'title', 'accent', 'verseLabel', 'resYes', 'tabActive', 'sectionLabel', 'toastText'])
+    expect([k, palette.dark[k].toLowerCase()]).not.toEqual([k, '#a9cbc0'])
+  expect(palette.dark.accent).toBe('#f3ede2')
+})
+
+it('switch thumbs are palette colours: cream on navy in light, night navy on sea glass in dark', () => {
+  expect([palette.light.switchThumbOn, palette.light.action]).toEqual(['#faf7f1', '#24395c'])
+  expect([palette.dark.switchThumbOn, palette.dark.action]).toEqual(['#0f1d33', '#a9cbc0'])
+})

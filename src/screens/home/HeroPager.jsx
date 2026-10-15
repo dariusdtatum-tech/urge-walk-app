@@ -85,7 +85,7 @@ export function HeroPager({ hero, days, since, segment, milestones, today, profi
         {pages.map((id, i) => (
           <Pressable key={id} onPress={() => go(i)} testID={`pager-dot-${i}`} accessible={false}
             style={{ width: 28, height: 44, alignItems: 'center', justifyContent: 'center' }}>
-            <View style={{ width: page === i ? 18 : 6, height: 6, borderRadius: 3, backgroundColor: page === i ? c.tabActive : c.fieldBorder }} />
+            <View style={{ width: page === i ? 18 : 6, height: 6, borderRadius: 3, backgroundColor: page === i ? c.dotActive : c.fieldBorder }} />
           </Pressable>
         ))}
       </View>

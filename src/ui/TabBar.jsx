@@ -44,7 +44,7 @@ export function TabBar({ active, onTab, onRide, onRideHold, bottomInset = 0 }) {
         <Pressable key={t.id} onPress={() => onTab(t.id)} testID={`tab-${t.id}`}
           accessibilityRole="tab" accessibilityState={{ selected: active === t.id }} accessibilityLabel={t.label}
           style={{ flex: 1, alignItems: 'center', minHeight: 48, justifyContent: 'center', gap: 2 }}>
-          <View style={{ height: 3, width: 22, borderRadius: 2, backgroundColor: active === t.id ? c.tabActive : 'transparent', marginBottom: 2 }} />
+          <View style={{ height: 3, width: 22, borderRadius: 2, backgroundColor: active === t.id ? c.dotActive : 'transparent', marginBottom: 2 }} />
           <t.Icon color={active === t.id ? c.tabActive : c.muted} />
           <T numberOfLines={1} font={active === t.id ? 'bold' : 'medium'} size={12} max={MAX_SCALE.tab} color={active === t.id ? c.tabActive : c.muted}>{t.label}</T>
         </Pressable>

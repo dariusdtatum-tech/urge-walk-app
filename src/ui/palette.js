@@ -4,23 +4,23 @@
 export const light = {
   bg: '#faf7f1',
   // Non-text contrast (WCAG 1.4.11, >= 3:1 vs the adjacent background; palette.test.js computes these)
-  ringTrack: '#e9e1d2', trackEdge: '#8d8778', switchOff: '#8d8778', switchThumbOff: '#fdfbf7', cellEdge: '#8d8778',
+  ringTrack: '#e9e1d2', trackEdge: '#8d8778', switchOff: '#8d8778', switchThumbOff: '#faf7f1', cellEdge: '#8d8778',
   walkTile: '#24395c', onWalkTile: '#faf7f1', onWalkTileSoft: '#d6dbe5', breatheEdge: null, breatheAccent: '#24395c',
-  surface: '#fdfbf7',
+  surface: '#faf7f1',
   border: '#e4dccd',
   fieldBorder: '#8d8778',
   // Daily verse card (You, opt-in)
   verseBg: '#faf7f1', verseBorder: '#f1ebe0', verseLabel: '#3f7a6b', verseText: '#24395c', verseRef: '#647289', // ref = navy at 70% on cream
-  card: '#fdfbf7',
+  card: '#faf7f1',
   cardBorder: '#e4dccd',
   sand: '#f1ebe0',
   seg: '#f1ebe0',
-  segOn: '#fdfbf7',
+  segOn: '#faf7f1',
   track: '#e9e1d2',
   text: '#2b3445',
   textSoft: '#3a4357',
   title: '#24395c',
-  muted: '#6b7280',
+  muted: '#647289', // navy at 70% on cream (60% would miss AA 4.5:1)
   mutedSand: '#5b6270',
   accent: '#3f7a6b',
   ringA: '#5d9384',
@@ -32,7 +32,7 @@ export const light = {
   tabActive: '#24395c',
   tileAlt: '#a9cbc0',
   onTileAlt: '#24395c',
-  breathePearlA: '#fdfbf7',
+  breathePearlA: '#faf7f1',
   breathePearlB: '#d7e8e1',
   breathePearlC: '#a9cbc0',
   breatheRim: '#5d9384',
@@ -51,6 +51,7 @@ export const light = {
   grab: '#d9cfbd',
   error: '#9b3b2f',
   // Kit: the one small sea-glass "Plus" tag, and chart bars
+  switchThumbOn: '#faf7f1', dotActive: '#24395c',
   plusBg: '#a9cbc0', onPlus: '#24395c', chartBar: '#5d9384', chartTrack: '#e9e1d2',
   // Editorial lists: small-caps labels, hairline dividers (navy at 10%), one flat featured panel
   moodFill: '#a9cbc0', sectionLabel: '#3f7a6b', hairline: 'rgba(36, 57, 92, 0.10)', featured: '#f1ebe0',
@@ -63,7 +64,7 @@ export const dark = {
   surface: '#182b47',
   border: '#2a3f60',
   fieldBorder: '#6b7d99',
-  verseBg: '#182b47', verseBorder: 'rgba(255,255,255,0.08)', verseLabel: '#a9cbc0', verseText: '#f3ede2', verseRef: '#b1b3b4', // ref = cream at 70% on night
+  verseBg: '#182b47', verseBorder: 'rgba(255,255,255,0.08)', verseLabel: '#b1b3b4', verseText: '#f3ede2', verseRef: '#b1b3b4', // ref = cream at 70% on night
   card: '#182b47',
   cardBorder: '#2a3f60',
   sand: '#1d3150',
@@ -75,14 +76,14 @@ export const dark = {
   title: '#f3ede2',
   muted: '#a7b0bf',
   mutedSand: '#a7b0bf',
-  accent: '#a9cbc0',
+  accent: '#f3ede2', // no sea glass text at night: links and labels are cream
   ringA: '#a9cbc0',
   ringB: '#d3e6df',
   holdFill: '#2e5e53',
   action: '#a9cbc0',
   onAction: '#0f1d33',
   onActionSoft: '#1b3152',
-  tabActive: '#a9cbc0',
+  tabActive: '#f3ede2',
   tileAlt: '#24395c',
   onTileAlt: '#f3ede2',
   breathePearlA: '#4f8279',
@@ -98,11 +99,12 @@ export const dark = {
   toastAct: '#2f6658',
   danger: '#f2a297',
   onDanger: '#0f1d33',
-  resYes: '#a9cbc0',
+  resYes: '#f3ede2',
   resKinda: '#d9bf8c',
   resNoText: '#a7b0bf',
   grab: '#3a5072',
   error: '#f0a59a',
+  switchThumbOn: '#0f1d33', dotActive: '#a9cbc0',
   plusBg: '#a9cbc0', onPlus: '#0f1d33', chartBar: '#a9cbc0', chartTrack: '#22375a',
   // cream at 70% on night, flattened; hairline = cream at 10%
   moodFill: '#a9cbc0', sectionLabel: '#afafae', hairline: 'rgba(243, 237, 226, 0.10)', featured: '#182b47',

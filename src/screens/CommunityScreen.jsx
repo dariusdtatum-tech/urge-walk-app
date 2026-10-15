@@ -46,7 +46,7 @@ export function CommunityScreen({ now, clock = Date.now }) {
             <T size={14} color={c.muted}>Saved on this phone only. We’ll tell you once, here in the app.</T>
           </View>
           <Switch value={notify} onValueChange={toggle} testID="community-notify" accessibilityLabel="Tell me when it opens"
-            trackColor={{ true: c.action, false: c.track }} thumbColor={c.card} ios_backgroundColor={c.track} />
+            trackColor={{ true: c.action, false: c.track }} thumbColor={c.switchThumbOn} activeThumbColor={c.switchThumbOn} ios_backgroundColor={c.track} />
         </View>
       </Card>
       <Card testID="community-line">
