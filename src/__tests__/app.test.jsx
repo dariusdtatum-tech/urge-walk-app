@@ -142,6 +142,8 @@ describe('Walk', () => {
     await act(async () => { jest.advanceTimersByTime(300) })
     expect(screen.getByTestId('walk-finish')).toBeTruthy()
     expect(device.calls.done).toBe(1)
+    // the scheduled time-up alert is cleared: the last sync sees the finished walk
+    expect(device.calls.alerts.at(-1).walk.endedAt).toBeTruthy()
   })
 })
 

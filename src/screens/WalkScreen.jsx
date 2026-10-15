@@ -3,6 +3,7 @@ import { AppState, ScrollView, View } from 'react-native'
 import { useKeepAwake } from 'expo-keep-awake'
 import { encouragementLines } from '../lib/encouragement.js'
 import { loadContacts } from '../lib/contacts.js'
+import { cancelFollowUpFor } from '../lib/followUp.js'
 import { loadProfile } from '../lib/profile.js'
 import { Sheet } from '../ui/Sheet.jsx'
 import { ReachOut } from './ReachOut.jsx'
@@ -33,7 +34,7 @@ function KeepAwake() {
 // never loses it; time comes from timestamps. A timed walk also schedules a local notification for its end.
 export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date.now }) {
   const storage = useStorage()
-  const goalLine = useGoalLine()
+  const goalLine = useGoalLine(clock())
   const device = useDevice()
   const { c } = useTheme()
   const [walk, setWalk] = useState(() => loadActiveWalk(storage))
@@ -65,6 +66,7 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
       const done = finishWalk(walk, now)
       saveActiveWalk(done, storage)
       setWalk(done)
+      device.syncWalkAlert(done, now) // clears the scheduled time-up alert (the walk is over)
       device.done()
     }
   }, [walk, now, storage, device])
@@ -148,7 +150,7 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
         <Confirm title="Cancel this walk?" message="Nothing will be saved. You can start again any time."
           confirmLabel="Cancel walk" cancelLabel="Keep walking"
           onCancel={() => setConfirmCancel(false)}
-          onConfirm={() => { setConfirmCancel(false); commit(null) }} />
+          onConfirm={() => { setConfirmCancel(false); if (cancelFollowUpFor(walk.id, storage)) device.cancelFollowUp(); commit(null) }} />
       )}
       {reach ? <Sheet title="Reach out" onClose={() => setReach(false)} testID="walk-reach-sheet"><ReachOut testID="walk-reach" title={null} /></Sheet> : null}
     </View>

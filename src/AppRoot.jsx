@@ -6,7 +6,7 @@ import { StatusBar } from 'expo-status-bar'
 import { loadTheme, saveTheme } from './lib/appearance.js'
 import { hasAnyData } from './lib/backup.js'
 import { markSaved, markStress } from './lib/calm.js'
-import { answerFollowUp, claimFollowUp, settleFollowUpDefault } from './lib/followUp.js'
+import { answerFollowUp, cancelFollowUpFor, claimFollowUp, settleFollowUpDefault } from './lib/followUp.js'
 import { resolveOnboarding } from './lib/profile.js'
 import { readObject, writeObject } from './lib/storage.js'
 import { BREATHE_SAVED_MESSAGES, LOGGED_SAVED_MESSAGE } from './lib/walkMessages.js'
@@ -72,6 +72,8 @@ function Shell({ clock, theme, onTheme }) {
 
   // "How did it go?": one local notification ~30 min after an urge (max one per urge, switch in You).
   const followUp = useCallback((urgeId) => { if (claimFollowUp(urgeId, storage, clock())) device.scheduleFollowUp(urgeId) }, [storage, clock, device])
+  // The urge is gone: drop its follow-up (and the scheduled notification if it was the pending one).
+  const dropFollowUp = useCallback((urgeId) => { if (cancelFollowUpFor(urgeId, storage)) device.cancelFollowUp() }, [storage, device])
   // Leaving the app partway through a walk or Breathe counts as the end of Ride it out for this.
   useEffect(() => {
     const sub = AppState.addEventListener?.('change', (state) => {
@@ -97,7 +99,7 @@ function Shell({ clock, theme, onTheme }) {
   const exitWalk = useCallback(() => setScreen((s) => (s === 'walk' ? 'tabs' : s)), [])
 
   function startWalk() {
-    startWalkNow(storage)
+    startWalkNow(storage, clock())
     markStress(clock(), storage)
     setToast(null); setShowRide(false); setScreen('walk')
   }
@@ -180,7 +182,7 @@ function Shell({ clock, theme, onTheme }) {
 
   let body
   if (screen === 'walk') body = <WalkScreen clock={clock} longPressTip={lpTip} onSaved={onWalkSaved} onExit={exitWalk} />
-  else if (screen === 'breathe') body = <BreatheScreen clock={clock} onSave={onBreatheSaved} onCancel={backHome} />
+  else if (screen === 'breathe') body = <BreatheScreen clock={clock} onSave={onBreatheSaved} onCancel={() => { dropFollowUp(breatheId.current); breatheId.current = null; backHome() }} />
   else if (backup) body = <BackupScreen key={dataVer} clock={clock} backLabel={tab === 'you' ? 'You' : 'Home'} onBack={() => { setBackup(false); setDataVer((v) => v + 1) }} />
   else if (tab === 'home') body = <HomeScreen key={dataVer} now={now} clock={clock} onRide={onRide} liveWalk={!!loadActiveWalk(storage)} onResume={() => setScreen('walk')} onOpenBackup={openBackup} onCheckIn={() => setCheckIn(true)} />
   else if (tab === 'track') {
@@ -208,7 +210,7 @@ function Shell({ clock, theme, onTheme }) {
           <T size={15} color={c.toastText} style={{ flex: 1 }}>{toast.text}</T>
           {toast.undoId && (
             <Pressable accessibilityRole="button" testID="toast-undo" style={{ minHeight: 44, minWidth: 44, justifyContent: 'center' }}
-              onPress={() => { removeWalk(toast.undoId, storage); setToast(null); setDataVer((v) => v + 1) }}>
+              onPress={() => { removeWalk(toast.undoId, storage); dropFollowUp(toast.undoId); setToast(null); setDataVer((v) => v + 1) }}>
               <T font="bold" size={15} color={c.toastAct}>Undo</T>
             </Pressable>
           )}

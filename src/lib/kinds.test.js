@@ -139,6 +139,9 @@ describe('starting a walk from Ride it out', () => {
     expect(JSON.parse(s._data['urgewalk.v1.activeWalk']).id).toBe(w.id)
     expect(startWalkNow(s).id).toBe(w.id)
   })
+  it('uses the clock it is given (so the app clock and tests agree)', () => {
+    expect(startWalkNow(memoryStorage(), 123456789).startedAt).toBe(123456789)
+  })
   it('open walks and length labels', () => {
     const s = memoryStorage({ 'urgewalk.v1.walkPrefs': JSON.stringify({ version: 1, choice: 'open', customMinutes: 20 }) })
     expect(startWalkNow(s).plannedMinutes).toBe(null)
