@@ -1,4 +1,5 @@
-// Your pattern (Home): one plain sentence about the last 7 days and a small heat strip by time of day.
+// Urge Map (Track → Log): the screen's one sand featured panel.
+// Your pattern: one plain sentence about the last 7 days and a small heat strip by time of day.
 // Computed on this phone from saved urges. Nothing shows until there are 3 urges in the week.
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
@@ -6,7 +7,7 @@ import { loadReminder, reminderLabel, saveReminder } from '../../lib/checkin.js'
 import { SLOTS, checkinSuggestion, dismissSuggestion, loadPatternPrefs, weeklyPattern } from '../../lib/urgeMap.js'
 import { Button } from '../../ui/Button.jsx'
 import { useDevice } from '../../ui/DeviceContext.js'
-import { Card } from '../../ui/Row.jsx'
+import { FeaturedPanel, SectionLabel } from '../../ui/kit.jsx'
 import { useStorage } from '../../ui/StorageContext.js'
 import { T } from '../../ui/Text.jsx'
 import { type, useTheme } from '../../ui/theme.js'
@@ -23,8 +24,10 @@ export function PatternCard({ walks, now }) {
   if (!pattern) return null
   const max = Math.max(1, ...pattern.slots)
   return (
-    <Card testID="pattern-card" style={{ gap: 10 }}>
-      <T accessibilityRole="header" font="semibold" size={17} color={c.title}>Your pattern this week</T>
+    <View>
+    <SectionLabel>Urge map</SectionLabel>
+    <FeaturedPanel testID="pattern-card" style={{ gap: 10 }}>
+      <T font="semibold" size={17} color={c.title}>Your pattern this week</T>
       <T size={type.body} color={c.text} testID="pattern-sentence">{pattern.sentence}</T>
       <View accessible accessibilityLabel={`Urges by time of day: ${pattern.slots.map((n, i) => (n ? `${n} around ${i * 2}:00` : null)).filter(Boolean).join(', ')}`} testID="pattern-strip">
         <View style={{ flexDirection: 'row', gap: 3 }}>
@@ -33,7 +36,7 @@ export function PatternCard({ walks, now }) {
           ))}
         </View>
         <View style={{ flexDirection: 'row', marginTop: 4 }}>
-          {AXIS.map((a) => <T key={a} size={12} color={c.muted} style={{ flex: 1 }}>{a}</T>)}
+          {AXIS.map((a) => <T key={a} size={12} color={c.mutedSand} style={{ flex: 1 }}>{a}</T>)}
         </View>
       </View>
       {setAt ? <T size={14} color={c.textSoft} testID="pattern-set">Daily check-in set for {setAt}. You can change it in You.</T> : null}
@@ -45,11 +48,12 @@ export function PatternCard({ walks, now }) {
               onPress={() => { saveReminder(suggest, storage); device.syncCheckinReminder(suggest); setSetAt(reminderLabel(suggest)); setSuggest(null) }} />
             <Pressable onPress={() => { dismissSuggestion(storage, now); setSuggest(null) }} accessibilityRole="button" testID="pattern-suggest-no"
               style={{ minHeight: 44, minWidth: 44, paddingHorizontal: 12, justifyContent: 'center' }}>
-              <T font="semibold" size={15} color={c.textSoft}>Not now</T>
+              <T font="semibold" size={15} color={c.title}>Not now</T>
             </Pressable>
           </View>
         </View>
       ) : null}
-    </Card>
+    </FeaturedPanel>
+    </View>
   )
 }

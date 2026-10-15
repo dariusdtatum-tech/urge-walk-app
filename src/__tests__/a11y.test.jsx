@@ -25,7 +25,8 @@ function audit(tree) {
       if (!name) problems.push(`${id}: no accessible name`)
       const st = StyleSheet.flatten(p.style) || {}
       const fill = st.position === 'absolute' && st.top === 0
-      const h = Math.max(st.minHeight ?? 0, st.height ?? 0)
+      // hitSlop extends the touch area beyond the drawn size (the compact Seg pill: 36pt drawn, 44pt target).
+      const h = Math.max(st.minHeight ?? 0, st.height ?? 0) + (p.hitSlop?.top ?? 0) + (p.hitSlop?.bottom ?? 0)
       if (n.type !== 'RCTSwitch' && !fill && h < 44) problems.push(`${id}: target ${h}pt`)
     }
     if (n.type === 'Text' && p.maxFontSizeMultiplier != null && p.maxFontSizeMultiplier < 1.25) problems.push(`${id ?? textOf(n.children).slice(0, 20)}: text capped at ${p.maxFontSizeMultiplier}x`)

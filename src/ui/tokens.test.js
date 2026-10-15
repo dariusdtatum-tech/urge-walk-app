@@ -22,8 +22,7 @@ describe('density tokens', () => {
     expect([size.ring, size.ringStroke, size.row, size.rideBar, size.rideTile, size.tabCenter, size.button]).toEqual([164, 8, 48, 56, 96, 56, 48])
   })
   test('no text size under 12pt', () => {
-    expect(Math.min(...Object.entries(theme.type).filter(([k]) => k !== 'label').map(([, v]) => v))).toBeGreaterThanOrEqual(12)
-    expect(theme.type.label).toBe(11) // small-caps section labels only
+    expect(Math.min(...Object.values(theme.type))).toBeGreaterThanOrEqual(12)
     for (const f of files) {
       for (const m of readFileSync(f, 'utf8').matchAll(/<T\b[^>]*\bsize=\{(\d+)\}/g)) expect({ f, ok: Number(m[1]) >= 12 }).toEqual({ f, ok: true })
     }
@@ -32,6 +31,12 @@ describe('density tokens', () => {
     for (const k of ['minTap', 'row', 'button', 'seg', 'logIt', 'rideBar', 'rideTile', 'tabCenter']) expect(theme.size[k]).toBeGreaterThanOrEqual(44)
     for (const f of files) {
       for (const m of readFileSync(f, 'utf8').matchAll(/minHeight: (\d+)/g)) expect({ f, v: Number(m[1]) >= 44 }).toEqual({ f, v: true })
+      // The one smaller visual: the compact Seg pill is 36pt drawn, with hitSlop making the target 44pt.
+      for (const m of readFileSync(f, 'utf8').matchAll(/minHeight: compact \? (\d+) : (\d+)/g)) {
+        expect(Number(m[2])).toBeGreaterThanOrEqual(44)
+        expect(Number(m[1]) + 8).toBeGreaterThanOrEqual(44)
+        expect(readFileSync(f, 'utf8')).toContain('hitSlop={compact ? { top: 4, bottom: 4 } : undefined}')
+      }
     }
   })
 })

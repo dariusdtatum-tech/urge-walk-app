@@ -108,14 +108,21 @@ describe('top inset', () => {
 })
 
 describe('Track > Your walks range', () => {
-  test('a compact right-aligned pill (Week / Month / All), each segment still 44pt', async () => {
+  test('a compact right-aligned pill (Week / Month / All): 36pt drawn, 44pt hit area, segments never shrink', async () => {
     await renderApp()
     await tab('track')
     const st = StyleSheet.flatten(screen.getByTestId('range').props.style)
     expect(st.alignSelf).toBe('flex-end')
     expect(screen.getByTestId('range-all')).toHaveTextContent('All')
     expect(screen.getByTestId('range-all').props.accessibilityLabel).toBe('All time')
-    expect(StyleSheet.flatten(screen.getByTestId('range-week').props.style).minHeight).toBe(44)
+    // 36pt pill with a 44pt hit area; segments never shrink (the squashed Week/Month/All fix).
+    for (const id of ['range-week', 'range-month', 'range-all']) {
+      const seg = screen.getByTestId(id)
+      const st = StyleSheet.flatten(seg.props.style)
+      expect(st).toMatchObject({ minHeight: 36, flexShrink: 0, minWidth: 56 })
+      expect(st.minHeight + seg.props.hitSlop.top + seg.props.hitSlop.bottom).toBe(44)
+    }
+    expect(StyleSheet.flatten(screen.getByTestId('range').props.style).flexShrink).toBe(0)
     expect(screen.getByTestId('chip-avg')).toHaveTextContent(/Avg walk/)
     expect(screen.queryByText(/Streak/)).toBeNull()
   })

@@ -11,8 +11,8 @@ export const type = {
   sheetTitle: 24, rideSheetTitle: 26, rideTileIcon: 26,
   screenTitle: 28, statBig: 34,
   heroStat: 56, statPair: 30,
-  // The one exception to 12pt+: small-caps section labels (uppercase, tracked 0.08em), editorial lists.
-  label: 11,
+  // Small-caps section labels (uppercase, tracked), editorial lists. 12pt like everything else.
+  label: 12,
   ringDays: 56, ringDaysMd: 46, ringDaysSm: 36,
 }
 export const space = {

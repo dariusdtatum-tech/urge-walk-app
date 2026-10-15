@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   DRAFT_KEY, JOURNAL_KEY, buildFeed, clearDraft, commitDraft, deleteEntry, draftFromEntry, filterFeed,
-  hasChanges, insertPrompt, loadDraft, loadJournal, newDraft, saveDraft, saveJournal,
+  hasChanges, insertPrompt, loadDraft, loadJournal, newDraft, sanitizeEntries, saveDraft, saveJournal,
 } from './journal.js'
 import { groupByDay } from './logStats.js'
 
@@ -27,7 +27,7 @@ const walk = (id, startedAt, note, result = 'yes') => ({
 describe('journal storage', () => {
   it('round-trips entries under a versioned key', () => {
     const s = memoryStorage()
-    const entries = [{ id: 'a', createdAt: '2026-10-07T12:00:00.000Z', updatedAt: '2026-10-07T12:00:00.000Z', title: 'T', body: 'B', mood: 'good' }]
+    const entries = [{ id: 'a', createdAt: '2026-10-07T12:00:00.000Z', updatedAt: '2026-10-07T12:00:00.000Z', title: 'T', body: 'B', mood: 4 }]
     saveJournal(entries, s)
     expect(JSON.parse(s.data[JOURNAL_KEY]).version).toBe(1)
     expect(loadJournal(s)).toEqual({ entries, recovered: false })
@@ -51,7 +51,7 @@ describe('journal storage', () => {
 describe('draft autosave / restore', () => {
   it('saves and restores a draft, then clears it', () => {
     const s = memoryStorage()
-    const d = { ...newDraft(T0), title: 'Tonight', body: 'Half-written thou', mood: 'okay' }
+    const d = { ...newDraft(T0), title: 'Tonight', body: 'Half-written thou', mood: 3 }
     saveDraft(d, s)
     expect(loadDraft(s)).toEqual(d)
     clearDraft(s)
@@ -82,8 +82,8 @@ describe('draft autosave / restore', () => {
     const [entry] = commitDraft([], { ...newDraft(T0), body: 'one' }, T0, ids)
     const same = commitDraft([entry], draftFromEntry(entry), T0 + MIN)
     expect(same[0]).toBe(entry)
-    const edited = commitDraft([entry], { ...draftFromEntry(entry), body: 'two', mood: 'great' }, T0 + 5 * MIN)
-    expect(edited[0]).toMatchObject({ id: entry.id, body: 'two', mood: 'great', createdAt: entry.createdAt,
+    const edited = commitDraft([entry], { ...draftFromEntry(entry), body: 'two', mood: 5 }, T0 + 5 * MIN)
+    expect(edited[0]).toMatchObject({ id: entry.id, body: 'two', mood: 5, createdAt: entry.createdAt,
       updatedAt: new Date(T0 + 5 * MIN).toISOString() })
     // clearing all text doesn't wipe a saved entry
     expect(commitDraft([entry], { ...draftFromEntry(entry), title: '', body: '' }, T0)[0]).toBe(entry)
@@ -92,7 +92,7 @@ describe('draft autosave / restore', () => {
   it('hasChanges', () => {
     const [entry] = commitDraft([], { ...newDraft(T0), body: 'one' }, T0, ids)
     expect(hasChanges(newDraft(T0), [entry])).toBe(false)
-    expect(hasChanges({ ...newDraft(T0), mood: 'low' }, [entry])).toBe(true)
+    expect(hasChanges({ ...newDraft(T0), mood: 2 }, [entry])).toBe(true)
     expect(hasChanges(draftFromEntry(entry), [entry])).toBe(false)
     expect(hasChanges({ ...draftFromEntry(entry), body: 'one!' }, [entry])).toBe(true)
   })
@@ -142,5 +142,27 @@ describe('insertPrompt', () => {
   it('adds the prompt at the top or as a new paragraph', () => {
     expect(insertPrompt('', 'What went well today?')).toBe('What went well today?\n')
     expect(insertPrompt('Some words  \n', 'Q?')).toBe('Some words\n\nQ?\n')
+  })
+})
+
+describe('mood scale (Rough … Good, levels 1–5)', () => {
+  it('five words, fills 20% → 100%, no emoji', async () => {
+    const { MOODS } = await import('./journalContent.js')
+    expect(MOODS.map((m) => [m.id, m.label, m.fill])).toEqual([[1, 'Rough', 0.2], [2, 'Low', 0.4], [3, 'Okay', 0.6], [4, 'Steady', 0.8], [5, 'Good', 1]])
+    expect(JSON.stringify(MOODS)).not.toMatch(/\p{Extended_Pictographic}/u)
+  })
+  it('old stored moods map onto the new scale, so nothing is lost', () => {
+    const old = ['hard', 'low', 'okay', 'good', 'great'].map((mood, i) => ({ id: `e${i}`, createdAt: '2026-10-07T12:00:00.000Z', title: 't', body: 'b', mood }))
+    expect(sanitizeEntries(old).map((e) => e.mood)).toEqual([1, 2, 3, 4, 5])
+    // new levels pass through untouched (a new "Good" = 5 never gets re-mapped to Steady)
+    expect(sanitizeEntries(sanitizeEntries(old)).map((e) => e.mood)).toEqual([1, 2, 3, 4, 5])
+    expect(sanitizeEntries([{ ...old[0], mood: 9 }, { ...old[0], mood: 'furious' }]).map((e) => e.mood)).toEqual([null, null])
+  })
+  it('an old draft and an old saved journal load with mapped moods', () => {
+    const storage = memoryStorage()
+    storage.setItem(JOURNAL_KEY, JSON.stringify({ version: 1, entries: [{ id: 'a', createdAt: '2026-10-07T12:00:00.000Z', title: 'T', body: 'B', mood: 'great' }] }))
+    storage.setItem(DRAFT_KEY, JSON.stringify({ version: 1, entryId: null, startedAt: '2026-10-07T12:00:00.000Z', title: 'd', body: '', mood: 'hard' }))
+    expect(loadJournal(storage).entries[0].mood).toBe(5)
+    expect(loadDraft(storage).mood).toBe(1)
   })
 })

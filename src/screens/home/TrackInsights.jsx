@@ -25,7 +25,7 @@ export function TrackInsights({ now }) {
   const since = [hero?.startDate, firstWalk === '9999' ? null : todayISO(new Date(firstWalk))].filter(Boolean).sort()[0] || today
   if (!hero && !walks.length) return null
   return (
-    <View style={{ gap: space.section }} testID="track-insights">
+    <View style={{ gap: space.section }} testID="track-insights">{/* Urge Map is the one sand panel; the rest are unboxed sections */}
       <PatternCard walks={walks} now={now} />
       {hero ? <NeverZero hero={hero} walks={walks} today={today} highlight={highlight} /> : null}
       <WalksCard walks={walks} range={range} onRange={(id) => { setRange(id); saveRange(id, storage) }} now={now} since={since} />

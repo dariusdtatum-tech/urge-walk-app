@@ -816,10 +816,10 @@ exports[`component kit in dark SectionLabel matches its snapshot and uses only t
       {
         "color": "#afafae",
         "fontFamily": "Jakarta-SemiBold",
-        "fontSize": 11,
+        "fontSize": 12,
       },
       {
-        "letterSpacing": 0.88,
+        "letterSpacing": 0.96,
         "marginBottom": 2,
         "marginTop": 18,
         "textTransform": "uppercase",
@@ -2020,10 +2020,10 @@ exports[`component kit in light SectionLabel matches its snapshot and uses only 
       {
         "color": "#3f7a6b",
         "fontFamily": "Jakarta-SemiBold",
-        "fontSize": 11,
+        "fontSize": 12,
       },
       {
-        "letterSpacing": 0.88,
+        "letterSpacing": 0.96,
         "marginBottom": 2,
         "marginTop": 18,
         "textTransform": "uppercase",

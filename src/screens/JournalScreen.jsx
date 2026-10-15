@@ -6,20 +6,19 @@ import {
   buildFeed, clearDraft, commitDraft, deleteEntry, draftFromEntry, filterFeed, hasChanges, insertPrompt, loadDraft, loadJournal,
   MAX_BODY_LENGTH, MAX_TITLE_LENGTH, newDraft, saveDraft, saveJournal,
 } from '../lib/journal.js'
-import { MOODS, PROMPTS } from '../lib/journalContent.js'
+import { MOODS, PROMPTS, moodInfo } from '../lib/journalContent.js'
 import { formatTimeOfDay, groupByDay, kindOf, walkSummaryLabel } from '../lib/logStats.js'
 import { loadWalks } from '../lib/walkStorage.js'
 import { Button } from '../ui/Button.jsx'
 import { Confirm } from '../ui/Confirm.jsx'
 import { Notice } from '../ui/Row.jsx'
-import { RowGroup, SectionLabel } from '../ui/kit.jsx'
+import { MoodDot, RowGroup, SectionLabel } from '../ui/kit.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
 import { size as sz, space, type, useTheme } from '../ui/theme.js'
 import { ResultWord } from './LogScreen.jsx'
 
 const NOTE_TAGS = { walk: '🚶 Walk note', breathe: '🌬️ Breathe note', ground: '🌿 Ground note', logged: '🌊 Urge note' }
-const moodInfo = (id) => MOODS.find((m) => m.id === id)
 
 // Journal: your entries plus notes from walks / breaths / logs, newest first, with search.
 // The editor autosaves a draft on every keystroke; an unfinished draft reopens next time.
@@ -87,7 +86,12 @@ export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChan
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
                         <T font="semibold" size={14} color={c.muted}>{formatTimeOfDay(item.time)}</T>
                         <T font="semibold" size={type.body} color={c.title} style={{ flex: 1 }} numberOfLines={1}>{item.entry.title}</T>
-                        {item.entry.mood ? <T size={18} accessibilityLabel={`Mood: ${moodInfo(item.entry.mood).label}`}>{moodInfo(item.entry.mood).emoji}</T> : null}
+                        {moodInfo(item.entry.mood) ? (
+                          <View testID="journal-mood" accessible accessibilityLabel={`Mood: ${moodInfo(item.entry.mood).label}`} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                            <MoodDot fill={moodInfo(item.entry.mood).fill} size={10} />
+                            <T size={13} color={c.textSoft}>{moodInfo(item.entry.mood).label}</T>
+                          </View>
+                        ) : null}
                       </View>
                       {item.entry.body ? <T size={15} color={c.textSoft} numberOfLines={3}>{item.entry.body}</T> : null}
                     </>
@@ -158,10 +162,10 @@ function JournalEditor({ draft, entries, restored, onChange, onDone, onDiscard, 
               const on = draft.mood === m.id
               return (
                 <Pressable key={m.id} onPress={() => change({ mood: on ? null : m.id })} accessibilityRole="button" accessibilityState={{ selected: on }}
-                  accessibilityLabel={m.label} testID={`mood-${m.id}`}
-                  style={{ flex: 1, minHeight: 60, borderRadius: 14, alignItems: 'center', justifyContent: 'center', borderWidth: on ? 2 : 1, borderColor: on ? c.title : c.border, backgroundColor: on ? c.sand : c.card }}>
-                  <T size={22} accessibilityElementsHidden>{m.emoji}</T>
-                  <T size={12} max={1.4} color={on ? c.title : c.muted}>{m.label}</T>
+                  accessibilityLabel={m.label} testID={`mood-${m.label.toLowerCase()}`}
+                  style={{ flex: 1, minHeight: 60, borderRadius: 14, alignItems: 'center', justifyContent: 'center', gap: 6, borderWidth: on ? 2 : 1, borderColor: on ? c.title : c.border, backgroundColor: on ? c.sand : c.card }}>
+                  <MoodDot fill={m.fill} size={14} />
+                  <T size={12} max={1.4} font={on ? 'semibold' : 'body'} color={on ? c.title : c.textSoft}>{m.label}</T>
                 </Pressable>
               )
             })}

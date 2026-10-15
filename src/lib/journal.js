@@ -1,8 +1,9 @@
 // Journal data and pure helpers.
 // - urgewalk.v1.journal       { version: 1, entries: [{ id, createdAt, updatedAt, title, body, mood }] }
+//   mood is a level 1–5 (Rough … Good); older string moods ('hard' … 'great') are mapped on read.
 // - urgewalk.v1.journalDraft  the entry being written right now (autosaved on every keystroke)
 // Walk notes are NOT copied here: the Journal list reads them from urgewalk.v1.walks.
-import { MOOD_IDS } from './journalContent.js'
+import { toMood } from './journalContent.js'
 import { makeId, readList, readObject, writeList, writeObject } from './storage.js'
 
 export const JOURNAL_KEY = 'urgewalk.v1.journal'
@@ -12,7 +13,7 @@ export const MAX_BODY_LENGTH = 20000
 
 const isTime = (s) => typeof s === 'string' && !Number.isNaN(Date.parse(s))
 const str = (v, max) => (typeof v === 'string' ? v.slice(0, max) : '')
-const mood = (m) => (MOOD_IDS.includes(m) ? m : null)
+const mood = toMood // 1–5; old string moods map onto the new scale
 
 // ---------- Saved entries ----------
 

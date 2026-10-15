@@ -1,6 +1,6 @@
 import { View } from 'react-native'
 import { cleanCount, last30, lifetimeRidden } from '../../lib/homeIdeas.js'
-import { Card } from '../../ui/Row.jsx'
+import { SectionLabel } from '../../ui/kit.jsx'
 import { T } from '../../ui/Text.jsx'
 import { type, useTheme } from '../../ui/theme.js'
 
@@ -21,7 +21,9 @@ export function NeverZero({ hero, walks, today, highlight = false }) {
     </View>
   )
   return (
-    <Card testID="never-zero">
+    <View>
+    <SectionLabel>Never zero</SectionLabel>
+    <View testID="never-zero" style={{ gap: 10, paddingVertical: 12, borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.hairline }}>
       <View style={{ flexDirection: 'row', gap: 12 }}>
         {col('Urges ridden out', total.toLocaleString(), null, 'lifetime · walks, breaths, logs', 'nz-lifetime', highlight)}
         {col('Last 30 days', clean, ' of 30', 'days clean', 'nz-clean')}
@@ -33,6 +35,7 @@ export function NeverZero({ hero, walks, today, highlight = false }) {
             style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: d.clean ? c.ringB : 'transparent', borderWidth: d.clean ? 0 : 1.5, borderColor: c.cellEdge }} />
         ))}
       </View>
-    </Card>
+    </View>
+    </View>
   )
 }

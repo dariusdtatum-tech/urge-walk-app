@@ -3,7 +3,7 @@ import Svg, { Circle, Defs, LinearGradient, Path, Stop } from 'react-native-svg'
 import { todayISO } from '../../lib/cleanTime.js'
 import { passedDayKeys, passedDaysIn } from '../../lib/dayRuns.js'
 import { RANGES, RANGE_IDS, bucketCounts, chartPoints, rangeBuckets, rangeStats, smoothPath, threeDayAverage } from '../../lib/homeStats.js'
-import { Card } from '../../ui/Row.jsx'
+import { SectionLabel } from '../../ui/kit.jsx'
 import { Seg } from '../../ui/Seg.jsx'
 import { T } from '../../ui/Text.jsx'
 import { type, useTheme } from '../../ui/theme.js'
@@ -30,18 +30,18 @@ export function WalksCard({ walks, range, onRange, now, since }) {
     avgChip(stats.avgWalkSeconds),
   ]
   return (
-    <Card testID="walks-card">
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-        <T accessibilityRole="header" font="serif" size={24} color={c.title} style={{ flex: 1, minWidth: 120 }}>Your walks</T>
+    <View testID="walks-card" style={{ gap: 10 }}>
+      <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 8 }}>
+        <View style={{ flex: 1 }}><SectionLabel>Your walks</SectionLabel></View>
         <Seg items={RANGE_IDS.map((id) => ({ id, label: id === 'all' ? 'All' : RANGES[id].name, a11y: RANGES[id].name }))} value={range} onChange={onRange} label="Walks range" testID="range" compact />
       </View>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        {chips.map((ch) => (
+      <View style={{ flexDirection: 'row', paddingVertical: 12, borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.hairline }}>
+        {chips.map((ch, i) => (
           <View key={ch.id} testID={`chip-${ch.id}`} accessible accessibilityLabel={ch.a11y ?? `${ch.n} ${ch.label}${ch.sub ? `, ${ch.sub}` : ''}`}
-            style={{ flex: 1, backgroundColor: c.sand, borderRadius: 14, padding: 10, gap: 2 }}>
-            <T font="serif" size={28} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{ch.n.toLocaleString()}</T>
-            <T font="semibold" size={13} color={c.mutedSand}>{ch.label}</T>
-            {ch.sub ? <T size={12} color={c.mutedSand}>{ch.sub}</T> : null}
+            style={{ flex: 1, gap: 2, paddingLeft: i ? 12 : 0, borderLeftWidth: i ? 1 : 0, borderLeftColor: c.hairline }}>
+            <T font="serifItalic" size={28} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{ch.n.toLocaleString()}</T>
+            <T font="semibold" size={13} color={c.textSoft}>{ch.label}</T>
+            {ch.sub ? <T size={12} color={c.textSoft}>{ch.sub}</T> : null}
           </View>
         ))}
       </View>
@@ -54,7 +54,7 @@ export function WalksCard({ walks, range, onRange, now, since }) {
       ) : null}
       <Chart buckets={buckets} counts={values} dots={range === 'week'} />
       {caption ? <T size={13} color={c.muted}>{caption}</T> : null}
-    </Card>
+    </View>
   )
 }
 

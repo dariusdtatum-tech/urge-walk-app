@@ -53,7 +53,7 @@ export const light = {
   // Kit: the one small sea-glass "Plus" tag, and chart bars
   plusBg: '#a9cbc0', onPlus: '#24395c', chartBar: '#5d9384', chartTrack: '#e9e1d2',
   // Editorial lists: small-caps labels, hairline dividers (navy at 10%), one flat featured panel
-  sectionLabel: '#3f7a6b', hairline: 'rgba(36, 57, 92, 0.10)', featured: '#f1ebe0',
+  moodFill: '#a9cbc0', sectionLabel: '#3f7a6b', hairline: 'rgba(36, 57, 92, 0.10)', featured: '#f1ebe0',
 }
 export const dark = {
   bg: '#0f1d33',
@@ -105,6 +105,6 @@ export const dark = {
   error: '#f0a59a',
   plusBg: '#a9cbc0', onPlus: '#0f1d33', chartBar: '#a9cbc0', chartTrack: '#22375a',
   // cream at 70% on night, flattened; hairline = cream at 10%
-  sectionLabel: '#afafae', hairline: 'rgba(243, 237, 226, 0.10)', featured: '#182b47',
+  moodFill: '#a9cbc0', sectionLabel: '#afafae', hairline: 'rgba(243, 237, 226, 0.10)', featured: '#182b47',
 }
 export const palettes = { light, dark }

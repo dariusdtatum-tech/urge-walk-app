@@ -84,7 +84,7 @@ export function HeroStat({ value, label, sub, testID = 'hero-stat', accessibilit
   )
 }
 
-// Small-caps section label: Plus Jakarta 11pt, tracked 0.08em. Deep sea in light, cream at 70% in dark.
+// Small-caps section label: Plus Jakarta 12pt, tracked 0.08em. Deep sea in light, cream at 70% in dark.
 export function SectionLabel({ children, testID }) {
   const { c } = useTheme()
   return (
@@ -151,4 +151,16 @@ export function StatPair({ items, testID = 'stat-pair' }) {
 export function FeaturedPanel({ children, testID, style }) {
   const { c } = useTheme()
   return <View testID={testID} style={[{ backgroundColor: c.featured, borderRadius: radius.card, padding: space.card, gap: space.cardGap }, style]}>{children}</View>
+}
+
+// Journal mood dot: sea glass whose fill grows 20% → 100% with the level (1–5). Every dot carries a
+// cellEdge outline so even the faintest stays ≥ 3:1 against the background. Decorative: the word says it.
+export function MoodDot({ fill, size: d = 12, testID }) {
+  const { c } = useTheme()
+  return (
+    <View testID={testID} accessibilityElementsHidden importantForAccessibility="no"
+      style={{ width: d, height: d, borderRadius: d / 2, borderWidth: 1.5, borderColor: c.cellEdge, overflow: 'hidden' }}>
+      <View style={{ flex: 1, backgroundColor: c.moodFill, opacity: fill }} />
+    </View>
+  )
 }

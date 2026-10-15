@@ -88,3 +88,24 @@ test.each(['light', 'dark'])('Track lists use hairline rows under section labels
   for (const e of screen.queryAllByTestId('log-entry')) expect(flat(e)).toMatchObject({ borderBottomWidth: 1, borderBottomColor: palettes[scheme].hairline })
   expect(boxedRows().filter((id) => id === 'log-entry' || id === 'journal-item' || id === 'summary')).toEqual([])
 })
+
+test.each(['light', 'dark'])('Track Log: chart sections are unboxed; the Urge Map is the one sand panel (%s)', async (scheme) => {
+  const walks = [0, 0, 1, 1, 2].map((d, i) => buildLoggedRecord({ id: `w${i}`, at: T0 - d * DAY - i * 3600000, note: '', result: 'yes' }))
+  await renderApp(scheme, { ...habitsSeed(), 'urgewalk.v1.walks': JSON.stringify({ version: 1, walks }) })
+  await tab('Track')
+  expect(flat(screen.getByTestId('pattern-card')).backgroundColor).toBe(palettes[scheme].featured)
+  for (const id of ['never-zero', 'walks-card']) expect(flat(screen.getByTestId(id)).backgroundColor).toBeUndefined()
+  expect(boxedRows().filter((id) => id !== 'pattern-empty')).toEqual([]) // the heat-strip cells are the chart itself
+  for (const ch of ['chip-walked', 'chip-passed', 'chip-avg']) expect(flat(screen.getByTestId(ch)).backgroundColor).toBeUndefined()
+})
+
+test('Journal rows show the mood word and a dot, never an emoji; old moods map (great → Good, good → Steady)', async () => {
+  const at = new Date(T0).toISOString()
+  const entries = [{ id: 'a', createdAt: at, title: 'One', body: 'x', mood: 'great' }, { id: 'b', createdAt: at, title: 'Two', body: 'y', mood: 'good' }]
+  await renderApp('light', { ...habitsSeed(), 'urgewalk.v1.journal': JSON.stringify({ version: 1, entries }) })
+  await tab('Track')
+  await fireEvent.press(screen.getByTestId('track-journal'))
+  const moods = screen.getAllByTestId('journal-mood')
+  expect(moods.map((m) => m.props.accessibilityLabel).sort()).toEqual(['Mood: Good', 'Mood: Steady'])
+  expect(JSON.stringify(screen.toJSON())).not.toMatch(/[\u{1F600}-\u{1F64F}]/u)
+})
