@@ -33,7 +33,7 @@ describe('Home extras', () => {
     const storage = memoryStorage({ ...habitsSeed(), ...onboardedProfile({ identity: 'waves', why: 'For a quiet morning' }) })
     await renderApp({ storage })
     expect(screen.getByTestId('identity-line').props.children).toBe('Someone riding it out, wave by wave')
-    expect(screen.getByTestId('daily-line')).toBeTruthy()
+    expect(screen.queryByTestId('daily-line')).toBeNull() // no rotating quote on Home
     await fireEvent.press(screen.getByTestId('pager-dot-1'))
     expect(screen.getByTestId('clean-time-value').props.accessibilityLabel).toMatch(/^163 days/)
     expect(screen.getByTestId('ms-last')).toHaveTextContent(/90 days|3 months/i)

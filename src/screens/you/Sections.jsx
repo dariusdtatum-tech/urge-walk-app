@@ -16,6 +16,7 @@ import { lengthLabel } from '../../lib/walkStorage.js'
 import { MAX_CONTACTS } from '../../lib/contacts.js'
 import { Button } from '../../ui/Button.jsx'
 import { Field } from '../../ui/Field.jsx'
+import { KeptCard } from '../home/KeptCard.jsx'
 import { Card, GroupTitle, Row, ToggleRow } from '../../ui/Row.jsx'
 import { Seg } from '../../ui/Seg.jsx'
 import { Sheet } from '../../ui/Sheet.jsx'
@@ -52,10 +53,6 @@ function WhySection({ storage, profile, hero, today, reasonCount, setShowReasons
   return (
     <>
       <Row title="Your reasons" sub={reasonCount ? `${reasonCount} saved · one shows when you ride it out` : 'A photo, a voice note, or a few words'} testID="reasons-row" onPress={() => setShowReasons(true)} />
-      <ToggleRow title="Money kept" sub={moneyOn(profile) ? `${fmtMoney(moneyPerTime(profile))} each time${loadGoal(storage)?.name ? ` · toward ${loadGoal(storage).name}` : ''}` : 'Off. A private running total, if it helps.'}
-        value={moneyOn(profile)} testID="money-toggle" onChange={(on) => (on ? setShowMoney(true) : changeProfile({ timeBack: { ...(profile.timeBack || { hoursPerTime: 1 }), moneyPerTime: null } }))} />
-      {moneyOn(profile) ? <Row title="Money kept settings" sub="Amount and goal" testID="money-row" onPress={() => setShowMoney(true)} /> : null}
-      <TimeBackCard profile={profile} hero={hero} today={today} onChange={changeProfile} />
       <GroupTitle>About you</GroupTitle>
       <Row title="Your answers" sub={`${list.filter((a) => a.value).length} of ${list.length} answered`} testID="answers-toggle" chevron={showAnswers ? '⌃' : '›'} onPress={() => setShowAnswers(!showAnswers)} />
       {showAnswers ? list.map((a) => <Row key={a.field} title={a.title} sub={a.value || 'Not set'} subMuted={!a.value} testID={`answer-${a.field}`} onPress={() => setAnswer(a.field)} />) : null}
@@ -65,11 +62,16 @@ function WhySection({ storage, profile, hero, today, reasonCount, setShowReasons
   )
 }
 
-function ProgressSection({ habits, hero, earned, setSheet, prefs, showLengths, setShowLengths, changePrefs }) {
+function ProgressSection({ storage, profile, today, walks, changeProfile, setShowMoney, habits, hero, earned, setSheet, prefs, showLengths, setShowLengths, changePrefs }) {
   return (
     <>
       <Row title="Trackers" sub={habits.length === 0 ? 'Add the date you started' : habits.map((h) => h.name).join(' · ')} testID="trackers-row" onPress={() => setSheet({ mode: 'manage' })} />
       {hero ? <Row title="Milestones" sub={`${earned === 1 ? '1 earned' : `${earned} earned`} · ${hero.name}`} testID="milestones-row" onPress={() => setSheet({ mode: 'milestones' })} /> : null}
+      <ToggleRow title="Money kept" sub={moneyOn(profile) ? `${fmtMoney(moneyPerTime(profile))} each time${loadGoal(storage)?.name ? ` · toward ${loadGoal(storage).name}` : ''}` : 'Off. A private running total, if it helps.'}
+        value={moneyOn(profile)} testID="money-toggle" onChange={(on) => (on ? setShowMoney(true) : changeProfile({ timeBack: { ...(profile.timeBack || { hoursPerTime: 1 }), moneyPerTime: null } }))} />
+      {moneyOn(profile) ? <Row title="Money kept settings" sub="Amount and goal" testID="money-row" onPress={() => setShowMoney(true)} /> : null}
+      <KeptCard profile={profile} hero={hero} walks={walks} today={today} />
+      <TimeBackCard profile={profile} hero={hero} today={today} onChange={changeProfile} />
       <Row title="Walk length" sub={`${lengthLabel(prefs)} · for Walk`} testID="walk-length" chevron={showLengths ? '⌃' : '›'} onPress={() => setShowLengths(!showLengths)} />
       {showLengths ? <WalkLengthPicker prefs={prefs} onChange={changePrefs} /> : null}
     </>

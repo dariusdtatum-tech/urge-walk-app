@@ -1,0 +1,44 @@
+// Money kept (You → Progress): the running total and the one optional savings goal. Hidden entirely
+// until money is set. Time back sits right below it (TimeBackCard), hidden until setup says how often.
+import { View } from 'react-native'
+import { fmtMoney, goalProgress, loadGoal, moneyKept } from '../../lib/money.js'
+import { Card } from '../../ui/Row.jsx'
+import { useStorage } from '../../ui/StorageContext.js'
+import { T } from '../../ui/Text.jsx'
+import { useTheme } from '../../ui/theme.js'
+
+export function KeptCard({ profile, hero, walks, today }) {
+  const storage = useStorage()
+  const { c } = useTheme()
+  const kept = moneyKept(profile, hero, walks, today)
+  const goal = kept ? loadGoal(storage) : null
+  const prog = goal ? goalProgress(goal, kept.total) : null
+  return (
+    <>
+      {kept ? (
+        <Card testID="kept-card" style={{ gap: 8 }}>
+          {kept ? (
+            <View testID="kept-money" style={{ gap: 2 }}>
+              <T size={13} color={c.muted}>Money kept</T>
+              <T font="serif" size={28} color={c.title}>{fmtMoney(kept.total)}</T>
+              <T size={13} color={c.muted}>
+                {kept.basis === 'estimate' ? `An estimate at ${fmtMoney(kept.perTime)} each time.` : `${kept.passed} ${kept.passed === 1 ? 'urge' : 'urges'} that passed × ${fmtMoney(kept.perTime)}.`}
+              </T>
+            </View>
+          ) : null}
+          {goal?.name || prog ? (
+            <View style={{ gap: 6 }} testID="kept-goal">
+              <T size={15} color={c.text}>Going toward{goal.name ? <T font="semibold" color={c.title}> {goal.name}</T> : ' your goal'}{prog ? ` · ${fmtMoney(goal.target)}` : ''}</T>
+              {prog ? (
+                <View accessible accessibilityRole="progressbar" accessibilityLabel={`${prog.pct} percent of your goal`} accessibilityValue={{ min: 0, max: 100, now: prog.pct }}
+                  style={{ height: 8, borderRadius: 4, backgroundColor: c.sand, overflow: 'hidden' }}>
+                  <View style={{ width: `${prog.pct}%`, height: 8, backgroundColor: c.action }} />
+                </View>
+              ) : null}
+            </View>
+          ) : null}
+        </Card>
+      ) : null}
+    </>
+  )
+}

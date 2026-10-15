@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { AccessibilityInfo, findNodeHandle, Pressable, ScrollView, View } from 'react-native'
+import { AccessibilityInfo, Animated, findNodeHandle, PanResponder, Pressable, ScrollView, useWindowDimensions, View } from 'react-native'
 import { bannerDismissed, dismissBanner } from '../lib/calm.js'
 import { todayISO } from '../lib/cleanTime.js'
 import { undoableReset } from '../lib/homeIdeas.js'
 import { cleanDays, shortDate } from '../lib/homeStats.js'
 import { loadMilestones, ringLabel, ringSegment, saveMilestones, syncMilestones } from '../lib/milestones.js'
 import { identityLine, loadProfile } from '../lib/profile.js'
-import { loadWalks } from '../lib/walkStorage.js'
 import { Button } from '../ui/Button.jsx'
 import { WaveIcon } from '../ui/Icons.jsx'
 import { Notice } from '../ui/Row.jsx'
@@ -17,40 +16,77 @@ import { HeroPager } from './home/HeroPager.jsx'
 import { MilestoneSheet } from './home/Milestones.jsx'
 import { CheckInCard } from './CheckInSheet.jsx'
 import { FirstWeekCard } from './home/FirstWeekCard.jsx'
-import { TrackerDrawer } from './home/TrackerDrawer.jsx'
-import { WhyLine, YourWhySheet } from './home/YourWhy.jsx'
+import { DrawerPeek, drawerWidth, TrackerDrawer } from './home/TrackerDrawer.jsx'
+import { useReducedMotion } from '../ui/motion.js'
 import { ReachOut } from './ReachOut.jsx'
-import { ReasonsSheet } from './Reasons.jsx'
 import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 
-// Home holds at most five things (Option C, written down in docs and enforced by a test):
-//   1. the title, which is the tracker switcher (opens the left drawer)
-//   2. Ride it out
-//   3. the ring (two-page hero with the daily line / clean time + milestone cards)
-//   4. the "Your why" line (or "+ Add a habit" in the same slot while there's one tracker)
-//   5. check-in
-// Short-lived helpers (undo-reset banners, notices, the first-week card) come and go; anything new
-// must replace one of the five or live in the drawer, Track or You.
-export const HOME_ITEMS = ['home-title', 'ride-bar', 'hero', 'why-line', 'checkin-card']
+// Home holds at most four things (Option C v2, written down in AGENTS.md and enforced by a test):
+//   1. the title, which is the tracker switcher (tap it, or swipe in from the left edge, to open the drawer)
+//   2. Ride it out (always one tap)
+//   3. the ring (two pages: milestone ring / clean time + milestone cards)
+//   4. check-in
+// Short-lived helpers (undo-reset banners, notices, the first-week card) come and go. There is no
+// rotating quote and no Your why line: reasons live in You and in Ride it out; money kept and time
+// back live in You → Progress. Add tracker lives in the drawer. Anything new must replace one of the
+// four or live in the drawer, Track or You.
+// Edge swipe: a narrow strip along the left edge (the screen's side padding, so it never sits on top
+// of Ride it out or any other control). It only takes over once the drag is clearly sideways and
+// rightward, so vertical scrolling and the ring pager (which is inset from the edge) keep working.
+export const EDGE_ZONE = space.screen
+export const edgeIntent = (dx, dy) => dx > 8 && Math.abs(dx) > 2 * Math.abs(dy)
+export const edgeOpens = (dx, vx, width) => dx > width * 0.35 || vx > 0.5
+export const HOME_ITEMS = ['home-title', 'ride-bar', 'hero', 'checkin-card']
 export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, onOpenBackup, onCheckIn = () => {}, onFirstWeek = () => {}, onOpenYou = () => {} }) {
   const storage = useStorage()
   const { c } = useTheme()
   const today = todayISO(new Date(now))
-  const [walks] = useState(() => loadWalks(storage).walks)
   const [profile] = useState(() => loadProfile(storage))
   const [milestones, setMilestones] = useState(() => loadMilestones(storage))
   const storeMilestones = (next) => { saveMilestones(next, storage); setMilestones(next) }
   const editor = useTrackerEditor({ today, now: clock, onOpenBackup, onMilestones: storeMilestones })
   const { habits, notice, setNotice, sheet, setSheet, hero, activeId, setActive } = editor
   const [celebrations, setCelebrations] = useState([])
-  const [drawer, setDrawer] = useState(false)
-  const [panel, setPanel] = useState(null) // 'why' | 'reasons' | 'reach'
+  const [drawer, setDrawer] = useState(null) // null | { fromX? }
+  const reduced = useReducedMotion()
+  const { width: screenW } = useWindowDimensions()
+  const panelW = drawerWidth(screenW)
+  const [peeking, setPeeking] = useState(false)
+  const peekX = useRef(new Animated.Value(-panelW)).current
+  const live = useRef({ reduced, panelW, dx: 0 })
+  live.current.reduced = reduced; live.current.panelW = panelW
+  const edge = useRef(PanResponder.create({
+    onStartShouldSetPanResponder: () => false,
+    onMoveShouldSetPanResponder: (_, g) => edgeIntent(g.dx, g.dy),
+    onPanResponderTerminationRequest: () => false,
+    onPanResponderGrant: () => {
+      const L = live.current
+      L.dx = 0
+      // Reduce Motion: no panel following the finger; the drawer just fades open.
+      if (L.reduced) { setDrawer({}); return }
+      peekX.setValue(-L.panelW); setPeeking(true)
+    },
+    onPanResponderMove: (_, g) => {
+      const L = live.current
+      if (L.reduced) return
+      L.dx = Math.max(0, Math.min(L.panelW, g.dx))
+      peekX.setValue(L.dx - L.panelW)
+    },
+    onPanResponderRelease: (_, g) => {
+      const L = live.current
+      if (L.reduced) return
+      if (edgeOpens(g.dx, g.vx, L.panelW)) { setPeeking(false); setDrawer({ fromX: L.dx - L.panelW }) }
+      else Animated.timing(peekX, { toValue: -L.panelW, duration: 150, useNativeDriver: true }).start(() => setPeeking(false))
+    },
+    onPanResponderTerminate: () => { setPeeking(false) },
+  })).current
+  const [panel, setPanel] = useState(null) // 'reach'
   const [, setTick] = useState(0)
   const titleRef = useRef(null)
   // Closing the drawer puts screen-reader focus back on the title that opened it.
   const closeDrawer = (then) => {
-    setDrawer(false)
+    setDrawer(null)
     // After the modal is gone (iOS needs a beat), move VoiceOver / TalkBack focus back to the title.
     setTimeout(() => {
       const el = titleRef.current
@@ -81,10 +117,12 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
   const identity = identityLine(profile)
 
   return (
+    <View style={{ flex: 1 }}>
     <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="home">
       <View style={{ gap: 2 }}>
         <T font="medium" size={15} color={c.muted}>{dateLine}</T>
-        <Pressable ref={titleRef} onPress={() => setDrawer(true)} testID="home-title" accessibilityRole="button"
+        <Pressable ref={titleRef} onPress={() => setDrawer({})} testID="home-title" accessibilityRole="button"
+          accessibilityActions={[{ name: 'activate' }, { name: 'openTrackers', label: 'Open trackers' }]} onAccessibilityAction={() => setDrawer({})}
           accessibilityLabel={hero ? `${hero.name}. ${habits.length > 1 ? 'Switch or edit trackers' : 'Your trackers'}` : 'Your trackers'}
           style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}>
           <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title} numberOfLines={2} style={{ flexShrink: 1 }}>{hero ? hero.name : 'Home'}</T>
@@ -128,14 +166,11 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
         </View>
       )}
 
-      {hero ? (
-        <WhyLine today={today} onOpen={() => setPanel('why')} onAddHabit={habits.length === 1 ? () => setSheet({ mode: 'add' }) : null} />
-      ) : null}
       <FirstWeekCard now={now} onStep={(id) => (id === 'start' ? setSheet({ mode: 'add' }) : onFirstWeek(id))} />
       <CheckInCard today={today} onOpen={onCheckIn} />
 
       {drawer ? (
-        <TrackerDrawer habits={habits} activeId={activeId} today={today} now={now} onClose={() => closeDrawer()}
+        <TrackerDrawer fromX={drawer.fromX ?? null} habits={habits} activeId={activeId} today={today} now={now} onClose={() => closeDrawer()}
           onSelect={(id) => closeDrawer(() => setActive(id))}
           onEdit={(habit) => closeDrawer(() => setSheet({ mode: 'edit', habit, from: 'manage' }))}
           onManage={() => closeDrawer(() => setSheet({ mode: 'manage' }))}
@@ -143,11 +178,6 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
           onReachOut={() => closeDrawer(() => setPanel('reach'))}
           onBackup={() => closeDrawer(onOpenBackup)} />
       ) : null}
-      {panel === 'why' ? (
-        <YourWhySheet profile={profile} hero={hero} walks={walks} today={today} onClose={() => setPanel(null)}
-          onEditReasons={() => setPanel('reasons')} onSettings={() => { setPanel(null); onOpenYou('why') }} />
-      ) : null}
-      {panel === 'reasons' ? <ReasonsSheet onClose={() => setPanel('why')} /> : null}
       {panel === 'reach' ? (
         <Sheet onClose={() => setPanel(null)} title="Reach out" testID="home-reach-sheet" right={<HeaderButton label="Done" onPress={() => setPanel(null)} testID="home-reach-done" />}>
           <ReachOut testID="home-reach" title="" onSetup={() => { setPanel(null); onOpenYou('contacts') }} />
@@ -159,6 +189,10 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
       ) : null}
       {editor.sheets}
     </ScrollView>
+    {peeking ? <DrawerPeek x={peekX} width={panelW} habits={habits} activeId={activeId} today={today} now={now} /> : null}
+    {!drawer ? <View {...edge.panHandlers} testID="home-edge" accessibilityElementsHidden importantForAccessibility="no"
+      style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: EDGE_ZONE }} /> : null}
+    </View>
   )
 }
 

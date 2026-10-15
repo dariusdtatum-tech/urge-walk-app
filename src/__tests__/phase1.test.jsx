@@ -273,17 +273,14 @@ describe('idea 4: money kept', () => {
     expect(logged.result).toBe('yes')
     expect(toast).toHaveTextContent(/\+\$12 kept/)
     await tab('You'); await tab('Home')
-    expect(screen.queryByTestId('money-card')).toBeNull() // Home stays at five things; money lives in Your why
-    await press('why-open')
-    expect(screen.getByTestId('why-money')).toHaveTextContent(/Money kept\$12/)
-    expect(screen.getByTestId('why-goal')).toHaveTextContent(/Car fund · \$200/)
-    await press('why-done')
+    expect(screen.queryByTestId('money-card')).toBeNull() // not on Home; money lives in You → Progress
     await tab('You')
+    expect(screen.getByTestId('you-progress')).toHaveTextContent(/\$12 kept/)
+    expect((await youEl(screen, fireEvent, 'kept-money'))).toHaveTextContent(/Money kept\$12/)
+    expect(screen.getByTestId('kept-goal')).toHaveTextContent(/Car fund · \$200/)
     await fireEvent((await youEl(screen, fireEvent, 'money-toggle')), 'valueChange', false)
-    await tab('Home')
-    await press('why-open')
-    expect(screen.queryByTestId('why-money')).toBeNull()
-    expect(screen.queryByTestId('why-goal')).toBeNull()
+    expect(screen.queryByTestId('kept-money')).toBeNull()
+    expect(screen.queryByTestId('kept-goal')).toBeNull()
   })
 
   test('the goal shows with a reason on Breathe only when money is on', async () => {

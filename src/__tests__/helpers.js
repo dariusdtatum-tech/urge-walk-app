@@ -56,7 +56,7 @@ export const DAY = 86400000
 // it opens the right section (going back first if another is open) and returns the element.
 export const YOU_SECTION_OF = {
   'crisis-row': 'support', 'you-reach': 'support', 'you-reach-text-0': 'support', 'you-reach-call-0': 'support', 'contacts-row': 'support',
-  'reasons-row': 'why', 'money-toggle': 'why', 'money-row': 'why', 'time-back': 'why', 'tb-hours': 'why', 'tb-money': 'why', 'tb-money-edit': 'why', 'tb-adjust': 'why', 'tb-formula': 'why', 'answers-toggle': 'why', 'redo-setup': 'why',
+  'reasons-row': 'why', 'kept-card': 'progress', 'kept-money': 'progress', 'kept-goal': 'progress', 'money-toggle': 'progress', 'money-row': 'progress', 'time-back': 'progress', 'tb-hours': 'progress', 'tb-money': 'progress', 'tb-money-edit': 'progress', 'tb-adjust': 'progress', 'tb-formula': 'progress', 'answers-toggle': 'why', 'redo-setup': 'why',
   'trackers-row': 'progress', 'milestones-row': 'progress', 'walk-length': 'progress',
   'notify-row': 'reminders', 'followup-toggle': 'reminders', 'checkin-reminder': 'reminders', 'checkin-time-more': 'reminders', 'checkin-time-less': 'reminders',
   'theme-system': 'appearance', 'theme-light': 'appearance', 'theme-dark': 'appearance', 'verse-toggle': 'appearance', 'app-lock-toggle': 'appearance', 'app-lock-note': 'appearance',

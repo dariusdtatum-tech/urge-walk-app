@@ -1,12 +1,13 @@
 import { useRef, useState } from 'react'
 import { Pressable, ScrollView, View } from 'react-native'
-import { cleanTime, cleanTimeLabel, dailyLine, milestoneCards, sinceLabel } from '../../lib/homeIdeas.js'
+import { cleanTime, cleanTimeLabel, milestoneCards, sinceLabel } from '../../lib/homeIdeas.js'
 import { Ring } from '../../ui/Ring.jsx'
 import { T } from '../../ui/Text.jsx'
 import { MAX_SCALE, size as sz, type, useTheme } from '../../ui/theme.js'
 import { Badge } from './Milestones.jsx'
 
-// Home hero, two swipeable pages: 1 = the milestone ring + label + daily line,
+// Home hero, two swipeable pages: 1 = the milestone ring + label (no rotating quote: your why is
+// permanent and already shows under the date as your identity line),
 // 2 = clean time (days and hours) with the last and next milestone cards.
 export function HeroPager({ hero, days, since, segment, label, milestones, today, profile, now }) {
   const { c } = useTheme()
@@ -15,7 +16,6 @@ export function HeroPager({ hero, days, since, segment, label, milestones, today
   const track = useRef(null)
   const ct = { ...cleanTime(hero, now), days }
   const cards = milestoneCards(hero, milestones, today)
-  const line = dailyLine(profile, today)
 
   function go(i) {
     setPage(i)
@@ -62,12 +62,6 @@ export function HeroPager({ hero, days, since, segment, label, milestones, today
           <T size={15} color={c.muted} testID="ring-label" style={{ textAlign: 'center' }}>
             <T font="bold" size={15} color={c.title}>{label.lead}</T>{label.rest}
           </T>
-          {line.text ? (
-            <View testID="daily-line" style={{ alignItems: 'center', gap: 4, paddingHorizontal: 12 }}>
-              <T font="serifItalic" size={21} color={c.title} style={{ textAlign: 'center' }}>“{line.text.replace(/[.]?$/, '.')}”</T>
-              <T size={13} color={c.muted}>{line.caption}</T>
-            </View>
-          ) : null}
         </View>
       ) : (
         <View style={{ flexDirection: 'row', gap: 10 }} testID="milestone-cards">

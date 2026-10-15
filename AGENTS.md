@@ -41,6 +41,6 @@ Docs: https://docs.expo.dev/eas/index.md
 
 ## Layout limits (Option C)
 
-- Home holds at most five things: the tracker title (switcher), Ride it out, the ring, the "Your why" line, and check-in (`HOME_ITEMS` in `src/screens/HomeScreen.jsx`, enforced by `src/__tests__/drawer.test.jsx`). Short-lived helpers (undo banners, notices, the first-week card) may come and go. Anything new replaces one of the five or goes to the drawer, Track or You.
-- The tracker drawer opens only from the title (no edge swipe). It holds Reach out (top), trackers with the user's own names and day counts, + Add tracker / Edit trackers, and the backup status row (bottom). Never Ride it out, and never Premium, Plus, upgrades or prices (tested).
+- Home holds at most four things: the tracker title (switcher), Ride it out (always one tap), the ring, and check-in (`HOME_ITEMS` in `src/screens/HomeScreen.jsx`, enforced by `src/__tests__/drawer.test.jsx`). No rotating quote, no Your why line, no "+ Add a habit": reasons live in You and Ride it out, money kept and time back in You → Progress, Add tracker in the drawer. Short-lived helpers (undo banners, notices, the first-week card) may come and go. Anything new replaces one of the four or goes to the drawer, Track or You.
+- The tracker drawer opens from the title or a swipe in from Home's left edge (a strip the width of the side padding, sideways intent only; Reduce Motion fades it open instead of following the finger). It holds Reach out (top), trackers with the user's own names and day counts, + Add tracker / Edit trackers, and the backup status row (bottom). Never Ride it out, and never Premium, Plus, upgrades or prices (tested).
 - You is six section rows plus "Your plan" last.

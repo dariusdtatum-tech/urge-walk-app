@@ -7,7 +7,6 @@ import { AppRoot } from '../AppRoot.jsx'
 import { ACTIVE_TRACKER_KEY } from '../lib/activeTracker.js'
 import { todayISO } from '../lib/cleanTime.js'
 import { HOME_ITEMS } from '../screens/HomeScreen.jsx'
-import { reasonOfDay } from '../screens/home/YourWhy.jsx'
 import { dayCount, swipeCloses } from '../screens/home/TrackerDrawer.jsx'
 import { DAY, fakeClock, habitsSeed, iso, memoryStorage, onboardedProfile, stubDevice, T0 } from './helpers.js'
 
@@ -165,7 +164,7 @@ describe('tracker title and drawer', () => {
   })
 
   it('never holds Premium, Plus, upgrades or prices (source)', () => {
-    for (const f of ['screens/home/TrackerDrawer.jsx', 'screens/home/YourWhy.jsx', 'screens/HomeScreen.jsx']) {
+    for (const f of ['screens/home/TrackerDrawer.jsx', 'screens/home/KeptCard.jsx', 'screens/HomeScreen.jsx']) {
       const src = readFileSync(join(__dirname, '..', f), 'utf8').split('\n').filter((l) => !l.trim().startsWith('//')).join('\n')
       expect([f, src.match(/premium|upgrade|subscri|paywall|unlock|free trial|\bpro\b/i)?.[0] ?? null]).toEqual([f, null])
     }
@@ -176,13 +175,13 @@ describe('tracker title and drawer', () => {
   })
 })
 
-describe('Home holds five things', () => {
-  it('title, Ride it out, ring, Your why and check-in; the old cards live elsewhere even with lots of data', async () => {
+describe('Home holds four things', () => {
+  it('title, Ride it out, ring and check-in; the old cards live elsewhere even with lots of data', async () => {
     const walks = { 'urgewalk.v1.walks': JSON.stringify({ version: 1, walks: [walk(0), walk(1), walk(1, 'no'), walk(2), walk(3)] }) }
     const seed = { ...habitsSeed(), ...onboardedProfile({ timeBack: { hoursPerTime: 1, moneyPerTime: 10 }, before: { daysPerWeek: 7, timesPerDay: 1 } }), ...walks,
       'urgewalk.v1.backupMeta': JSON.stringify({ lastBackupAt: iso(T0 - 30 * DAY) }), 'urgewalk.v1.firstWeek': JSON.stringify({ done: true }) }
     await renderApp(seed)
-    expect(HOME_ITEMS).toHaveLength(5)
+    expect(HOME_ITEMS).toEqual(['home-title', 'ride-bar', 'hero', 'checkin-card'])
     for (const id of HOME_ITEMS) expect([id, Boolean(screen.queryByTestId(id))]).toEqual([id, true])
     for (const id of ['pattern-card', 'money-card', 'walks-card', 'never-zero', 'backup-nudge', 'home-edit']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
     await tab('Track')
@@ -198,69 +197,99 @@ describe('Home holds five things', () => {
   })
 })
 
-describe('Your why', () => {
-  it('shows one reason picked by the date, the same all day', async () => {
-    const texts = ['First thing', 'Second thing', 'Third thing']
-    await renderApp({ ...habitsSeed(), ...reasonsSeed(texts) })
-    const expected = reasonOfDay(texts.map((text, i) => ({ id: `r${i}`, kind: 'text', text })), today).text
-    expect(screen.getByTestId('why-text')).toHaveTextContent(`“${expected}”`)
+describe('Home has no Your why line, quote or Add a habit; money and time live in You → Progress', () => {
+  it('none of the why pieces are on Home, even with reasons, a setup why and money set', async () => {
+    await renderApp({ ...habitsSeed(), ...reasonsSeed(['First thing']), ...onboardedProfile({ why: 'A quiet example why', timeBack: { hoursPerTime: 1, moneyPerTime: 10 }, before: { daysPerWeek: 7, timesPerDay: 1 } }) })
+    for (const id of ['why-line', 'why-open', 'why-add-habit', 'daily-line', 'money-card', 'kept-card']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
+    expect(screen.queryByText(/your why|Add a reason|Add a habit|A quiet example why/i)).toBeNull()
   })
 
-  it('reasonOfDay rotates day by day and prefers written reasons', () => {
-    const rs = [{ id: 'p', kind: 'photo', text: '' }, { id: 'a', kind: 'text', text: 'A' }, { id: 'b', kind: 'text', text: 'B' }]
-    const seen = new Set([0, 1, 2, 3].map((d) => reasonOfDay(rs, todayISO(new Date(T0 + d * DAY))).id))
-    expect([...seen].sort()).toEqual(['a', 'b'])
-    expect(reasonOfDay([], today)).toBeNull()
-    expect(reasonOfDay([{ id: 'p', kind: 'photo', text: '' }], today).id).toBe('p')
-  })
-
-  it('no reasons yet: a gentle "Add a reason" that still opens the sheet', async () => {
+  it('Add tracker stays reachable from the drawer', async () => {
     await renderApp()
-    expect(screen.getByTestId('why-text')).toHaveTextContent('Add a reason ›')
-    await press('why-open')
-    expect(screen.getByTestId('why-empty')).toBeTruthy()
-    await press('why-edit-reasons')
-    expect(screen.getByTestId('reasons-sheet')).toBeTruthy()
-  })
-
-  it('"+ Add a habit" shares the slot while there is one tracker, and goes away with two', async () => {
-    await renderApp()
-    await press('why-add-habit')
+    await press('home-title'); await press('drawer-add')
     expect(screen.getByTestId('habit-sheet')).toBeTruthy()
-    await renderApp(twoHabits())
-    expect(screen.getByTestId('why-line')).toBeTruthy()
-    expect(screen.queryByTestId('why-add-habit')).toBeNull()
   })
 
-  it('sheet without money: reasons and time back, no money and no goal', async () => {
-    await renderApp({ ...habitsSeed(), ...reasonsSeed(['First thing', 'Second thing']), ...onboardedProfile({ before: { daysPerWeek: 7, timesPerDay: 1 } }),
-      'urgewalk.v1.moneyGoal': JSON.stringify({ version: 1, name: 'A goal', target: 100 }) })
-    await press('why-open')
-    expect(screen.getByTestId('why-reason-0')).toHaveTextContent('“First thing”')
-    expect(screen.getByTestId('why-reason-1')).toHaveTextContent('“Second thing”')
-    expect(screen.getByTestId('why-time')).toHaveTextContent(/About 160 hours back so far/)
-    expect(screen.queryByTestId('why-money')).toBeNull()
-    expect(screen.queryByTestId('why-goal')).toBeNull()
-  })
-
-  it('sheet with money set: one card with money kept, time back and the goal', async () => {
+  it('Progress with money set: money kept, the goal and time back', async () => {
     await renderApp({ ...habitsSeed(), ...onboardedProfile({ timeBack: { hoursPerTime: 1, moneyPerTime: 10 }, before: { daysPerWeek: 7, timesPerDay: 1 } }),
       'urgewalk.v1.moneyGoal': JSON.stringify({ version: 1, name: 'A goal', target: 100 }) })
-    await press('why-open')
-    const card = screen.getByTestId('why-card')
-    expect(within(card).getByTestId('why-money')).toHaveTextContent(/Money kept\$/)
-    expect(within(card).getByTestId('why-time')).toBeTruthy()
-    expect(within(card).getByTestId('why-goal')).toHaveTextContent(/A goal · \$100/)
-    expect(screen.getAllByTestId('why-card')).toHaveLength(1)
+    await tab('You')
+    expect(screen.getByTestId('you-progress')).toHaveTextContent(/Habit A · 163 days · \$\d[\d,]* kept/)
+    await press('you-progress')
+    expect(screen.getByTestId('kept-money')).toHaveTextContent(/Money kept\$/)
+    expect(screen.getByTestId('kept-goal')).toHaveTextContent(/A goal · \$100/)
+    expect(screen.getByTestId('time-back')).toBeTruthy()
+    expect(screen.getByTestId('money-toggle').props.value).toBe(true)
   })
 
-  it('nothing set: no card at all, just the settings link, which opens You → Your why', async () => {
+  it('Progress with nothing set: no money card, no time back, just the money switch (off)', async () => {
     await renderApp()
-    await press('why-open')
-    expect(screen.queryByTestId('why-card')).toBeNull()
-    await press('why-settings')
-    expect(screen.getByTestId('you-back')).toBeTruthy()
-    expect(screen.getByTestId('money-toggle')).toBeTruthy()
+    await tab('You')
+    expect(screen.getByTestId('you-progress')).not.toHaveTextContent(/kept/)
+    await press('you-progress')
+    expect(screen.queryByTestId('kept-card')).toBeNull()
+    expect(screen.queryByTestId('time-back')).toBeNull()
+    expect(screen.getByTestId('money-toggle').props.value).toBe(false)
+  })
+
+  it('time back without money: time back shows, money stays hidden', async () => {
+    await renderApp({ ...habitsSeed(), ...onboardedProfile({ before: { daysPerWeek: 7, timesPerDay: 1 } }) })
+    await tab('You'); await press('you-progress')
+    expect(screen.getByTestId('tb-hours')).toBeTruthy()
+    expect(screen.queryByTestId('kept-card')).toBeNull()
+  })
+})
+
+describe('edge swipe opens the drawer', () => {
+  const H = require('../screens/HomeScreen.jsx')
+  it('intent: clearly sideways and rightward only', () => {
+    expect(H.edgeIntent(20, 3)).toBe(true)
+    expect(H.edgeIntent(20, 15)).toBe(false) // mostly vertical: Home keeps scrolling
+    expect(H.edgeIntent(-30, 0)).toBe(false)
+    expect(H.edgeIntent(5, 0)).toBe(false)
+  })
+  it('opens past about a third of the panel or on a quick flick; otherwise snaps back', () => {
+    expect(H.edgeOpens(130, 0, 340)).toBe(true)
+    expect(H.edgeOpens(40, 0.9, 340)).toBe(true)
+    expect(H.edgeOpens(60, 0.1, 340)).toBe(false)
+  })
+  it('a narrow strip on the left edge only, inside the side padding, and only on Home', async () => {
+    await renderApp()
+    const zone = screen.getByTestId('home-edge', { includeHiddenElements: true })
+    const st = require('react-native').StyleSheet.flatten(zone.props.style)
+    expect(st.left).toBe(0)
+    expect(st.width).toBe(H.EDGE_ZONE)
+    expect(H.EDGE_ZONE).toBeLessThanOrEqual(20)
+    expect(typeof zone.props.onMoveShouldSetResponder).toBe('function')
+    expect(zone.props.onStartShouldSetResponder?.({ nativeEvent: { touches: [] }, touchHistory: { touchBank: [] } }) ?? false).toBe(false) // taps pass through
+    await tab('Track')
+    expect(screen.queryByTestId('home-edge', { includeHiddenElements: true })).toBeNull()
+    await tab('You')
+    expect(screen.queryByTestId('home-edge', { includeHiddenElements: true })).toBeNull()
+  })
+  it('the strip goes away while the drawer is open', async () => {
+    await renderApp()
+    await press('home-title')
+    expect(screen.queryByTestId('home-edge', { includeHiddenElements: true })).toBeNull()
+  })
+  it('VoiceOver: the title has an "Open trackers" action', async () => {
+    await renderApp()
+    const title = screen.getByTestId('home-title')
+    expect(title.props.accessibilityActions).toEqual(expect.arrayContaining([{ name: 'openTrackers', label: 'Open trackers' }]))
+    await fireEvent(title, 'accessibilityAction', { nativeEvent: { actionName: 'openTrackers' } })
+    expect(screen.getByTestId('drawer')).toBeTruthy()
+  })
+  it('opening from a swipe continues from where the finger left the panel', async () => {
+    const rn = require('react-native')
+    jest.spyOn(rn.AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(false)
+    const { render: r } = require('@testing-library/react-native')
+    const { TrackerDrawer } = require('../screens/home/TrackerDrawer.jsx')
+    const { StorageContext } = require('../ui/StorageContext.js')
+    const noop = () => {}
+    await r(<StorageContext.Provider value={memoryStorage()}><TrackerDrawer fromX={-120} habits={[]} activeId={null} today={today} onSelect={noop} onEdit={noop} onManage={noop} onAdd={noop} onReachOut={noop} onBackup={noop} onClose={noop} /></StorageContext.Provider>)
+    const st = rn.StyleSheet.flatten(screen.getByTestId('drawer').props.style)
+    expect(st.transform).toEqual([{ translateX: -120 }])
+    jest.restoreAllMocks()
   })
 })
 
