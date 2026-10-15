@@ -5,9 +5,7 @@ import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 import { dayNumber, timeBack } from '../../lib/homeIdeas.js'
 import { fmtMoney, goalProgress, loadGoal, moneyKept } from '../../lib/money.js'
-import { loadProfile } from '../../lib/profile.js'
-import { whyReasons } from '../../lib/reasons.js'
-import { DailyVerseCard } from '../DailyVerse.jsx'
+import { loadReasons } from '../../lib/reasons.js'
 import { Card } from '../../ui/Row.jsx'
 import { HeaderButton, Sheet } from '../../ui/Sheet.jsx'
 import { useStorage } from '../../ui/StorageContext.js'
@@ -23,10 +21,10 @@ export function reasonOfDay(reasons, today) {
   return pool[((dayNumber(today) % pool.length) + pool.length) % pool.length]
 }
 
-export function WhyLine({ today, onOpen, onAddHabit = null, verse = false, now = Date.now() }) {
+export function WhyLine({ today, onOpen, onAddHabit = null }) {
   const storage = useStorage()
   const { c } = useTheme()
-  const [reason] = useState(() => reasonOfDay(whyReasons(storage, loadProfile(storage)), today))
+  const [reason] = useState(() => reasonOfDay(loadReasons(storage), today))
   return (
     <View style={{ gap: 4, alignItems: 'center' }} testID="why-line">
       <Pressable onPress={onOpen} testID="why-open" accessibilityRole="button"
@@ -37,7 +35,6 @@ export function WhyLine({ today, onOpen, onAddHabit = null, verse = false, now =
           {reason ? `“${reasonText(reason)}”` : 'Add a reason ›'}
         </T>
       </Pressable>
-      {verse ? <View style={{ alignSelf: 'stretch' }}><DailyVerseCard date={new Date(now)} /></View> : null}
       {onAddHabit ? (
         <Pressable onPress={onAddHabit} testID="why-add-habit" accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 12 }}>
           <T font="semibold" size={15} color={c.accent}>+ Add a habit</T>
@@ -50,7 +47,7 @@ export function WhyLine({ today, onOpen, onAddHabit = null, verse = false, now =
 export function YourWhySheet({ profile, hero, walks, today, onEditReasons, onSettings, onClose }) {
   const storage = useStorage()
   const { c } = useTheme()
-  const [reasons] = useState(() => whyReasons(storage, profile))
+  const [reasons] = useState(() => loadReasons(storage))
   const kept = moneyKept(profile, hero, walks, today)
   const tb = timeBack(profile, hero, today)
   const goal = kept ? loadGoal(storage) : null
@@ -60,10 +57,7 @@ export function YourWhySheet({ profile, hero, walks, today, onEditReasons, onSet
       {reasons.length ? (
         <View style={{ gap: 8 }} testID="why-reasons">
           {reasons.map((r, i) => (
-            <View key={r.id} style={{ gap: 2 }}>
-              <T font="serifItalic" size={19} color={c.title} testID={`why-reason-${i}`}>“{reasonText(r)}”</T>
-              {r.setup ? <T size={13} color={c.muted} testID="why-reason-setup">From your setup · edit in You → Your why</T> : null}
-            </View>
+            <T key={r.id} font="serifItalic" size={19} color={c.title} testID={`why-reason-${i}`}>“{reasonText(r)}”</T>
           ))}
         </View>
       ) : (
