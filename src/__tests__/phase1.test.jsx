@@ -23,12 +23,14 @@ beforeEach(() => { jest.useFakeTimers(); jest.setSystemTime(T0) })
 afterEach(() => { jest.useRealTimers(); jest.restoreAllMocks() })
 
 describe('idea 6: how did it go? follow-up', () => {
-  it('each urge gets one follow-up, keyed to its entry', async () => {
-    const { storage, device } = await renderApp()
+  it('a follow-up is keyed to its entry; the budget allows one a day', async () => {
+    const { storage, device, clock } = await renderApp()
     await logUrge()
-    await logUrge()
+    await logUrge() // same day: over the budget, no second notification
+    clock.advance(86400000)
+    await logUrge() // next day (10:00): fits again
     const ids = loadWalks(storage).walks.map((w) => w.id)
-    expect(device.calls.followUps).toEqual(ids)
+    expect(device.calls.followUps).toEqual([ids[0], ids[2]])
   })
   it('leaving partway through a walk schedules it once; saving later doesn’t add a second', async () => {
     const handlers = new Set()

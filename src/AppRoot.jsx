@@ -6,7 +6,8 @@ import { StatusBar } from 'expo-status-bar'
 import { loadTheme, saveTheme } from './lib/appearance.js'
 import { hasAnyData } from './lib/backup.js'
 import { markSaved, markStress } from './lib/calm.js'
-import { answerFollowUp, cancelFollowUpFor, claimFollowUp, settleFollowUpDefault } from './lib/followUp.js'
+import { answerFollowUp, cancelFollowUpFor, claimFollowUp, pendingFollowUp, settleFollowUpDefault } from './lib/followUp.js'
+import { fitsBudget, followUpFireAt, recordSent, unrecordSent } from './lib/notifyBudget.js'
 import { resolveOnboarding } from './lib/profile.js'
 import { readObject, writeObject } from './lib/storage.js'
 import { BREATHE_SAVED_MESSAGES, GROUND_SAVED_MESSAGES, LOGGED_SAVED_MESSAGE } from './lib/walkMessages.js'
@@ -102,9 +103,17 @@ function Shell({ clock, theme, onTheme }) {
   }, [toast])
 
   // "How did it go?": one local notification ~30 min after an urge (max one per urge, switch in You).
-  const followUp = useCallback((urgeId) => { if (claimFollowUp(urgeId, storage, clock())) device.scheduleFollowUp(urgeId) }, [storage, clock, device])
+  // It counts toward the notification budget: at most one a day, never in quiet hours (10 PM–8 AM).
+  const followUp = useCallback((urgeId) => {
+    const fireAt = followUpFireAt(clock())
+    if (!fitsBudget(fireAt, storage)) return
+    if (claimFollowUp(urgeId, storage, clock())) { recordSent(fireAt, storage); device.scheduleFollowUp(urgeId) }
+  }, [storage, clock, device])
   // The urge is gone: drop its follow-up (and the scheduled notification if it was the pending one).
-  const dropFollowUp = useCallback((urgeId) => { if (cancelFollowUpFor(urgeId, storage)) device.cancelFollowUp() }, [storage, device])
+  const dropFollowUp = useCallback((urgeId) => {
+    const p = pendingFollowUp(storage)
+    if (cancelFollowUpFor(urgeId, storage)) { device.cancelFollowUp(); if (p?.urgeId === urgeId) unrecordSent(followUpFireAt(p.at), storage) }
+  }, [storage, device])
   // Leaving the app partway through a walk or Breathe counts as the end of Ride it out for this.
   useEffect(() => {
     const sub = AppState.addEventListener?.('change', (state) => {

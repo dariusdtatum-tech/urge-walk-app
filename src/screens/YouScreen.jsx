@@ -35,6 +35,7 @@ import { LOCK_ERRORS, loadAppLock, saveAppLock } from '../lib/appLock.js'
 import { DailyVerseCard } from './DailyVerse.jsx'
 import { DesignCheck } from './DesignCheck.jsx'
 import { FreeForeverSheet } from './FreeForever.jsx'
+import { NotificationsSheet } from './NotificationsSheet.jsx'
 import APP from '../../app.json'
 
 const APP_VERSION = APP.expo.version
@@ -90,6 +91,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [appLockNote, setAppLockNote] = useState('')
   const [designCheck, setDesignCheck] = useState(false)
   const [showFree, setShowFree] = useState(false)
+  const [showNotify, setShowNotify] = useState(false)
   // Turning the lock on needs a successful Face ID / passcode check first; turning it off doesn't.
   async function changeAppLock(on) {
     setAppLockNote('')
@@ -186,6 +188,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
         {hero ? <Row title="Milestones" sub={`${earned === 1 ? '1 earned' : `${earned} earned`} · ${hero.name}`} testID="milestones-row" onPress={() => setSheet({ mode: 'milestones' })} /> : null}
         <Row title="Walk length" sub={`${lengthLabel(prefs)} · for Walk`} testID="walk-length" chevron={showLengths ? '⌃' : '›'} onPress={() => setShowLengths(!showLengths)} />
         {showLengths ? <WalkLengthPicker prefs={prefs} onChange={changePrefs} /> : null}
+        <Row title="Notifications" sub="At most one a day. See what they’ll say." testID="notify-row" onPress={() => setShowNotify(true)} />
         <ToggleRow title="Check in after an urge" sub="One quiet notification about 30 minutes later. Never more than one per urge."
           value={followUpOn} testID="followup-toggle"
           onChange={(on) => { saveFollowUpEnabled(on, storage); setFollowUpOn(on); if (!on) { clearPendingFollowUp(storage); device.cancelFollowUp() } }} />
@@ -236,6 +239,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
           <T size={type.footnote} color={c.muted}>Version {APP_VERSION}</T>
         </Pressable>
       </ScrollView>
+      {showNotify ? <NotificationsSheet onClose={() => { setShowNotify(false); setFollowUpOn(loadFollowUpEnabled(storage)); setReminder(loadReminder(storage)) }} /> : null}
       {showFree ? <FreeForeverSheet onClose={() => setShowFree(false)} /> : null}
       {designCheck ? <DesignCheck onClose={() => setDesignCheck(false)} /> : null}
 
