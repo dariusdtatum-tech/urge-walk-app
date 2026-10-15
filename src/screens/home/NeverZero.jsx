@@ -30,7 +30,7 @@ export function NeverZero({ hero, walks, today, highlight = false }) {
         style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
         {days.map((d) => (
           <View key={d.date} testID={d.clean ? 'nz-dot-on' : 'nz-dot'}
-            style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: d.clean ? c.ringB : 'transparent', borderWidth: d.clean ? 0 : 1.5, borderColor: c.fieldBorder }} />
+            style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: d.clean ? c.ringB : 'transparent', borderWidth: d.clean ? 0 : 1.5, borderColor: c.cellEdge }} />
         ))}
       </View>
     </Card>

@@ -42,3 +42,27 @@ it('verse reference colour is the navy/cream at 70% blended on the card', () => 
 it('every theme defines every colour token (no theme falls back to a missing colour)', () => {
   expect(Object.keys(palette.dark).sort()).toEqual(Object.keys(palette.light).sort())
 })
+
+// WCAG 1.4.11 non-text contrast (Gemini review): each boundary that has to be seen is >= 3:1 against what it sits on.
+const boundary = (s, key) => palette[s][key]
+const NON_TEXT = {
+  // [label, colour key (or a fallback key when the first is null), background key]
+  light: [['ring track edge', 'trackEdge', 'bg'], ['money toggle off track', 'switchOff', 'card'], ['toggle off thumb', 'switchThumbOff', 'switchOff'],
+    ['empty heatmap cell edge', 'cellEdge', 'card'], ['empty 30-day dot', 'cellEdge', 'card']],
+  dark: [['ring track', 'ringTrack', 'bg'], ['ring fill vs track', 'ringA', 'ringTrack'], ['Breathe tile edge', 'breatheEdge', 'surface'],
+    ['money toggle off track', 'switchOff', 'card'], ['toggle off thumb', 'switchThumbOff', 'switchOff'],
+    ['empty heatmap cell edge', 'cellEdge', 'card'], ['empty 30-day dot', 'cellEdge', 'card']],
+}
+describe.each(['light', 'dark'])('%s non-text contrast ≥ 3:1', (s) => {
+  it.each(NON_TEXT[s])('%s', (_label, fg, bg) => {
+    expect(ratio(boundary(s, fg), palette[s][bg])).toBeGreaterThanOrEqual(3)
+  })
+  it.each([['onWalkTile', 'walkTile'], ['onWalkTileSoft', 'walkTile'], ['breatheAccent', 'tileAlt']])('%s on %s ≥ 4.5 (Ride it out tiles)', (fg, bg) => {
+    expect(ratio(palette[s][fg], palette[s][bg])).toBeGreaterThanOrEqual(4.5)
+  })
+})
+it('the before colours really failed (kept as a record of the fix)', () => {
+  expect(ratio(palette.dark.track, palette.dark.bg)).toBeLessThan(3) // old ring track #22375a, 1.42:1
+  expect(ratio(palette.dark.tileAlt, palette.dark.surface)).toBeLessThan(3) // Breathe fill alone, 1.23:1
+  expect(ratio(palette.dark.sand, palette.dark.card)).toBeLessThan(3) // empty cell fill alone, 1.09:1
+})

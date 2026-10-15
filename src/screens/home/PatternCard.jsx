@@ -29,7 +29,7 @@ export function PatternCard({ walks, now }) {
       <View accessible accessibilityLabel={`Urges by time of day: ${pattern.slots.map((n, i) => (n ? `${n} around ${i * 2}:00` : null)).filter(Boolean).join(', ')}`} testID="pattern-strip">
         <View style={{ flexDirection: 'row', gap: 3 }}>
           {pattern.slots.map((n, i) => (
-            <View key={i} style={{ flex: 1, height: 18, borderRadius: 4, backgroundColor: n ? c.action : c.sand, opacity: n ? 0.25 + 0.75 * (n / max) : 1 }} />
+            <View key={i} style={{ flex: 1, height: 18, borderRadius: 4, backgroundColor: n ? c.action : c.sand, borderWidth: n ? 0 : 1, borderColor: c.cellEdge, opacity: n ? 0.25 + 0.75 * (n / max) : 1 }} testID={n ? undefined : 'pattern-empty'} />
           ))}
         </View>
         <View style={{ flexDirection: 'row', marginTop: 4 }}>

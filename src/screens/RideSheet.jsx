@@ -57,19 +57,19 @@ export function RideSheet({ visible, onWalk, onBreathe, onGround, onLog, onClose
                 <>
                   <View style={{ flexDirection: stack ? 'column' : 'row', gap: 12 }} testID="ride-tiles">
                     <Pressable onPress={onWalk} testID="ride-walk" accessibilityRole="button" accessibilityLabel={`Walk, ${walkLabel}. Starts now`}
-                      style={{ flex: 1, minHeight: sz.rideTile, borderRadius: radius.card, backgroundColor: c.action, padding: space.card, justifyContent: 'space-between' }}>
-                      <PathIcon color={c.onAction} />
+                      style={{ flex: 1, minHeight: sz.rideTile, borderRadius: radius.card, backgroundColor: c.walkTile, padding: space.card, justifyContent: 'space-between' }}>
+                      <PathIcon color={c.onWalkTile} />
                       <View>
-                        <T font="bold" size={type.rideTile} color={c.onAction}>Walk</T>
-                        <T size={14} color={c.onActionSoft}>{walkLabel}</T>
+                        <T font="bold" size={type.rideTile} color={c.onWalkTile}>Walk</T>
+                        <T size={14} color={c.onWalkTileSoft}>{walkLabel}</T>
                       </View>
                     </Pressable>
                     <Pressable onPress={onBreathe} testID="ride-breathe" accessibilityRole="button" accessibilityLabel="Breathe, 5 slow breaths"
-                      style={{ flex: 1, minHeight: sz.rideTile, borderRadius: radius.card, backgroundColor: c.tileAlt, padding: space.card, justifyContent: 'space-between' }}>
-                      <WaveIcon color={c.onTileAlt} size={type.rideTileIcon} />
+                      style={{ flex: 1, minHeight: sz.rideTile, borderRadius: radius.card, backgroundColor: c.tileAlt, borderWidth: c.breatheEdge ? 1.5 : 0, borderColor: c.breatheEdge ?? 'transparent', padding: space.card, justifyContent: 'space-between' }}>
+                      <WaveIcon color={c.breatheAccent} size={type.rideTileIcon} />
                       <View>
                         <T font="bold" size={type.rideTile} color={c.onTileAlt}>Breathe</T>
-                        <T size={14} color={c.onTileAlt}>5 breaths</T>
+                        <T size={14} color={c.breatheAccent}>5 breaths</T>
                       </View>
                     </Pressable>
                   </View>

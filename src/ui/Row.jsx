@@ -50,7 +50,7 @@ export function ToggleRow({ title, sub, value, onChange, testID }) {
         {sub ? <T size={type.rowSub} color={c.textSoft}>{sub}</T> : null}
       </View>
       <Switch value={value} onValueChange={onChange} testID={testID} accessibilityLabel={title}
-        trackColor={{ true: c.action, false: c.track }} thumbColor={c.card} ios_backgroundColor={c.track} />
+        trackColor={{ true: c.action, false: c.switchOff }} thumbColor={value ? c.card : c.switchThumbOff} ios_backgroundColor={c.switchOff} />
     </View>
   )
 }

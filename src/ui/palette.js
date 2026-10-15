@@ -3,6 +3,9 @@
 // (accent) is text on cream/white only, never on sand.
 export const light = {
   bg: '#faf7f1',
+  // Non-text contrast (WCAG 1.4.11, >= 3:1 vs the adjacent background; palette.test.js computes these)
+  ringTrack: '#e9e1d2', trackEdge: '#8d8778', switchOff: '#8d8778', switchThumbOff: '#fdfbf7', cellEdge: '#8d8778',
+  walkTile: '#24395c', onWalkTile: '#faf7f1', onWalkTileSoft: '#d6dbe5', breatheEdge: null, breatheAccent: '#24395c',
   surface: '#fdfbf7',
   border: '#e4dccd',
   fieldBorder: '#8d8778',
@@ -52,6 +55,9 @@ export const light = {
 }
 export const dark = {
   bg: '#0f1d33',
+  // Non-text contrast (WCAG 1.4.11, >= 3:1 vs the adjacent background; palette.test.js computes these)
+  ringTrack: '#566c8f', trackEdge: null, switchOff: '#6b7d99', switchThumbOff: '#f1ebe0', cellEdge: '#6b7d99',
+  walkTile: '#3f7a6b', onWalkTile: '#faf7f1', onWalkTileSoft: '#faf7f1', breatheEdge: '#a9cbc0', breatheAccent: '#a9cbc0',
   surface: '#182b47',
   border: '#2a3f60',
   fieldBorder: '#6b7d99',

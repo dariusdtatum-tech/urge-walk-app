@@ -770,13 +770,13 @@ exports[`component kit in dark ToggleRow matches its snapshot and uses only toke
           "alignSelf": "flex-start",
         },
         {
-          "backgroundColor": "#22375a",
+          "backgroundColor": "#6b7d99",
           "borderRadius": 16,
         },
       ]
     }
     thumbTintColor="#182b47"
-    tintColor="#22375a"
+    tintColor="#6b7d99"
     value={true}
   />
 </View>
@@ -1552,13 +1552,13 @@ exports[`component kit in light ToggleRow matches its snapshot and uses only tok
           "alignSelf": "flex-start",
         },
         {
-          "backgroundColor": "#e9e1d2",
+          "backgroundColor": "#8d8778",
           "borderRadius": 16,
         },
       ]
     }
     thumbTintColor="#fdfbf7"
-    tintColor="#e9e1d2"
+    tintColor="#8d8778"
     value={true}
   />
 </View>
