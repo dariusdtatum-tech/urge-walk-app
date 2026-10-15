@@ -62,7 +62,8 @@ export const dark = {
   bg: '#0f1d33',
   // Non-text contrast (WCAG 1.4.11, >= 3:1 vs the adjacent background; palette.test.js computes these)
   ringTrack: '#566c8f', trackEdge: null, switchOff: '#6b7d99', switchThumbOff: '#f1ebe0', cellEdge: '#6b7d99',
-  walkTile: '#3f7a6b', onWalkTile: '#faf7f1', onWalkTileSoft: '#faf7f1', breatheEdge: '#a9cbc0', breatheAccent: '#a9cbc0',
+  // Ride it out tiles: Walk and Breathe are one even pair in dark: same navy surface, same sea glass edge, cream text.
+  walkTile: '#24395c', onWalkTile: '#f3ede2', onWalkTileSoft: '#b5b7ba', breatheEdge: '#a9cbc0', breatheAccent: '#b5b7ba',
   surface: '#182b47',
   border: '#2a3f60',
   fieldBorder: '#6b7d99',

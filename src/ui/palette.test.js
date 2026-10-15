@@ -99,3 +99,9 @@ it('switch thumbs are palette colours: cream on navy in light, night navy on sea
   expect([palette.light.switchThumbOn, palette.light.action]).toEqual(['#faf7f1', '#24395c'])
   expect([palette.dark.switchThumbOn, palette.dark.action]).toEqual(['#0f1d33', '#a9cbc0'])
 })
+
+it('dark Ride it out tiles are one even pair: same surface, same edge, no sea glass text', () => {
+  const d = palette.dark
+  expect(d.walkTile).toBe(d.tileAlt)
+  for (const k of ['onWalkTile', 'onWalkTileSoft', 'onTileAlt', 'breatheAccent']) expect(d[k].toLowerCase()).not.toBe('#a9cbc0')
+})

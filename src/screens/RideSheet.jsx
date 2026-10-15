@@ -65,7 +65,7 @@ export function RideSheet({ visible, onWalk, onBreathe, onGround, onLog, onClose
                 <>
                   <View style={{ flexDirection: stack ? 'column' : 'row', gap: 12 }} testID="ride-tiles">
                     <Pressable onPress={onWalk} testID="ride-walk" accessibilityRole="button" accessibilityLabel={`Walk, ${walkLabel}. Starts now`}
-                      style={{ flex: 1, minHeight: sz.rideTile, borderRadius: radius.card, backgroundColor: c.walkTile, padding: space.card, justifyContent: 'space-between' }}>
+                      style={{ flex: 1, minHeight: sz.rideTile, borderRadius: radius.card, backgroundColor: c.walkTile, borderWidth: c.breatheEdge ? 1.5 : 0, borderColor: c.breatheEdge ?? 'transparent', padding: space.card, justifyContent: 'space-between' }}>
                       <PathIcon color={c.onWalkTile} />
                       <View>
                         <T font="bold" size={type.rideTile} color={c.onWalkTile}>Walk</T>
@@ -74,7 +74,7 @@ export function RideSheet({ visible, onWalk, onBreathe, onGround, onLog, onClose
                     </Pressable>
                     <Pressable onPress={onBreathe} testID="ride-breathe" accessibilityRole="button" accessibilityLabel="Breathe, 5 slow breaths"
                       style={{ flex: 1, minHeight: sz.rideTile, borderRadius: radius.card, backgroundColor: c.tileAlt, borderWidth: c.breatheEdge ? 1.5 : 0, borderColor: c.breatheEdge ?? 'transparent', padding: space.card, justifyContent: 'space-between' }}>
-                      <WaveIcon color={c.breatheAccent} size={type.rideTileIcon} />
+                      <WaveIcon color={c.onTileAlt} size={type.rideTileIcon} />
                       <View>
                         <T font="bold" size={type.rideTile} color={c.onTileAlt}>Breathe</T>
                         <T size={14} color={c.breatheAccent}>5 breaths</T>
