@@ -44,7 +44,8 @@
             ]
           }
         ]
-      }
+      },
+      "bundleIdentifier": "com.evenfaring.urgewalk"
     },
     "android": {
       "adaptiveIcon": {
@@ -53,7 +54,8 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.evenfaring.urgewalk"
     },
     "web": {
       "favicon": "./assets/favicon.png"
