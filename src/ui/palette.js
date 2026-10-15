@@ -56,7 +56,7 @@ export const light = {
   stoneBase: '#a9cbc0', stoneMid: '#e9e1d2', stoneTop: '#d9cfbd', ripple: '#24395c',
   plusBg: '#a9cbc0', onPlus: '#24395c', chartBar: '#5d9384', chartTrack: '#e9e1d2',
   // Editorial lists: small-caps labels, hairline dividers (navy at 10%), one flat featured panel
-  moodFill: '#a9cbc0', sectionLabel: '#3f7a6b', hairline: 'rgba(36, 57, 92, 0.10)', featured: '#f1ebe0',
+  moodFill: '#3f7a6b', sectionLabel: '#3f7a6b', hairline: 'rgba(36, 57, 92, 0.10)', featured: '#f1ebe0',
 }
 export const dark = {
   bg: '#0f1d33',

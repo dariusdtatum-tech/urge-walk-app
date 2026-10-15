@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet } from 'react-native'
-import { Card, Chart, EmptyState, FeaturedPanel, HairlineRow, HairlineToggle, HeroStat, PrimaryButton, QuietLink, Row, RowGroup, SectionLabel, Sheet, StatPair, Tag, ToggleRow } from './kit.jsx'
+import { Card, Chart, EmptyState, FeaturedPanel, HairlineRow, HairlineToggle, HeroStat, MoodDot, PrimaryButton, QuietLink, Row, RowGroup, SectionLabel, Sheet, StatPair, Tag, ToggleRow } from './kit.jsx'
 import { palettes } from './palette.js'
 import { PreviewFontScale, T } from './Text.jsx'
 import { SchemeContext, type, size as sz } from './theme.js'
@@ -77,4 +77,12 @@ it('QuietLink is pressable', async () => {
   await render(<QuietLink label="More" onPress={fn} />)
   await fireEvent.press(screen.getByRole('link', { name: 'More' }))
   expect(fn).toHaveBeenCalled()
+})
+
+test('MoodDot is flat: no stroke in either mode', async () => {
+  for (const s of ['light', 'dark']) {
+    const r = await render(<SchemeContext.Provider value={s}><MoodDot testID="d" fill={0.2} /></SchemeContext.Provider>)
+    expect(StyleSheet.flatten(r.getByTestId('d', { includeHiddenElements: true }).props.style).borderWidth ?? 0).toBe(0)
+    r.unmount()
+  }
 })

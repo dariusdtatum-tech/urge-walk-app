@@ -58,9 +58,9 @@ it('every theme defines every colour token (no theme falls back to a missing col
 const boundary = (s, key) => palette[s][key]
 const NON_TEXT = {
   // [label, colour key (or a fallback key when the first is null), background key]
-  light: [['ring track edge', 'trackEdge', 'bg'], ['mood dot outline on cream', 'cellEdge', 'bg'], ['mood dot outline on a selected (sand) mood', 'cellEdge', 'sand'], ['money toggle off track', 'switchOff', 'card'], ['toggle off thumb', 'switchThumbOff', 'switchOff'],
+  light: [['ring track edge', 'trackEdge', 'bg'], ['full mood dot on cream', 'moodFill', 'bg'], ['full mood dot on a selected (sand) mood', 'moodFill', 'sand'], ['money toggle off track', 'switchOff', 'card'], ['toggle off thumb', 'switchThumbOff', 'switchOff'],
     ['empty heatmap cell edge', 'cellEdge', 'card'], ['empty 30-day dot', 'cellEdge', 'card']],
-  dark: [['ring track', 'ringTrack', 'bg'], ['mood dot outline on night', 'cellEdge', 'bg'], ['mood dot outline on a selected mood', 'cellEdge', 'sand'], ['ring fill vs track', 'ringA', 'ringTrack'], ['Breathe tile edge', 'breatheEdge', 'surface'],
+  dark: [['ring track', 'ringTrack', 'bg'], ['full mood dot on night', 'moodFill', 'bg'], ['full mood dot on a selected mood', 'moodFill', 'sand'], ['ring fill vs track', 'ringA', 'ringTrack'], ['Breathe tile edge', 'breatheEdge', 'surface'],
     ['money toggle off track', 'switchOff', 'card'], ['toggle off thumb', 'switchThumbOff', 'switchOff'],
     ['empty heatmap cell edge', 'cellEdge', 'card'], ['empty 30-day dot', 'cellEdge', 'card']],
 }

@@ -153,13 +153,13 @@ export function FeaturedPanel({ children, testID, style }) {
   return <View testID={testID} style={[{ backgroundColor: c.featured, borderRadius: radius.card, padding: space.card, gap: space.cardGap }, style]}>{children}</View>
 }
 
-// Journal mood dot: sea glass whose fill grows 20% → 100% with the level (1–5). Every dot carries a
-// cellEdge outline so even the faintest stays ≥ 3:1 against the background. Decorative: the word says it.
+// Journal mood dot (level 1–5). Flat, no stroke. The level is the opacity; the word label beside every dot carries the meaning, so the pale
+// low levels (under 3:1) are decorative only.
 export function MoodDot({ fill, size: d = 12, testID }) {
   const { c } = useTheme()
   return (
     <View testID={testID} accessibilityElementsHidden importantForAccessibility="no"
-      style={{ width: d, height: d, borderRadius: d / 2, borderWidth: 1.5, borderColor: c.cellEdge, overflow: 'hidden' }}>
+      style={{ width: d, height: d, borderRadius: d / 2, overflow: 'hidden' }}>
       <View style={{ flex: 1, backgroundColor: c.moodFill, opacity: fill }} />
     </View>
   )
