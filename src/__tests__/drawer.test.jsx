@@ -261,7 +261,8 @@ describe('edge swipe opens the drawer', () => {
     expect(st.width).toBe(H.EDGE_ZONE)
     expect(H.EDGE_ZONE).toBeLessThanOrEqual(20)
     expect(typeof zone.props.onMoveShouldSetResponder).toBe('function')
-    expect(zone.props.onStartShouldSetResponder?.({ nativeEvent: { touches: [] }, touchHistory: { touchBank: [] } }) ?? false).toBe(false) // taps pass through
+    // It sits on the side padding, so it covers no control: Ride it out starts to its right.
+    expect(H.EDGE_ZONE).toBeLessThanOrEqual(require('../ui/theme.js').space.screen)
     await tab('Track')
     expect(screen.queryByTestId('home-edge', { includeHiddenElements: true })).toBeNull()
     await tab('You')

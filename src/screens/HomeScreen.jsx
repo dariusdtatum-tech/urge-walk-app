@@ -54,32 +54,37 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
   const panelW = drawerWidth(screenW)
   const [peeking, setPeeking] = useState(false)
   const peekX = useRef(new Animated.Value(-panelW)).current
-  const live = useRef({ reduced, panelW, dx: 0 })
+  const live = useRef({ reduced, panelW, dx: 0, engaged: false })
   live.current.reduced = reduced; live.current.panelW = panelW
+  // The strip claims touches that start in it (it sits on the side padding, so there's nothing to tap
+  // underneath), but only acts once the drag is clearly sideways; until then it hands the touch to
+  // Home's vertical scroll if that asks for it.
   const edge = useRef(PanResponder.create({
-    onStartShouldSetPanResponder: () => false,
+    onStartShouldSetPanResponder: () => true,
     onMoveShouldSetPanResponder: (_, g) => edgeIntent(g.dx, g.dy),
-    onPanResponderTerminationRequest: () => false,
-    onPanResponderGrant: () => {
-      const L = live.current
-      L.dx = 0
-      // Reduce Motion: no panel following the finger; the drawer just fades open.
-      if (L.reduced) { setDrawer({}); return }
-      peekX.setValue(-L.panelW); setPeeking(true)
-    },
+    onPanResponderTerminationRequest: () => !live.current.engaged,
+    onPanResponderGrant: () => { const L = live.current; L.dx = 0; L.engaged = false },
     onPanResponderMove: (_, g) => {
       const L = live.current
+      if (!L.engaged) {
+        if (!edgeIntent(g.dx, g.dy)) return
+        L.engaged = true
+        // Reduce Motion: no panel following the finger; the drawer just fades open.
+        if (L.reduced) { setDrawer({}); return }
+        peekX.setValue(-L.panelW); setPeeking(true)
+      }
       if (L.reduced) return
       L.dx = Math.max(0, Math.min(L.panelW, g.dx))
       peekX.setValue(L.dx - L.panelW)
     },
     onPanResponderRelease: (_, g) => {
       const L = live.current
-      if (L.reduced) return
+      if (!L.engaged || L.reduced) return
+      L.engaged = false
       if (edgeOpens(g.dx, g.vx, L.panelW)) { setPeeking(false); setDrawer({ fromX: L.dx - L.panelW }) }
       else Animated.timing(peekX, { toValue: -L.panelW, duration: 150, useNativeDriver: true }).start(() => setPeeking(false))
     },
-    onPanResponderTerminate: () => { setPeeking(false) },
+    onPanResponderTerminate: () => { live.current.engaged = false; setPeeking(false) },
   })).current
   const [panel, setPanel] = useState(null) // 'reach'
   const [, setTick] = useState(0)
