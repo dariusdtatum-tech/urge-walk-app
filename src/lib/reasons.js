@@ -42,6 +42,16 @@ export function sanitizeReasonsData(raw) {
 export const loadReasonsData = (storage) => sanitizeReasonsData(readObject(REASONS_KEY, storage)) ?? { version: 1, reasons: [], next: 0, lock: false }
 export const saveReasonsData = (data, storage) => writeObject(REASONS_KEY, sanitizeReasonsData(data), storage)
 export const loadReasons = (storage) => loadReasonsData(storage).reasons
+// Your why everywhere (Home line, Your why sheet, You status): the saved reasons plus the "why"
+// sentence from setup, so a why written during onboarding never sits next to "No reasons yet".
+// The setup why is read-only here (edit it in You → Your why → Your answers) and isn't duplicated.
+export const SETUP_WHY_ID = 'setup-why'
+export function whyReasons(storage, profile) {
+  const saved = loadReasons(storage)
+  const why = cleanText(profile?.why || '')
+  if (!why || saved.some((r) => r.text.toLowerCase() === why.toLowerCase())) return saved
+  return [{ id: SETUP_WHY_ID, kind: 'text', text: why, at: profile?.onboardedAt || new Date(0).toISOString(), setup: true }, ...saved]
+}
 
 // Returns { ok, error, reason }.
 export function addReason(storage, reason, now = new Date()) {

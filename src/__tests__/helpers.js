@@ -59,7 +59,7 @@ export const YOU_SECTION_OF = {
   'reasons-row': 'why', 'money-toggle': 'why', 'money-row': 'why', 'time-back': 'why', 'tb-hours': 'why', 'tb-money': 'why', 'tb-money-edit': 'why', 'tb-adjust': 'why', 'tb-formula': 'why', 'answers-toggle': 'why', 'redo-setup': 'why',
   'trackers-row': 'progress', 'milestones-row': 'progress', 'walk-length': 'progress',
   'notify-row': 'reminders', 'followup-toggle': 'reminders', 'checkin-reminder': 'reminders', 'checkin-time-more': 'reminders', 'checkin-time-less': 'reminders',
-  'theme-system': 'appearance', 'theme-light': 'appearance', 'theme-dark': 'appearance', 'verse-toggle': 'appearance', 'app-lock-toggle': 'appearance', 'app-lock-note': 'appearance',
+  'theme-system': 'appearance', 'theme-light': 'appearance', 'theme-dark': 'appearance', 'verse-toggle': 'why', 'app-lock-toggle': 'appearance', 'app-lock-note': 'appearance',
   'backup-row': 'data', 'reset-app': 'data', 'free-row': 'data', 'legal-0': 'data', 'legal-1': 'data', 'legal-2': 'data', 'app-version': 'data', 'legal-links': 'data',
 }
 export async function youEl(screen, fireEvent, id) {

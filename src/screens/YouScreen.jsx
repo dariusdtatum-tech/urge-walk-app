@@ -34,7 +34,7 @@ import { NotificationsSheet } from './NotificationsSheet.jsx'
 import { loadVerseEnabled } from '../lib/verse.js'
 import { MoneySheet } from './MoneySheet.jsx'
 import { moneyOn } from '../lib/money.js'
-import { loadReasons } from '../lib/reasons.js'
+import { whyReasons } from '../lib/reasons.js'
 import { loadContacts } from '../lib/contacts.js'
 
 export { CRISIS }
@@ -91,7 +91,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   }
   const [verseOn, setVerseOn] = useState(() => loadVerseEnabled(storage))
   const [verseFade, setVerseFade] = useState(false)
-  const reasonCount = loadReasons(storage).length
+  const reasonCount = whyReasons(storage, profile).length
   const [contactsVer, setContactsVer] = useState(0)
   const people = loadContacts(storage)
   const [followUpOn, setFollowUpOn] = useState(() => loadFollowUpEnabled(storage))
@@ -155,10 +155,10 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   // Live status lines for the six rows.
   const status = {
     support: `988 · ${people.length ? people.map((p) => p.name).join(' · ') : 'No trusted contacts yet'}`,
-    why: [reasonCount ? `${reasonCount} ${reasonCount === 1 ? 'reason' : 'reasons'}` : 'No reasons yet', moneyOn(profile) ? 'money kept on' : null].filter(Boolean).join(' · '),
+    why: [reasonCount ? `${reasonCount} ${reasonCount === 1 ? 'reason' : 'reasons'}` : 'No reasons yet', verseOn ? 'daily verse on' : null, moneyOn(profile) ? 'money kept on' : null].filter(Boolean).join(' · '),
     progress: hero ? `${hero.name} · ${days.toLocaleString()} ${days === 1 ? 'day' : 'days'}${habits.length > 1 ? ` · ${habits.length} trackers` : ''}` : 'Add the date you started',
     reminders: `${reminder ? `Check-in ${reminderLabel(reminder)}` : 'Check-in reminder off'} · follow-up ${followUpOn ? 'on' : 'off'}`,
-    appearance: [themeLabel, appLock ? 'App lock on' : null, verseOn ? 'Daily verse on' : null].filter(Boolean).join(' · '),
+    appearance: [themeLabel, appLock ? 'App lock on' : null].filter(Boolean).join(' · '),
     data: lastBackupLabel(loadBackupMeta(storage), now),
   }
   const props = {
