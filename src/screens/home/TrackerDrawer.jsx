@@ -59,7 +59,7 @@ export function TrackerDrawer({ habits, activeId, today, now = Date.now(), onSel
         </Animated.View>
         <Animated.View {...pan.panHandlers} testID="drawer" accessibilityViewIsModal
           style={{ width: panelW, backgroundColor: c.sand, borderTopRightRadius: radius.card, borderBottomRightRadius: radius.card,
-            paddingTop: insets.top + 12, paddingBottom: insets.bottom + 12, opacity: reduced ? fade : 1, transform: [{ translateX: x }] }}>
+            paddingTop: insets.top + 24, paddingBottom: insets.bottom + 12, opacity: reduced ? fade : 1, transform: [{ translateX: x }] }}>
           <ScrollView contentContainerStyle={{ paddingHorizontal: space.screen, gap: 10, flexGrow: 1 }}>
             <DrawerRow testID="drawer-reach" title="Reach out" sub="988 and your trusted people" onPress={onReachOut} />
 
@@ -85,7 +85,7 @@ export function TrackerDrawer({ habits, activeId, today, now = Date.now(), onSel
                 </Pressable>
               )
             })}
-            <View style={{ flexDirection: 'row', gap: 10 }}>
+            <View style={{ alignItems: 'flex-start' }}>
               <LinkButton testID="drawer-add" label="+ Add tracker" onPress={onAdd} />
               {habits.length ? <LinkButton testID="home-edit" label="Edit trackers" onPress={onManage} /> : null}
             </View>
