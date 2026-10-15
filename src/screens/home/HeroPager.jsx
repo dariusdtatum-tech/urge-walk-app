@@ -30,7 +30,7 @@ export function HeroPager({ hero, days, since, segment, label, milestones, today
           onMomentumScrollEnd={(e) => { const i = Math.round(e.nativeEvent.contentOffset.x / Math.max(1, width)); if (i !== page) setPage(i) }}>
           <View style={pageStyle} importantForAccessibility={page === 0 ? 'auto' : 'no-hide-descendants'} accessibilityElementsHidden={page !== 0}>
             <Ring value={segment.progress} testID="hero-ring">
-              <T font="bold" size={type.ringName} max={MAX_SCALE.ringSmall} color={c.accent} numberOfLines={1}
+              <T font="bold" size={type.ringName} max={MAX_SCALE.ringSmall} color={c.accent} numberOfLines={1} accessibilityLabel={hero.name}
                 style={{ letterSpacing: 2, textTransform: 'uppercase' }}>{hero.name}</T>
               <T font="serif" size={days > 99999 ? type.ringDaysSm : days > 999 ? type.ringDaysMd : type.ringDays} max={MAX_SCALE.ring} color={c.title} testID="hero-days"
                 accessibilityLabel={`${days} ${days === 1 ? 'day' : 'days'} clean`} style={{ lineHeight: type.ringDays + 4, fontVariant: ['lining-nums', 'tabular-nums'] }}>{days.toLocaleString()}</T>

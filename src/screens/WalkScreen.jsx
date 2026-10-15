@@ -110,7 +110,7 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
               </View>
               <T size={15} color={c.text} style={{ flex: 1 }}>
                 <T font="bold" size={15} color={c.title}>Walk started by holding the Ride it out button. </T>
-                Tap that button instead to choose Walk, Breathe or Just log it.
+                Tap that button instead to choose Walk, Breathe, Ground or Just log it.
               </T>
             </View>
             <Button kind="primary" label="Got it" onPress={() => setTip(false)} style={{ alignSelf: 'flex-end' }} testID="tip-ok" />

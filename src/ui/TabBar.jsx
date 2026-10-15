@@ -13,7 +13,7 @@ const TABS = [
   { id: 'you', label: 'You', Icon: YouIcon },
 ]
 
-// Home · Track · Ride it out · Community · You. Four tabs and the centre "Ride it out" button: tap = choose Walk / Breathe / Just log it,
+// Home · Track · Ride it out · Community · You. Four tabs and the centre "Ride it out" button: tap = choose Walk / Breathe / Ground / Just log it,
 // hold = start a walk right away.
 export function TabBar({ active, onTab, onRide, onRideHold, bottomInset = 0 }) {
   const { c } = useTheme()
@@ -31,8 +31,8 @@ export function TabBar({ active, onTab, onRide, onRideHold, bottomInset = 0 }) {
             delayLongPress={LONG_PRESS_MS}
             accessibilityRole="button"
             accessibilityLabel="Ride it out"
-            accessibilityHint="Tap to choose Walk, Breathe or Just log it. Hold to start a walk right away."
-            style={({ pressed }) => ({ alignItems: 'center', marginTop: -26, opacity: pressed ? 0.9 : 1 })}
+            accessibilityHint="Tap to choose Walk, Breathe, Ground or Just log it. Hold to start a walk right away."
+            style={({ pressed }) => ({ alignItems: 'center', minHeight: sz.minTap, marginTop: -26, opacity: pressed ? 0.9 : 1 })}
           >
             <View style={{ width: sz.tabCenter, height: sz.tabCenter, borderRadius: sz.tabCenter / 2, backgroundColor: c.action, alignItems: 'center', justifyContent: 'center', borderWidth: 4, borderColor: c.surface }}>
               <WaveIcon color={c.onAction} size={sz.tabWave} />
@@ -56,7 +56,7 @@ export function TabBar({ active, onTab, onRide, onRideHold, bottomInset = 0 }) {
 // One-time tip after setup (and after the first walk started by holding): a small callout above
 // the tab bar, its arrow pointing down at the centre button. Tapping anywhere dismisses it.
 // VoiceOver reads it once.
-export const RIDE_TIP = 'Tap for Walk, Breathe or Just log it. Hold to start a walk.'
+export const RIDE_TIP = 'Tap for Walk, Breathe, Ground or Just log it. Hold to start a walk.'
 export function RideCoachmark({ onDismiss }) {
   const { c } = useTheme()
   useEffect(() => { AccessibilityInfo.announceForAccessibility?.(`Tip. ${RIDE_TIP}`) }, [])

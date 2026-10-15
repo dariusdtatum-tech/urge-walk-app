@@ -38,3 +38,7 @@ it('verse reference colour is the navy/cream at 70% blended on the card', () => 
   expect(palette.light.verseRef).toBe(blend('#24395c', '#faf7f1', 0.7))
   expect(palette.dark.verseRef).toBe(blend('#f3ede2', '#182b47', 0.7))
 })
+
+it('every theme defines every colour token (no theme falls back to a missing colour)', () => {
+  expect(Object.keys(palette.dark).sort()).toEqual(Object.keys(palette.light).sort())
+})
