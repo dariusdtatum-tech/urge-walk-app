@@ -70,7 +70,7 @@ function ProgressSection({ storage, profile, today, walks, changeProfile, setSho
       <ToggleRow title="Money kept" sub={moneyOn(profile) ? `${fmtMoney(moneyPerTime(profile))} each time${loadGoal(storage)?.name ? ` · toward ${loadGoal(storage).name}` : ''}` : 'Off. A private running total, if it helps.'}
         value={moneyOn(profile)} testID="money-toggle" onChange={(on) => (on ? setShowMoney(true) : changeProfile({ timeBack: { ...(profile.timeBack || { hoursPerTime: 1 }), moneyPerTime: null } }))} />
       {moneyOn(profile) ? <Row title="Money kept settings" sub="Amount and goal" testID="money-row" onPress={() => setShowMoney(true)} /> : null}
-      <KeptCard profile={profile} hero={hero} walks={walks} today={today} />
+      <KeptCard profile={profile} hero={hero} walks={walks} today={today} onEditMoney={() => setShowMoney(true)} />
       <TimeBackCard profile={profile} hero={hero} today={today} onChange={changeProfile} />
       <Row title="Walk length" sub={`${lengthLabel(prefs)} · for Walk`} testID="walk-length" chevron={showLengths ? '⌃' : '›'} onPress={() => setShowLengths(!showLengths)} />
       {showLengths ? <WalkLengthPicker prefs={prefs} onChange={changePrefs} /> : null}
@@ -182,16 +182,15 @@ function TimeBackCard({ profile, hero, today, onChange }) {
         <T accessibilityRole="header" font="semibold" size={17} color={c.title} style={{ flex: 1 }}>Time back</T>
         <T font="semibold" size={12} color={c.mutedSand} style={{ backgroundColor: c.sand, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 }}>Estimate</T>
       </View>
-      <T size={type.body} color={c.muted}>about <T font="serif" size={type.screenTitle} color={c.title} testID="tb-hours">{tb.hours.toLocaleString()}</T> <T size={type.body} color={c.text}>hours</T></T>
-      {tb.money != null ? <T size={type.body} color={c.muted}>and about <T font="serif" size={type.rideSheetTitle} color={c.title} testID="tb-money">${tb.money.toLocaleString()}</T> <T size={type.body} color={c.text}>kept</T></T> : null}
+      <T size={type.body} color={c.muted}>about <T font="semibold" size={type.screenTitle} color={c.title} testID="tb-hours" style={{ fontVariant: ['lining-nums', 'tabular-nums'] }}>{tb.hours.toLocaleString()}</T> <T size={type.body} color={c.text}>hours</T></T>
+      {tb.money != null ? <T size={type.body} color={c.muted}>and about <T font="serif" size={type.rideSheetTitle} color={c.title} testID="tb-money" style={{ fontVariant: ['lining-nums'] }}>${tb.money.toLocaleString()}</T> <T size={type.body} color={c.text}>kept</T></T> : null}
       <T size={13} color={c.muted} testID="tb-formula">
-        Since {shortDate(hero.startDate, '0000-01-01')}, based on what you told us: {plural(tb.daysPerWeek, 'day', 'days')} a week,{' '}
+        Since {shortDate(hero.startDate, today)}, based on what you told us: {plural(tb.daysPerWeek, 'day', 'days')} a week,{' '}
         {tb.timesPerDay === 7 ? '7+ times' : plural(tb.timesPerDay, 'time', 'times')} a day, about {fmtHours(tb.hoursPerTime)} each
         {tb.moneyPerTime != null ? ` and $${tb.moneyPerTime} each time` : ''}.
       </T>
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Button kind="quiet" label={tb.moneyPerTime == null ? 'Add money estimate' : 'Change money'} onPress={() => setAdjust('money')} testID="tb-money-edit" />
-        <Button kind="quiet" label="Adjust" onPress={() => setAdjust('hours')} testID="tb-adjust" />
+        <Button kind="quiet" label="Adjust time estimate" onPress={() => setAdjust('hours')} testID="tb-adjust" />
       </View>
       {adjust ? <AdjustSheet kind={adjust} value={adjust === 'hours' ? tb.hoursPerTime : tb.moneyPerTime} onSave={save} onClose={() => setAdjust(null)} /> : null}
     </Card>

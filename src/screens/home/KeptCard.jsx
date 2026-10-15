@@ -2,12 +2,14 @@
 // until money is set. Time back sits right below it (TimeBackCard), hidden until setup says how often.
 import { View } from 'react-native'
 import { fmtMoney, goalProgress, loadGoal, moneyKept } from '../../lib/money.js'
+import { Button } from '../../ui/Button.jsx'
 import { Card } from '../../ui/Row.jsx'
 import { useStorage } from '../../ui/StorageContext.js'
 import { T } from '../../ui/Text.jsx'
 import { useTheme } from '../../ui/theme.js'
 
-export function KeptCard({ profile, hero, walks, today }) {
+// onEditMoney (You → Progress) adds a button for the $ estimate; the card shows even with money off then.
+export function KeptCard({ profile, hero, walks, today, onEditMoney = null }) {
   const storage = useStorage()
   const { c } = useTheme()
   const kept = moneyKept(profile, hero, walks, today)
@@ -15,12 +17,13 @@ export function KeptCard({ profile, hero, walks, today }) {
   const prog = goal ? goalProgress(goal, kept.total) : null
   return (
     <>
-      {kept ? (
+      {kept || onEditMoney ? (
         <Card testID="kept-card" style={{ gap: 8 }}>
+          {!kept ? <T size={13} color={c.muted}>Money kept</T> : null}
           {kept ? (
             <View testID="kept-money" style={{ gap: 2 }}>
               <T size={13} color={c.muted}>Money kept</T>
-              <T font="serif" size={28} color={c.title}>{fmtMoney(kept.total)}</T>
+              <T font="serif" size={28} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{fmtMoney(kept.total)}</T>
               <T size={13} color={c.muted}>
                 {kept.basis === 'estimate' ? `An estimate at ${fmtMoney(kept.perTime)} each time.` : `${kept.passed} ${kept.passed === 1 ? 'urge' : 'urges'} that passed × ${fmtMoney(kept.perTime)}.`}
               </T>
@@ -35,6 +38,11 @@ export function KeptCard({ profile, hero, walks, today }) {
                   <View style={{ width: `${prog.pct}%`, height: 8, backgroundColor: c.action }} />
                 </View>
               ) : null}
+            </View>
+          ) : null}
+          {onEditMoney ? (
+            <View style={{ flexDirection: 'row' }}>
+              <Button kind="quiet" label={kept ? 'Change money estimate' : 'Add money estimate'} onPress={onEditMoney} testID="kept-money-edit" />
             </View>
           ) : null}
         </Card>

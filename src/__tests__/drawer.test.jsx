@@ -227,7 +227,8 @@ describe('Home has no Your why line, quote or Add a habit; money and time live i
     await tab('You')
     expect(screen.getByTestId('you-progress')).not.toHaveTextContent(/kept/)
     await press('you-progress')
-    expect(screen.queryByTestId('kept-card')).toBeNull()
+    expect(screen.queryByTestId('kept-money')).toBeNull() // no total yet, only the Add money estimate button
+    expect(screen.getByTestId('kept-money-edit')).toHaveTextContent('Add money estimate')
     expect(screen.queryByTestId('time-back')).toBeNull()
     expect(screen.getByTestId('money-toggle').props.value).toBe(false)
   })
@@ -236,7 +237,7 @@ describe('Home has no Your why line, quote or Add a habit; money and time live i
     await renderApp({ ...habitsSeed(), ...onboardedProfile({ before: { daysPerWeek: 7, timesPerDay: 1 } }) })
     await tab('You'); await press('you-progress')
     expect(screen.getByTestId('tb-hours')).toBeTruthy()
-    expect(screen.queryByTestId('kept-card')).toBeNull()
+    expect(screen.queryByTestId('kept-money')).toBeNull()
   })
 })
 

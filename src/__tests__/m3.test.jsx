@@ -206,9 +206,11 @@ describe('You', () => {
     await renderApp({ storage })
     await tab('You')
     expect((await youEl(screen, fireEvent, 'tb-hours'))).toHaveTextContent('160') // 163 days ≈ 23.3 weeks × 7 × 1 × 1h, rounded to 10
-    await fireEvent.press((await youEl(screen, fireEvent, 'tb-money-edit')))
-    await fireEvent.changeText(screen.getByTestId('adjust-money'), '12')
-    await fireEvent.press(screen.getByTestId('adjust-save'))
+    expect(screen.queryByTestId('tb-money-edit')).toBeNull() // the $ estimate lives in Money kept now
+    expect(screen.getByTestId('tb-adjust')).toHaveTextContent('Adjust time estimate')
+    await fireEvent.press((await youEl(screen, fireEvent, 'kept-money-edit')))
+    await fireEvent.changeText(screen.getByTestId('money-amount'), '12')
+    await fireEvent.press(screen.getByTestId('money-save'))
     expect((await youEl(screen, fireEvent, 'tb-money'))).toHaveTextContent('$1,960')
   })
 
