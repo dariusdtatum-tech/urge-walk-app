@@ -1,7 +1,9 @@
 // The optional daily check-in reminder (local, repeats daily). `N` is expo-notifications.
 import { CHECKIN_REMINDER_CONTENT } from '../lib/checkin.js'
 
-export const CHECKIN_REMINDER_ID = 'urgewalk-checkin'
+import { CHECKIN_REMINDER_ID } from '../lib/checkinIds.js'
+
+export { CHECKIN_REMINDER_ID }
 
 export async function syncCheckinReminder(N, reminder) {
   try {

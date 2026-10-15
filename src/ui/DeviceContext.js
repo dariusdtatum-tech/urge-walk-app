@@ -17,6 +17,8 @@ export const noopDevice = {
   onFollowUp: (_cb) => () => {},
   // The optional daily check-in reminder. syncCheckinReminder(null) turns it off.
   syncCheckinReminder: (_reminder) => Promise.resolve(false),
+  notificationStatus: () => Promise.resolve({ permission: null, scheduled: null }),
+  openSettings: () => {},
   onCheckinReminder: (_cb) => () => {},
   // Trusted contacts: textContact opens the Messages composer (never sends); pickContact -> { name, phone } | null
   textContact: (_phone, _message) => Promise.resolve(/** @type {string} */ ('composer')),

@@ -14,6 +14,7 @@ import { pickBackupFile, shareBackup } from './backupFile.js'
 import { syncWalkAlert } from './walkAlert.js'
 import { ensureChannel } from './channel.js'
 import { authenticateApp } from './appAuth.js'
+import { notificationStatus } from './notifyStatus.js'
 import { listenCheckin, syncCheckinReminder } from './checkinReminder.js'
 import { cancelFollowUp, listenFollowUp, scheduleFollowUp } from './followUpNotify.js'
 
@@ -47,6 +48,9 @@ export const device = {
     return () => window.removeEventListener('urgewalk-followup', f)
   },
   syncCheckinReminder(reminder) { return native ? syncCheckinReminder(Notifications, reminder) : Promise.resolve(false) },
+  // Launch self-check: notification permission + what's scheduled. Web: unknown.
+  notificationStatus() { return native ? notificationStatus(Notifications) : Promise.resolve({ permission: null, scheduled: null }) },
+  openSettings() { Linking.openSettings?.().catch(() => {}) },
   onCheckinReminder(cb) { return native ? listenCheckin(Notifications, cb) : () => {} },
   // Opens the Messages composer filled in; the person presses Send. Never sends by itself.
   textContact(phone, message) { return native ? composeText(SMS, Linking, phone, message) : Linking.openURL(`sms:${phone}`).then(() => 'link').catch(() => 'unavailable') },
