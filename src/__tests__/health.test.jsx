@@ -1,7 +1,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import { AppRoot } from '../AppRoot.jsx'
 import { CHECKIN_PREFS_KEY } from '../lib/checkin.js'
-import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0 } from './helpers.js'
+import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0, youEl } from './helpers.js'
 
 jest.mock('../screens/CommunityScreen.jsx', () => ({
   CommunityScreen: () => { throw new Error('boom') },
@@ -55,7 +55,7 @@ describe('notification budget and preview', () => {
     const device = stubDevice()
     await renderApp(storage, device)
     await fireEvent.press(screen.getByRole('tab', { name: 'You' }))
-    await fireEvent.press(screen.getByTestId('notify-row'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'notify-row')))
     expect(screen.getByTestId('notify-budget')).toHaveTextContent(/At most one a day.*none from 10 PM to 8 AM/)
     expect(screen.getByTestId('notify-followUp-preview')).toHaveTextContent(/Checking in.*How’s it going\?/)
     expect(screen.getByTestId('notify-walkAlert-preview')).toHaveTextContent(/Walk done/)
@@ -66,8 +66,8 @@ describe('notification budget and preview', () => {
     await fireEvent(screen.getByTestId('notify-followUp-toggle'), 'valueChange', false)
     await fireEvent(screen.getByTestId('notify-walkAlert-toggle'), 'valueChange', false)
     await fireEvent.press(screen.getByTestId('notify-sheet-backdrop'))
-    expect(screen.getByTestId('followup-toggle').props.value).toBe(false)
-    expect(screen.getByTestId('checkin-reminder').props.value).toBe(true)
+    expect((await youEl(screen, fireEvent, 'followup-toggle')).props.value).toBe(false)
+    expect((await youEl(screen, fireEvent, 'checkin-reminder')).props.value).toBe(true)
   })
   it('no follow-up in quiet hours', async () => {
     const storage = plain()

@@ -3,7 +3,7 @@ import { AppRoot } from '../AppRoot.jsx'
 import { applyBackup, validateBackup } from '../lib/backup.js'
 import { loadProfile } from '../lib/profile.js'
 import { RIDE_TIP } from '../ui/TabBar.jsx'
-import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0 } from './helpers.js'
+import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0, youEl, YOU_SECTION_OF } from './helpers.js'
 
 const renderApp = async (opts = {}) => {
   const storage = opts.storage ?? memoryStorage({ ...habitsSeed(), ...onboardedProfile() })
@@ -11,7 +11,7 @@ const renderApp = async (opts = {}) => {
   await render(<AppRoot storage={storage} device={device} clock={fakeClock()} />)
   return { storage, device }
 }
-const press = (id) => fireEvent.press(screen.getByTestId(id))
+const press = async (id) => fireEvent.press(YOU_SECTION_OF[id] ? await youEl(screen, fireEvent, id) : screen.getByTestId(id))
 async function toStep3() {
   await press('ob-begin')
   await press('ob-adult')

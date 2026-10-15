@@ -2,7 +2,7 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import { AppState } from 'react-native'
 import { AppRoot } from '../AppRoot.jsx'
 import { loadWalks } from '../lib/walkStorage.js'
-import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0 } from './helpers.js'
+import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0, youEl, YOU_SECTION_OF } from './helpers.js'
 
 const renderApp = async (opts = {}) => {
   const storage = opts.storage ?? memoryStorage({ ...habitsSeed(), ...onboardedProfile() })
@@ -11,7 +11,7 @@ const renderApp = async (opts = {}) => {
   await render(<AppRoot storage={storage} device={device} clock={clock} />)
   return { storage, device, clock }
 }
-const press = (id) => fireEvent.press(screen.getByTestId(id))
+const press = async (id) => fireEvent.press(YOU_SECTION_OF[id] ? await youEl(screen, fireEvent, id) : screen.getByTestId(id))
 const tab = (name) => fireEvent.press(screen.getByRole('tab', { name }))
 async function logUrge() {
   await press('ride-button')
@@ -72,8 +72,8 @@ describe('idea 6: how did it go? follow-up', () => {
   it('can be switched off in You (cancels anything pending)', async () => {
     const { device } = await renderApp()
     await tab('You')
-    expect(screen.getByTestId('followup-toggle').props.value).toBe(true)
-    await fireEvent(screen.getByTestId('followup-toggle'), 'valueChange', false)
+    expect((await youEl(screen, fireEvent, 'followup-toggle')).props.value).toBe(true)
+    await fireEvent((await youEl(screen, fireEvent, 'followup-toggle')), 'valueChange', false)
     expect(device.calls.followUpCancels).toBe(1)
     await tab('Home')
     await logUrge()
@@ -131,11 +131,11 @@ describe('idea 9: daily check-in', () => {
   it('optional daily reminder in You (off by default, 15-minute steps); tapping it opens the check-in', async () => {
     const { device } = await renderApp()
     await tab('You')
-    expect(screen.getByTestId('checkin-reminder').props.value).toBe(false)
-    await fireEvent(screen.getByTestId('checkin-reminder'), 'valueChange', true)
+    expect((await youEl(screen, fireEvent, 'checkin-reminder')).props.value).toBe(false)
+    await fireEvent((await youEl(screen, fireEvent, 'checkin-reminder')), 'valueChange', true)
     await press('checkin-time-more')
     expect(device.calls.reminders).toEqual([{ hour: 8, minute: 30 }, { hour: 8, minute: 45 }])
-    await fireEvent(screen.getByTestId('checkin-reminder'), 'valueChange', false)
+    await fireEvent((await youEl(screen, fireEvent, 'checkin-reminder')), 'valueChange', false)
     expect(device.calls.reminders.at(-1)).toBe(null)
     await act(async () => { device.emitCheckinReminder() })
     expect(screen.getByTestId('checkin-sheet')).toBeTruthy()
@@ -253,18 +253,18 @@ describe('idea 4: money kept', () => {
     await logUrge()
     expect(screen.getByTestId('toast')).not.toHaveTextContent(/kept/)
     await tab('You')
-    expect(screen.getByTestId('money-toggle').props.value).toBe(false)
+    expect((await youEl(screen, fireEvent, 'money-toggle')).props.value).toBe(false)
   })
 
   test('turn on with a goal; Home total; a passed urge adds a kept line; turn off hides it', async () => {
     const { storage } = await renderApp()
     await tab('You')
-    await fireEvent(screen.getByTestId('money-toggle'), 'valueChange', true)
+    await fireEvent((await youEl(screen, fireEvent, 'money-toggle')), 'valueChange', true)
     await fireEvent.changeText(screen.getByTestId('money-amount'), '12')
     await fireEvent.changeText(screen.getByTestId('money-goal-name'), 'Car fund')
     await fireEvent.changeText(screen.getByTestId('money-goal-target'), '200')
     await press('money-save')
-    expect(screen.getByTestId('money-toggle').props.value).toBe(true)
+    expect((await youEl(screen, fireEvent, 'money-toggle')).props.value).toBe(true)
     expect(JSON.parse(storage.getItem('urgewalk.v1.profile')).timeBack.moneyPerTime).toBe(12)
     await tab('Home')
     await logUrge()
@@ -276,7 +276,7 @@ describe('idea 4: money kept', () => {
     expect(screen.getByTestId('money-card')).toBeTruthy()
     expect(screen.getByTestId('money-goal')).toHaveTextContent(/Car fund/)
     await tab('You')
-    await fireEvent(screen.getByTestId('money-toggle'), 'valueChange', false)
+    await fireEvent((await youEl(screen, fireEvent, 'money-toggle')), 'valueChange', false)
     await tab('Home')
     expect(screen.queryByTestId('money-card')).toBeNull()
   })
@@ -357,14 +357,14 @@ describe('phase 1 follow-ups', () => {
     const existing = memoryStorage({ ...habitsSeed(), ...onboardedProfile() })
     await renderApp({ storage: existing })
     await tab('You')
-    expect(screen.getByTestId('followup-toggle').props.value).toBe(true)
+    expect((await youEl(screen, fireEvent, 'followup-toggle')).props.value).toBe(true)
   })
 
   test('a saved "off" stays off for existing users', async () => {
     const chose = memoryStorage({ ...habitsSeed(), ...onboardedProfile(), 'urgewalk.v1.followUpPrefs': JSON.stringify({ enabled: false }) })
     await renderApp({ storage: chose })
     await tab('You')
-    expect(screen.getByTestId('followup-toggle').props.value).toBe(false)
+    expect((await youEl(screen, fireEvent, 'followup-toggle')).props.value).toBe(false)
   })
 
   test('tags show quietly on urge entries in Track and survive editing the entry', async () => {
@@ -389,13 +389,14 @@ describe('daily verse (You, opt-in)', () => {
     expect(screen.queryByTestId('daily-verse')).toBeNull()
     await tab('You')
     expect(screen.queryByTestId('daily-verse')).toBeNull()
-    expect(screen.getByTestId('verse-toggle').props.value).toBe(false)
+    expect((await youEl(screen, fireEvent, 'verse-toggle')).props.value).toBe(false)
   })
 
   test('toggle on: card at the top of You with one combined label; never on Home or Ride it out', async () => {
     const { storage } = await renderApp()
     await tab('You')
-    await fireEvent(screen.getByTestId('verse-toggle'), 'valueChange', true)
+    await fireEvent((await youEl(screen, fireEvent, 'verse-toggle')), 'valueChange', true)
+    await fireEvent.press(screen.getByTestId('you-back')) // the card sits at the top of You
     const card = screen.getByTestId('daily-verse')
     const { verseFor, verseLabel, refLine } = require('../lib/verse.js')
     const v = verseFor(new Date(T0))
@@ -414,7 +415,7 @@ describe('daily verse (You, opt-in)', () => {
     await renderApp({ storage: memoryStorage({ ...habitsSeed(), ...onboardedProfile(), 'urgewalk.v1.versePrefs': JSON.stringify({ enabled: true }) }) })
     await tab('You')
     expect(screen.getByTestId('daily-verse')).toBeTruthy()
-    await fireEvent(screen.getByTestId('verse-toggle'), 'valueChange', false)
+    await fireEvent((await youEl(screen, fireEvent, 'verse-toggle')), 'valueChange', false)
     expect(screen.queryByTestId('daily-verse')).toBeNull()
   })
 })
@@ -491,7 +492,7 @@ describe('optional whole-app lock', () => {
     expect(screen.queryByTestId('lock-cover')).toBeNull()
     expect(device.calls.appAuths).toBe(0)
     await tab('You')
-    expect(screen.getByTestId('app-lock-toggle').props.value).toBe(false)
+    expect((await youEl(screen, fireEvent, 'app-lock-toggle')).props.value).toBe(false)
   })
 
   test('turning it on needs a successful check first', async () => {
@@ -499,18 +500,22 @@ describe('optional whole-app lock', () => {
     const device = stubDevice({ appAuth: () => result })
     const { storage } = await renderApp({ device })
     await tab('You')
+    await youEl(screen, fireEvent, 'app-lock-toggle')
     await act(async () => { fireEvent(screen.getByTestId('app-lock-toggle'), 'valueChange', true) })
-    expect(screen.getByTestId('app-lock-note')).toHaveTextContent('That didn’t unlock. You can try again.')
-    expect(screen.getByTestId('app-lock-toggle').props.value).toBe(false)
+    expect((await youEl(screen, fireEvent, 'app-lock-note'))).toHaveTextContent('That didn’t unlock. You can try again.')
+    expect((await youEl(screen, fireEvent, 'app-lock-toggle')).props.value).toBe(false)
     expect(storage.getItem('urgewalk.v1.appLock')).toBeFalsy()
     result = { ok: false, reason: 'unavailable' }
+    await youEl(screen, fireEvent, 'app-lock-toggle')
     await act(async () => { fireEvent(screen.getByTestId('app-lock-toggle'), 'valueChange', true) })
-    expect(screen.getByTestId('app-lock-note')).toHaveTextContent(/Set up Face ID or a passcode/)
+    expect((await youEl(screen, fireEvent, 'app-lock-note'))).toHaveTextContent(/Set up Face ID or a passcode/)
     result = { ok: true }
+    await youEl(screen, fireEvent, 'app-lock-toggle')
     await act(async () => { fireEvent(screen.getByTestId('app-lock-toggle'), 'valueChange', true) })
-    expect(screen.getByTestId('app-lock-toggle').props.value).toBe(true)
+    expect((await youEl(screen, fireEvent, 'app-lock-toggle')).props.value).toBe(true)
     expect(JSON.parse(storage.getItem('urgewalk.v1.appLock')).enabled).toBe(true)
     expect(screen.queryByTestId('lock-cover')).toBeNull()
+    await youEl(screen, fireEvent, 'app-lock-toggle')
     await act(async () => { fireEvent(screen.getByTestId('app-lock-toggle'), 'valueChange', false) })
     expect(JSON.parse(storage.getItem('urgewalk.v1.appLock')).enabled).toBe(false)
     expect(device.calls.appAuths).toBe(3)

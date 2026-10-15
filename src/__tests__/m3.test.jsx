@@ -5,7 +5,7 @@ import { loadJournal } from '../lib/journal.js'
 import { loadProfile } from '../lib/profile.js'
 import { buildLoggedRecord, buildBreatheRecord, loadWalks } from '../lib/walkStorage.js'
 import { clampISO } from '../ui/DatePicker.jsx'
-import { DAY, fakeClock, habitsSeed, iso, memoryStorage, onboardedProfile, stubDevice, T0 } from './helpers.js'
+import { DAY, fakeClock, habitsSeed, iso, memoryStorage, onboardedProfile, stubDevice, T0, youEl } from './helpers.js'
 
 const renderApp = async (opts = {}) => {
   const storage = opts.storage ?? memoryStorage(habitsSeed())
@@ -172,17 +172,17 @@ describe('You', () => {
   it('Appearance: Dark is remembered and recolours the app', async () => {
     const { storage } = await renderApp()
     await tab('You')
-    await fireEvent.press(screen.getByTestId('theme-dark'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'theme-dark')))
     expect(storage.getItem('urgewalk.v1.theme')).toBe('dark')
-    expect(screen.getByTestId('theme-dark').props.accessibilityState.checked).toBe(true)
-    await fireEvent.press(screen.getByTestId('theme-system'))
+    expect((await youEl(screen, fireEvent, 'theme-dark')).props.accessibilityState.checked).toBe(true)
+    await fireEvent.press((await youEl(screen, fireEvent, 'theme-system')))
     expect(storage.getItem('urgewalk.v1.theme')).toBeNull()
   })
 
   it('your answers: edit one in a sheet; the why then shows on Ride it out', async () => {
     const { storage } = await renderApp()
     await tab('You')
-    await fireEvent.press(screen.getByTestId('answers-toggle'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'answers-toggle')))
     await fireEvent.press(screen.getByTestId('answer-why'))
     await fireEvent.changeText(screen.getByTestId('why'), 'Clear head')
     await fireEvent.press(screen.getByTestId('answer-save'))
@@ -195,22 +195,22 @@ describe('You', () => {
     const storage = memoryStorage({ ...habitsSeed(), ...onboardedProfile({ before: { daysPerWeek: 7, timesPerDay: 1 } }) })
     await renderApp({ storage })
     await tab('You')
-    expect(screen.getByTestId('tb-hours')).toHaveTextContent('160') // 163 days ≈ 23.3 weeks × 7 × 1 × 1h, rounded to 10
-    await fireEvent.press(screen.getByTestId('tb-money-edit'))
+    expect((await youEl(screen, fireEvent, 'tb-hours'))).toHaveTextContent('160') // 163 days ≈ 23.3 weeks × 7 × 1 × 1h, rounded to 10
+    await fireEvent.press((await youEl(screen, fireEvent, 'tb-money-edit')))
     await fireEvent.changeText(screen.getByTestId('adjust-money'), '12')
     await fireEvent.press(screen.getByTestId('adjust-save'))
-    expect(screen.getByTestId('tb-money')).toHaveTextContent('$1,960')
+    expect((await youEl(screen, fireEvent, 'tb-money'))).toHaveTextContent('$1,960')
   })
 
   it('crisis lines, trusted contact, and Privacy / Terms / Support open outside the app', async () => {
     const storage = memoryStorage({ ...habitsSeed(), ...onboardedProfile({ support: 'trusted', trustedName: 'Sam', trustedPhone: '(555) 123-4567' }) })
     const { device } = await renderApp({ storage })
     await tab('You')
-    await fireEvent.press(screen.getByTestId('you-reach-text-0'))
-    await fireEvent.press(screen.getByTestId('legal-0'))
-    await fireEvent.press(screen.getByTestId('legal-1'))
-    await fireEvent.press(screen.getByTestId('legal-2'))
-    await fireEvent.press(screen.getByTestId('crisis-row'))
+    await fireEvent.press(await youEl(screen, fireEvent, 'you-reach-text-0'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'legal-0')))
+    await fireEvent.press((await youEl(screen, fireEvent, 'legal-1')))
+    await fireEvent.press((await youEl(screen, fireEvent, 'legal-2')))
+    await fireEvent.press((await youEl(screen, fireEvent, 'crisis-row')))
     await fireEvent.press(screen.getByTestId('crisis-link-tel:988'))
     expect(device.calls.texts).toHaveLength(1)
     expect(device.calls.texts[0].phone).toBe('5551234567')
@@ -225,7 +225,7 @@ describe('You', () => {
   it('walk length: Custom with a stepper, used by Walk', async () => {
     const { storage } = await renderApp()
     await tab('You')
-    await fireEvent.press(screen.getByTestId('walk-length'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'walk-length')))
     await fireEvent.press(screen.getByTestId('length-custom'))
     await fireEvent.press(screen.getByTestId('custom-minutes-more'))
     expect(JSON.parse(storage.getItem('urgewalk.v1.walkPrefs'))).toMatchObject({ choice: 'custom', customMinutes: 21 })
@@ -236,7 +236,7 @@ describe('Backup & restore (format 1)', () => {
   it('Export hands the format-1 file to the share sheet and records the time', async () => {
     const { device, storage } = await renderApp()
     await tab('You')
-    await fireEvent.press(screen.getByTestId('backup-row'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'backup-row')))
     await fireEvent.press(screen.getByTestId('export'))
     expect(device.calls.shared).toHaveLength(1)
     expect(device.calls.shared[0].filename).toBe('urge-walk-backup-2030-05-14.json')
@@ -250,7 +250,7 @@ describe('Backup & restore (format 1)', () => {
     const text = JSON.stringify(buildBackup(other, T0 - DAY))
     const { storage } = await renderApp({ device: stubDevice({ file: { size: text.length, text } }) })
     await tab('You')
-    await fireEvent.press(screen.getByTestId('backup-row'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'backup-row')))
     await fireEvent.press(screen.getByTestId('import'))
     expect(screen.getByText('Replace everything on this phone?')).toBeTruthy()
     await fireEvent.press(screen.getByTestId('confirm-ok'))
@@ -264,7 +264,7 @@ describe('Backup & restore (format 1)', () => {
   it('a file that is not a backup is refused and nothing changes', async () => {
     const { storage } = await renderApp({ device: stubDevice({ file: { size: 10, text: '{"hello":1}' } }) })
     await tab('You')
-    await fireEvent.press(screen.getByTestId('backup-row'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'backup-row')))
     await fireEvent.press(screen.getByTestId('import'))
     expect(screen.getByTestId('backup-msg')).toHaveTextContent('This file isn’t an Urge Walk backup.')
     expect(JSON.parse(storage.getItem('urgewalk.v1.habits')).habits).toHaveLength(1)
@@ -275,7 +275,7 @@ describe('Reset (safe)', () => {
   it('nothing is erased unless the person confirms the file was saved', async () => {
     const { storage, device } = await renderApp()
     await tab('You')
-    await fireEvent.press(screen.getByTestId('reset-app'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'reset-app')))
     await fireEvent.press(screen.getByTestId('confirm-ok')) // Save backup and reset
     expect(device.calls.shared).toHaveLength(1)
     expect(screen.getByText('Did the backup file save?')).toBeTruthy()
@@ -287,7 +287,7 @@ describe('Reset (safe)', () => {
   it('confirmed: everything is erased and setup starts again', async () => {
     const { storage } = await renderApp()
     await tab('You')
-    await fireEvent.press(screen.getByTestId('reset-app'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'reset-app')))
     await fireEvent.press(screen.getByTestId('confirm-ok'))
     await fireEvent.press(screen.getByTestId('confirm-ok')) // Yes, erase everything
     expect([...storage._map.keys()].filter((k) => k.startsWith('urgewalk.'))).toEqual([])
@@ -297,7 +297,7 @@ describe('Reset (safe)', () => {
   it('share failed: asks plainly before erasing without a backup', async () => {
     const { storage } = await renderApp({ device: stubDevice({ share: new Error('no') }) })
     await tab('You')
-    await fireEvent.press(screen.getByTestId('reset-app'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'reset-app')))
     await fireEvent.press(screen.getByTestId('confirm-ok'))
     expect(screen.getByText('Backup not saved')).toBeTruthy()
     await fireEvent.press(screen.getByTestId('confirm-cancel'))
@@ -356,7 +356,7 @@ describe('Onboarding (first run) and the date picker', () => {
   it('Redo setup from You keeps existing trackers and Back returns to You', async () => {
     await renderApp()
     await tab('You')
-    await fireEvent.press(screen.getByTestId('redo-setup'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'redo-setup')))
     expect(screen.getByLabelText('Setup step 2')).toBeTruthy()
     await fireEvent.press(screen.getByTestId('ob-back'))
     expect(screen.getByTestId('you')).toBeTruthy()
@@ -373,7 +373,11 @@ describe('rules', () => {
   it('no paywall, ads, accounts or sign-in anywhere in You', async () => {
     await renderApp()
     await tab('You')
-    const text = screen.getAllByText(/./).map((n) => [].concat(n.props.children).join('')).join(' | ')
+    const grab = () => screen.getAllByText(/./).map((n) => [].concat(n.props.children).join('')).join(' | ')
+    let text = grab()
+    for (const id of ['support', 'why', 'progress', 'reminders', 'appearance', 'data']) {
+      await fireEvent.press(screen.getByTestId(`you-${id}`)); text += grab(); await fireEvent.press(screen.getByTestId('you-back'))
+    }
     expect(text).toMatch(/No ads\. No tracking\. No account\./)
     expect(text).not.toMatch(/premium|subscri|upgrade|sign in|sign up|log in|purchase|streak restore|unlock|trial/i)
   })

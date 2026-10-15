@@ -7,7 +7,7 @@ import { loadActiveWalk, loadWalks } from '../lib/walkStorage.js'
 import { createSqliteStorage } from '../storage/sqliteStorage.js'
 import { openTestDatabase } from '../storage/sqlJsShim.js'
 import { MAX_SCALE } from '../ui/theme.js'
-import { fakeClock, habitsSeed, memoryStorage, stubDevice, T0 } from './helpers.js'
+import { fakeClock, habitsSeed, memoryStorage, stubDevice, T0, youEl } from './helpers.js'
 
 const renderApp = async (opts = {}) => {
   const storage = opts.storage ?? memoryStorage(habitsSeed())
@@ -272,7 +272,7 @@ describe('Design Check (dev only)', () => {
   it('opens from a long-press on the version in You, with Light and Night, largest text and Reduce Motion', async () => {
     await renderApp()
     await fireEvent.press(screen.getByRole('tab', { name: 'You' }))
-    const v = screen.getByTestId('app-version')
+    const v = (await youEl(screen, fireEvent, 'app-version'))
     expect(screen.getByText('Version 1.0.0')).toBeTruthy()
     await fireEvent(v, 'longPress')
     expect(screen.getByTestId('design-check')).toBeTruthy()

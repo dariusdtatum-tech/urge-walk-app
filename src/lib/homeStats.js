@@ -2,10 +2,9 @@
 // the stat chips and the "urges walked" line chart. No React here.
 import { cleanDayCount, parseISODate, todayISO } from './cleanTime.js'
 
-// The tracker shown in the Home ring is the first one in the list.
-// "Show on Home" (in Edit) moves a tracker to the front, so no extra setting is stored.
-export function heroHabit(habits) {
-  return habits.length > 0 ? habits[0] : null
+// The tracker shown in the Home ring: the stored active one (activeTracker.js), else the first.
+export function heroHabit(habits, activeId = null) {
+  return habits.find((h) => h.id === activeId) ?? (habits.length > 0 ? habits[0] : null)
 }
 
 // Move one habit to the front of the list (keeps everything else in order).

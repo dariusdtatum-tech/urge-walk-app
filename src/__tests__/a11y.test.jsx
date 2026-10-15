@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet } from 'react-native'
 import { AppRoot } from '../AppRoot.jsx'
-import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0 } from './helpers.js'
+import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0, youEl } from './helpers.js'
 
 const renderApp = async (scheme = 'light') => {
   const storage = memoryStorage({ ...habitsSeed(), ...onboardedProfile() })
@@ -47,10 +47,10 @@ describe.each(['light', 'dark'])('accessibility audit (%s)', (scheme) => {
     ['Ride it out', async () => fireEvent.press(screen.getByTestId('ride-button'))],
     ['Breathe', async () => { await fireEvent.press(screen.getByTestId('ride-button')); await fireEvent.press(screen.getByTestId('ride-breathe')) }],
     ['Ground', async () => { await fireEvent.press(screen.getByTestId('ride-button')); await fireEvent.press(screen.getByTestId('ride-ground')); await fireEvent.press(screen.getByTestId('ground-next')) }],
-    ['Crisis resources', async () => { await fireEvent.press(screen.getByRole('tab', { name: 'You' })); await fireEvent.press(screen.getByTestId('crisis-row')) }],
-    ['Trusted contacts', async () => { await fireEvent.press(screen.getByRole('tab', { name: 'You' })); await fireEvent.press(screen.getByTestId('contacts-row')) }],
-    ['Your reasons', async () => { await fireEvent.press(screen.getByRole('tab', { name: 'You' })); await fireEvent.press(screen.getByTestId('reasons-row')) }],
-    ['Backup', async () => { await fireEvent.press(screen.getByRole('tab', { name: 'You' })); await fireEvent.press(screen.getByTestId('backup-row')) }],
+    ['Crisis resources', async () => { await fireEvent.press(screen.getByRole('tab', { name: 'You' })); await fireEvent.press((await youEl(screen, fireEvent, 'crisis-row'))) }],
+    ['Trusted contacts', async () => { await fireEvent.press(screen.getByRole('tab', { name: 'You' })); await fireEvent.press((await youEl(screen, fireEvent, 'contacts-row'))) }],
+    ['Your reasons', async () => { await fireEvent.press(screen.getByRole('tab', { name: 'You' })); await fireEvent.press((await youEl(screen, fireEvent, 'reasons-row'))) }],
+    ['Backup', async () => { await fireEvent.press(screen.getByRole('tab', { name: 'You' })); await fireEvent.press((await youEl(screen, fireEvent, 'backup-row'))) }],
     ['Just log it', async () => { await fireEvent.press(screen.getByTestId('ride-button')); await fireEvent.press(screen.getByTestId('ride-log')) }],
     ['Walk', async () => { await fireEvent.press(screen.getByTestId('ride-button')); await fireEvent.press(screen.getByTestId('ride-walk')) }],
   ])('%s: every control is named, ≥44pt, and text can grow', async (_name, go) => {

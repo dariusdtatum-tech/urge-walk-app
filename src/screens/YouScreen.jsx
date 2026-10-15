@@ -1,26 +1,20 @@
 import { useState } from 'react'
-import { Pressable, ScrollView, View } from 'react-native'
+import { ScrollView, View } from 'react-native'
 import { THEMES } from '../lib/appearance.js'
 import { backupFilename, buildBackup, clearAllData, lastBackupLabel, loadBackupMeta } from '../lib/backup.js'
 import { todayISO } from '../lib/cleanTime.js'
-import { DEFAULT_HOURS_PER_TIME, timeBack } from '../lib/homeIdeas.js'
-import { heroHabit, shortDate } from '../lib/homeStats.js'
+import { cleanDays } from '../lib/homeStats.js'
+import { SECTION_ORDER, SECTION_TITLES, SECTIONS } from './you/Sections.jsx'
 import { earnedList, loadMilestones, saveMilestones } from '../lib/milestones.js'
-import {
-  emptyProfile, identityLine, IMPORTANCE, improveLabels, labelFor, loadProfile, saveProfile, SUPPORT, supportValid,
-} from '../lib/profile.js'
-import { DEFAULT_REMINDER, loadReminder, reminderLabel, saveReminder, stepReminder } from '../lib/checkin.js'
-import { clearPendingFollowUp, loadFollowUpEnabled, saveFollowUpEnabled } from '../lib/followUp.js'
-import { CUSTOM_MAX, CUSTOM_MIN, WALK_OPTIONS, clampCustomMinutes } from '../lib/walkTimer.js'
-import { lengthLabel, loadWalkPrefs, saveWalkPrefs } from '../lib/walkStorage.js'
+import { emptyProfile, identityLine, IMPORTANCE, improveLabels, labelFor, loadProfile, saveProfile, SUPPORT, supportValid } from '../lib/profile.js'
+import { loadReminder, reminderLabel, saveReminder } from '../lib/checkin.js'
+import { loadFollowUpEnabled } from '../lib/followUp.js'
+import { loadWalkPrefs, saveWalkPrefs } from '../lib/walkStorage.js'
 import { Button } from '../ui/Button.jsx'
 import { Confirm } from '../ui/Confirm.jsx'
 import { useDevice } from '../ui/DeviceContext.js'
-import { Field } from '../ui/Field.jsx'
-import { Card, GroupTitle, Notice, Row, ToggleRow } from '../ui/Row.jsx'
-import { Seg } from '../ui/Seg.jsx'
+import { Notice, Row } from '../ui/Row.jsx'
 import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
-import { Stepper } from '../ui/Stepper.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
 import { space, type, useTheme } from '../ui/theme.js'
@@ -29,28 +23,22 @@ import { BeforeSteppers, IdentityStep, ImportanceStep, ImproveStep, SupportStep,
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 
 import { CRISIS, CrisisSheet } from './Crisis.jsx'
-import { ContactsSheet, ReachOut } from './ReachOut.jsx'
+import { ContactsSheet } from './ReachOut.jsx'
 import { ReasonsSheet } from './Reasons.jsx'
 import { LOCK_ERRORS, loadAppLock, saveAppLock } from '../lib/appLock.js'
 import { DailyVerseCard } from './DailyVerse.jsx'
 import { DesignCheck } from './DesignCheck.jsx'
 import { FreeForeverSheet } from './FreeForever.jsx'
 import { NotificationsSheet } from './NotificationsSheet.jsx'
-import APP from '../../app.json'
 
-const APP_VERSION = APP.expo.version
-import { loadVerseEnabled, saveVerseEnabled } from '../lib/verse.js'
+import { loadVerseEnabled } from '../lib/verse.js'
 import { MoneySheet } from './MoneySheet.jsx'
-import { fmtMoney, loadGoal, moneyOn, moneyPerTime } from '../lib/money.js'
+import { moneyOn } from '../lib/money.js'
 import { loadReasons } from '../lib/reasons.js'
-import { MAX_CONTACTS, loadContacts } from '../lib/contacts.js'
+import { loadContacts } from '../lib/contacts.js'
 
 export { CRISIS }
-export const LEGAL_LINKS = [
-  { label: 'Privacy policy', url: 'https://dariusdtatum-tech.github.io/urgewalk/privacy.html' },
-  { label: 'Terms', url: 'https://dariusdtatum-tech.github.io/urgewalk/terms.html' },
-  { label: 'Support', url: 'https://dariusdtatum-tech.github.io/urgewalk/support.html' },
-]
+export { LEGAL_LINKS } from './you/Sections.jsx'
 const ANSWER_TITLES = { before: 'Before you started', improve: 'What you want more of', importance: 'How important right now', identity: 'I see myself as', support: 'Who’s with you', why: 'Your why' }
 
 function answers(p) {
@@ -70,7 +58,7 @@ function answers(p) {
 
 // You: help now, trackers + milestones, walk length, time back, your answers + Redo setup,
 // Appearance, Backup & restore, a safe Reset, and the Privacy / Terms / Support links.
-export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup, onRedo, onErased, onAppLock = () => {}, health = [], open = null }) {
+export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup, onRedo, onErased, onAppLock = () => {}, health = [], open = null, initialSection = null }) {
   const storage = useStorage()
   const device = useDevice()
   const { c } = useTheme()
@@ -110,7 +98,8 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [reminder, setReminder] = useState(() => loadReminder(storage))
   const changeReminder = (r) => { saveReminder(r, storage); setReminder(r); device.syncCheckinReminder(r) }
   const [reset, setReset] = useState(null) // null | 'confirm' | 'saved?' | 'notSaved'
-  const hero = heroHabit(habits)
+  const hero = editor.hero
+  const [section, setSection] = useState(open === 'reasons' ? 'why' : open === 'contacts' ? 'support' : initialSection)
   const earned = hero ? earnedList(milestones, hero.id).length : 0
 
   const list = answers(profile)
@@ -161,83 +150,50 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
     )
   }
 
+  const days = hero ? cleanDays(hero, today) : 0
+  const themeLabel = THEMES.find((t) => t.id === theme)?.label ?? 'System'
+  // Live status lines for the six rows.
+  const status = {
+    support: `988 · ${people.length ? people.map((p) => p.name).join(' · ') : 'No trusted contacts yet'}`,
+    why: [reasonCount ? `${reasonCount} ${reasonCount === 1 ? 'reason' : 'reasons'}` : 'No reasons yet', moneyOn(profile) ? 'money kept on' : null].filter(Boolean).join(' · '),
+    progress: hero ? `${hero.name} · ${days.toLocaleString()} ${days === 1 ? 'day' : 'days'}${habits.length > 1 ? ` · ${habits.length} trackers` : ''}` : 'Add the date you started',
+    reminders: `${reminder ? `Check-in ${reminderLabel(reminder)}` : 'Check-in reminder off'} · follow-up ${followUpOn ? 'on' : 'off'}`,
+    appearance: [themeLabel, appLock ? 'App lock on' : null, verseOn ? 'Daily verse on' : null].filter(Boolean).join(' · '),
+    data: lastBackupLabel(loadBackupMeta(storage), now),
+  }
+  const props = {
+    c, storage, device, today, now, profile, editor, habits, hero, earned, prefs, showLengths, setShowLengths, changePrefs,
+    people, contactsVer, reasonCount, appLock, appLockNote, changeAppLock, followUpOn, setFollowUpOn, reminder, changeReminder,
+    list, showAnswers, setShowAnswers, setAnswer, onRedo, theme, onTheme, verseOn, setVerseOn, setVerseFade, onOpenBackup,
+    setShowCrisis, setShowContacts, setShowReasons, setShowMoney, setShowNotify, setShowFree, setReset, setDesignCheck, changeProfile, setSheet,
+  }
+  const Section = section ? SECTIONS[section] : null
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: 10 }} testID="you">
-        <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>You</T>
+        {Section ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -8 }}>
+            <HeaderButton label="‹ You" accessibilityLabel="Back to You" onPress={() => setSection(null)} testID="you-back" />
+          </View>
+        ) : null}
+        <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>{Section ? SECTION_TITLES[section] : 'You'}</T>
         <Notice text={notice} onDismiss={() => setNotice('')} />
-        {health.map((h) => (
+        {!Section ? health.map((h) => (
           <Row key={h.id} title={h.title} sub={h.action ? `${h.sub} ${h.action}.` : h.sub} testID={`health-${h.id}`}
             chevron={h.action ? '›' : ''} accessibilityRole={h.action ? 'button' : 'text'}
             onPress={h.action ? () => device.openSettings() : undefined} />
-        ))}
+        )) : null}
         <ResetToast editor={editor} />
-
-        {verseOn ? <DailyVerseCard date={new Date(now)} fadeIn={verseFade} /> : null}
-        <GroupTitle>Help now</GroupTitle>
-        <Row title="Crisis resources" sub="988, SAMHSA helpline, 911" testID="crisis-row" onPress={() => setShowCrisis(true)} />
-        <Card><ReachOut key={contactsVer} testID="you-reach" title={null} onSetup={() => setShowContacts(true)} /></Card>
-        <Row title="Trusted contacts" sub={people.length ? people.map((p) => p.name).join(' · ') : `Up to ${MAX_CONTACTS} people and a message ready to go`} testID="contacts-row" onPress={() => setShowContacts(true)} />
-
-        <GroupTitle>Your recovery</GroupTitle>
-        <Row title="Trackers" sub={habits.length === 0 ? 'Add the date you started' : habits.map((h) => h.name).join(' · ')} testID="trackers-row" onPress={() => setSheet({ mode: 'manage' })} />
-        <Row title="Your reasons" sub={reasonCount ? `${reasonCount} saved · one shows when you ride it out` : 'A photo, a voice note, or a few words'} testID="reasons-row" onPress={() => setShowReasons(true)} />
-        <ToggleRow title="App lock" sub={appLock ? 'Face ID or your passcode when you open Urge Walk. 988 stays one tap away.' : 'Off. Ask for Face ID or your passcode when you open Urge Walk.'}
-          value={appLock} testID="app-lock-toggle" onChange={changeAppLock} />
-        {appLockNote ? <T size={type.sub} color={c.textSoft} accessibilityRole="alert" testID="app-lock-note">{appLockNote}</T> : null}
-        {hero ? <Row title="Milestones" sub={`${earned === 1 ? '1 earned' : `${earned} earned`} · ${hero.name}`} testID="milestones-row" onPress={() => setSheet({ mode: 'milestones' })} /> : null}
-        <Row title="Walk length" sub={`${lengthLabel(prefs)} · for Walk`} testID="walk-length" chevron={showLengths ? '⌃' : '›'} onPress={() => setShowLengths(!showLengths)} />
-        {showLengths ? <WalkLengthPicker prefs={prefs} onChange={changePrefs} /> : null}
-        <Row title="Notifications" sub="At most one a day. See what they’ll say." testID="notify-row" onPress={() => setShowNotify(true)} />
-        <ToggleRow title="Check in after an urge" sub="One quiet notification about 30 minutes later. Never more than one per urge."
-          value={followUpOn} testID="followup-toggle"
-          onChange={(on) => { saveFollowUpEnabled(on, storage); setFollowUpOn(on); if (!on) { clearPendingFollowUp(storage); device.cancelFollowUp() } }} />
-        <ToggleRow title="Daily check-in reminder" sub={reminder ? `Every day at ${reminderLabel(reminder)}` : 'Off. You can still check in from Home.'}
-          value={!!reminder} testID="checkin-reminder" onChange={(on) => changeReminder(on ? DEFAULT_REMINDER : null)} />
-        {reminder ? (
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 }} testID="checkin-time">
-            <Button kind="secondary" label="−" accessibilityLabel="15 minutes earlier" onPress={() => changeReminder(stepReminder(reminder, -1))} testID="checkin-time-less" />
-            <T font="semibold" size={18} color={c.title} style={{ minWidth: 96, textAlign: 'center' }} accessibilityLiveRegion="polite">{reminderLabel(reminder)}</T>
-            <Button kind="secondary" label="+" accessibilityLabel="15 minutes later" onPress={() => changeReminder(stepReminder(reminder, 1))} testID="checkin-time-more" />
-          </View>
-        ) : null}
-        <ToggleRow title="Money kept" sub={moneyOn(profile) ? `${fmtMoney(moneyPerTime(profile))} each time${loadGoal(storage)?.name ? ` · toward ${loadGoal(storage).name}` : ''}` : 'Off. A private running total, if it helps.'}
-          value={moneyOn(profile)} testID="money-toggle" onChange={(on) => (on ? setShowMoney(true) : changeProfile({ timeBack: { ...(profile.timeBack || { hoursPerTime: 1 }), moneyPerTime: null } }))} />
-        {moneyOn(profile) ? <Row title="Money kept settings" sub="Amount and goal" testID="money-row" onPress={() => setShowMoney(true)} /> : null}
-        <TimeBackCard profile={profile} hero={hero} today={today} onChange={changeProfile} />
-
-        <GroupTitle>About you</GroupTitle>
-        <Row title="Your answers" sub={`${list.filter((a) => a.value).length} of ${list.length} answered`} testID="answers-toggle" chevron={showAnswers ? '⌃' : '›'} onPress={() => setShowAnswers(!showAnswers)} />
-        {showAnswers ? list.map((a) => <Row key={a.field} title={a.title} sub={a.value || 'Not set'} subMuted={!a.value} testID={`answer-${a.field}`} onPress={() => setAnswer(a.field)} />) : null}
-        <Row title="Redo setup" testID="redo-setup" onPress={onRedo}
-          sub={`Go through the questions again${profile.onboardedAt && !profile.skipped ? ` · last done ${shortDate(profile.onboardedAt.slice(0, 10), today)}` : ''}`} />
-
-        <GroupTitle>Appearance</GroupTitle>
-        <Seg items={THEMES} value={theme} onChange={onTheme} label="Appearance" testID="theme" />
-        <ToggleRow title="Daily verse" sub="One short verse a day on endurance and freedom." value={verseOn} testID="verse-toggle"
-          onChange={(on) => { saveVerseEnabled(on, storage); setVerseFade(on); setVerseOn(on) }} />
-
-        <GroupTitle>Your data</GroupTitle>
-        <Row title="Backup & restore" sub={lastBackupLabel(loadBackupMeta(storage), now)} testID="backup-row" onPress={onOpenBackup} />
-        <Row title="Reset app" sub="Saves a backup file first, then starts fresh" testID="reset-app" danger onPress={() => setReset('confirm')} />
-
-        <GroupTitle>About</GroupTitle>
-        <T size={14} color={c.muted}>No ads. No tracking. No account. For now, everything stays on this phone.</T>
-        <Row title="Free forever" sub="What stays free, always" testID="free-row" onPress={() => setShowFree(true)} />
-        <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }} testID="legal-links">
-          {LEGAL_LINKS.map((l, i) => (
-            <View key={l.url} style={{ flexDirection: 'row', alignItems: 'center' }}>
-              {i > 0 ? <T size={14} color={c.muted} accessibilityElementsHidden>·</T> : null}
-              <Pressable onPress={() => device.openURL(l.url)} accessibilityRole="link" testID={`legal-${i}`} style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 8 }}>
-                <T font="semibold" size={14} color={c.accent} style={{ textDecorationLine: 'underline' }}>{l.label}</T>
-              </Pressable>
-            </View>
-          ))}
-        </View>
-        <Pressable onLongPress={__DEV__ ? () => setDesignCheck(true) : undefined} delayLongPress={3000} testID="app-version"
-          accessibilityLabel={`Version ${APP_VERSION}`} style={{ minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' }}>
-          <T size={type.footnote} color={c.muted}>Version {APP_VERSION}</T>
-        </Pressable>
+        {Section ? <Section {...props} /> : (
+          <>
+            {verseOn ? <DailyVerseCard date={new Date(now)} fadeIn={verseFade} /> : null}
+            {SECTION_ORDER.map((id) => (
+              <Row key={id} title={SECTION_TITLES[id]} sub={status[id]} testID={`you-${id}`} onPress={() => setSection(id)} />
+            ))}
+            <Row title="Your plan" sub="Free. Everything in Urge Walk is free to use." testID="you-plan" onPress={() => setShowFree(true)} />
+          </>
+        )}
       </ScrollView>
       {showNotify ? <NotificationsSheet onClose={() => { setShowNotify(false); setFollowUpOn(loadFollowUpEnabled(storage)); setReminder(loadReminder(storage)) }} /> : null}
       {showFree ? <FreeForeverSheet onClose={() => setShowFree(false)} /> : null}
@@ -258,104 +214,6 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   )
 }
 
-
-// 5 · 10 · 15 · Custom (1–120) · Open. Remembered, and used by "Walk" in Ride it out.
-function WalkLengthPicker({ prefs, onChange }) {
-  const { c } = useTheme()
-  const set = (changes) => onChange({ ...prefs, ...changes })
-  const items = [
-    ...WALK_OPTIONS.map((m) => ({ id: m, label: String(m), sub: 'min', a11y: `${m} minutes` })),
-    { id: 'custom', label: 'Custom', sub: `${prefs.customMinutes} min`, a11y: 'Custom length' },
-    { id: 'open', label: 'Open', sub: 'no timer', a11y: 'Open walk' },
-  ]
-  return (
-    <Card testID="walk-options">
-      <Seg items={items} value={prefs.choice} onChange={(choice) => set({ choice })} label="Walk length" testID="length" small />
-      {prefs.choice === 'custom' ? (
-        <Stepper value={prefs.customMinutes} min={CUSTOM_MIN} max={CUSTOM_MAX} unit="minutes" testID="custom-minutes"
-          onChange={(v) => set({ customMinutes: clampCustomMinutes(v) })} />
-      ) : null}
-      {prefs.choice === 'open' ? <T size={14} color={c.muted}>No timer. Walk as long as you like, then tap Finish walk.</T> : null}
-    </Card>
-  )
-}
-
-const fmtHours = (h) => (h === 1 ? '1 hour' : `${h} hours`)
-const plural = (n, one, many) => `${n} ${n === 1 ? one : many}`
-const HOUR_STEPS = [0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 5, 6, 8, 10, 12]
-
-// Time back: an estimate from the setup answers. Hidden when days a week / times a day were skipped.
-// Money is off until the person adds a $ per time.
-function TimeBackCard({ profile, hero, today, onChange }) {
-  const { c } = useTheme()
-  const [adjust, setAdjust] = useState(null) // null | 'hours' | 'money'
-  const tb = timeBack(profile, hero, today)
-  if (!tb) return null
-  const save = (v) => {
-    const cur = profile.timeBack || { hoursPerTime: DEFAULT_HOURS_PER_TIME, moneyPerTime: null }
-    onChange({ timeBack: adjust === 'hours' ? { ...cur, hoursPerTime: v } : { ...cur, moneyPerTime: v } })
-    setAdjust(null)
-  }
-  return (
-    <Card testID="time-back">
-      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <T accessibilityRole="header" font="semibold" size={17} color={c.title} style={{ flex: 1 }}>Time back</T>
-        <T font="semibold" size={12} color={c.mutedSand} style={{ backgroundColor: c.sand, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 }}>Estimate</T>
-      </View>
-      <T size={type.body} color={c.muted}>about <T font="serif" size={type.screenTitle} color={c.title} testID="tb-hours">{tb.hours.toLocaleString()}</T> <T size={type.body} color={c.text}>hours</T></T>
-      {tb.money != null ? <T size={type.body} color={c.muted}>and about <T font="serif" size={type.rideSheetTitle} color={c.title} testID="tb-money">${tb.money.toLocaleString()}</T> <T size={type.body} color={c.text}>kept</T></T> : null}
-      <T size={13} color={c.muted} testID="tb-formula">
-        Since {shortDate(hero.startDate, '0000-01-01')}, based on what you told us: {plural(tb.daysPerWeek, 'day', 'days')} a week,{' '}
-        {tb.timesPerDay === 7 ? '7+ times' : plural(tb.timesPerDay, 'time', 'times')} a day, about {fmtHours(tb.hoursPerTime)} each
-        {tb.moneyPerTime != null ? ` and $${tb.moneyPerTime} each time` : ''}.
-      </T>
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Button kind="quiet" label={tb.moneyPerTime == null ? 'Add money estimate' : 'Change money'} onPress={() => setAdjust('money')} testID="tb-money-edit" />
-        <Button kind="quiet" label="Adjust" onPress={() => setAdjust('hours')} testID="tb-adjust" />
-      </View>
-      {adjust ? <AdjustSheet kind={adjust} value={adjust === 'hours' ? tb.hoursPerTime : tb.moneyPerTime} onSave={save} onClose={() => setAdjust(null)} /> : null}
-    </Card>
-  )
-}
-
-function AdjustSheet({ kind, value, onSave, onClose }) {
-  const { c } = useTheme()
-  const [hours, setHours] = useState(value ?? DEFAULT_HOURS_PER_TIME)
-  const [money, setMoney] = useState(value == null ? '' : String(value))
-  const m = Number(money)
-  const moneyOk = money.trim() !== '' && Number.isFinite(m) && m > 0 && m <= 100000
-  const i = Math.max(0, HOUR_STEPS.indexOf(hours))
-  return (
-    <Sheet title={kind === 'hours' ? 'About how long each time?' : 'Money estimate'} onClose={onClose} testID="adjust-sheet">
-      {kind === 'hours' ? (
-        <>
-          <T size={15} color={c.muted}>A rough guess is fine. The default is 1 hour.</T>
-          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-            <Button kind="secondary" label="−" accessibilityLabel="Less" disabled={i === 0} onPress={() => setHours(HOUR_STEPS[i - 1])} style={{ width: 56 }} testID="adjust-less" />
-            <View style={{ alignItems: 'center' }} accessible accessibilityLabel={`${hours} ${hours === 1 ? 'hour' : 'hours'} each time`}>
-              <T font="serif" size={44} color={c.title} testID="adjust-hours">{hours}</T>
-              <T size={14} color={c.muted}>{hours === 1 ? 'hour' : 'hours'} each time</T>
-            </View>
-            <Button kind="secondary" label="+" accessibilityLabel="More" disabled={i === HOUR_STEPS.length - 1} onPress={() => setHours(HOUR_STEPS[i + 1])} style={{ width: 56 }} testID="adjust-more" />
-          </View>
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            <Button kind="secondary" label="Cancel" onPress={onClose} style={{ flex: 1 }} />
-            <Button label="Save" onPress={() => onSave(hours)} style={{ flex: 1 }} testID="adjust-save" />
-          </View>
-        </>
-      ) : (
-        <>
-          <T size={15} color={c.muted}>Optional, and only on this phone. About how much did one time cost?</T>
-          <Field label="Dollars per time" value={money} onChangeText={setMoney} keyboardType="decimal-pad" placeholder="e.g. 40" testID="adjust-money" />
-          <View style={{ flexDirection: 'row', gap: 12 }}>
-            <Button kind="secondary" label={value == null ? 'Cancel' : 'Turn off'} onPress={() => (value == null ? onClose() : onSave(null))} style={{ flex: 1 }} />
-            <Button label="Save" disabled={!moneyOk} onPress={() => onSave(Math.round(m * 100) / 100)} style={{ flex: 1 }} testID="adjust-save" />
-          </View>
-        </>
-      )}
-    </Sheet>
-  )
-}
 
 // Edit one setup answer from You (same editors as setup). Saves only on Save.
 function AnswerSheet({ field, profile, onSave, onClose }) {

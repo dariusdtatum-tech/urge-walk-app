@@ -3,7 +3,8 @@ import { Pressable, View } from 'react-native'
 import { markStress } from '../lib/calm.js'
 import { breakdown, formatBreakdown, isValidISODate, todayISO } from '../lib/cleanTime.js'
 import { resetTracker, undoReset, undoableReset } from '../lib/homeIdeas.js'
-import { cleanDays, makePrimary, shortDate } from '../lib/homeStats.js'
+import { cleanDays, heroHabit, shortDate } from '../lib/homeStats.js'
+import { loadActiveTrackerId, saveActiveTrackerId } from '../lib/activeTracker.js'
 import { backfillTracker, earnedList, loadMilestones, milestoneShort, removeTracker } from '../lib/milestones.js'
 import { loadHabits, makeId, MAX_NAME_LENGTH, saveHabits } from '../lib/storage.js'
 import { loadWalks } from '../lib/walkStorage.js'
@@ -26,6 +27,9 @@ export function useTrackerEditor({ today, now, onOpenBackup, onMilestones }) {
   const storage = useStorage()
   const [initial] = useState(() => loadHabits(storage))
   const [habits, setHabits] = useState(initial.habits)
+  const [activeId, setActiveId] = useState(() => loadActiveTrackerId(storage))
+  const setActive = (id) => { saveActiveTrackerId(id, storage); setActiveId(id) }
+  const hero = heroHabit(habits, activeId)
   const [notice, setNotice] = useState(initial.recovered ? 'Some saved data was damaged and couldn’t be read. A backup was kept on this phone.' : '')
   const [sheet, setSheet] = useState(null) // { mode: 'manage' | 'add' | 'edit' | 'reset' | 'milestones', habit?, from? }
   const [undo, setUndo] = useState(null) // { habitId } for the short "History kept." toast
@@ -86,7 +90,7 @@ export function useTrackerEditor({ today, now, onOpenBackup, onMilestones }) {
         <TrackerSheet habits={habits} today={today}
           onEdit={(habit) => setSheet({ mode: 'edit', habit, from: 'manage' })}
           onAdd={() => setSheet({ mode: 'add', from: 'manage' })}
-          onMakePrimary={(id) => update(makePrimary(habits, id))}
+          activeId={hero?.id} onMakePrimary={setActive}
           onOpenBackup={() => { setSheet(null); onOpenBackup() }}
           onClose={() => setSheet(null)} />
       )}
@@ -102,11 +106,11 @@ export function useTrackerEditor({ today, now, onOpenBackup, onMilestones }) {
       )}
     </>
   )
-  return { habits, notice, setNotice, sheet, setSheet, sheets, undo, handleUndo, undoLast }
+  return { habits, hero, activeId: hero?.id ?? null, setActive, notice, setNotice, sheet, setSheet, sheets, undo, handleUndo, undoLast }
 }
 
 // "Edit" on Home / "Trackers" in You: every tracker, which one is on Home, add another, and Backup.
-function TrackerSheet({ habits, today, onEdit, onAdd, onMakePrimary, onOpenBackup, onClose }) {
+function TrackerSheet({ habits, today, activeId, onEdit, onAdd, onMakePrimary, onOpenBackup, onClose }) {
   const { c } = useTheme()
   return (
     <Sheet title="Your trackers" onClose={onClose} testID="tracker-sheet" right={<HeaderButton label="Done" onPress={onClose} testID="trackers-done" />}>
@@ -122,7 +126,7 @@ function TrackerSheet({ habits, today, onEdit, onAdd, onMakePrimary, onOpenBacku
               <T size={14} color={c.text}><T font="bold" size={14} color={c.text} testID="tracker-days">{days.toLocaleString()}</T> {days === 1 ? 'day' : 'days'} · since {shortDate(h.startDate, today)}</T>
               {b && b.totalDays > 0 ? <T size={13} color={c.muted}>{formatBreakdown(b)}</T> : null}
             </View>
-            {i === 0 ? (
+            {h.id === activeId ? (
               <T font="semibold" size={13} color={c.accent}>On Home</T>
             ) : (
               <Pressable onPress={() => onMakePrimary(h.id)} accessibilityRole="button" accessibilityLabel={`Show ${h.name} on Home`}

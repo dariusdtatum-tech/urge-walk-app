@@ -51,3 +51,22 @@ export function stubDevice({ share = 'shared', file = null, picked = null, photo
 export const onboardedProfile = (extra = {}) => ({ 'urgewalk.v1.profile': JSON.stringify({ version: 1, onboardedAt: '2030-05-01T12:00:00.000Z', skipped: false, adultConfirmed: true, ...extra }) })
 export const iso = (ms) => new Date(ms).toISOString()
 export const DAY = 86400000
+
+// You is six rows (Option C). Tests reach a control inside a section with youEl(screen, fireEvent, testID):
+// it opens the right section (going back first if another is open) and returns the element.
+export const YOU_SECTION_OF = {
+  'crisis-row': 'support', 'you-reach': 'support', 'you-reach-text-0': 'support', 'you-reach-call-0': 'support', 'contacts-row': 'support',
+  'reasons-row': 'why', 'money-toggle': 'why', 'money-row': 'why', 'time-back': 'why', 'tb-hours': 'why', 'tb-money': 'why', 'tb-money-edit': 'why', 'tb-adjust': 'why', 'tb-formula': 'why', 'answers-toggle': 'why', 'redo-setup': 'why',
+  'trackers-row': 'progress', 'milestones-row': 'progress', 'walk-length': 'progress',
+  'notify-row': 'reminders', 'followup-toggle': 'reminders', 'checkin-reminder': 'reminders', 'checkin-time-more': 'reminders', 'checkin-time-less': 'reminders',
+  'theme-system': 'appearance', 'theme-light': 'appearance', 'theme-dark': 'appearance', 'verse-toggle': 'appearance', 'app-lock-toggle': 'appearance', 'app-lock-note': 'appearance',
+  'backup-row': 'data', 'reset-app': 'data', 'free-row': 'data', 'legal-0': 'data', 'legal-1': 'data', 'legal-2': 'data', 'app-version': 'data', 'legal-links': 'data',
+}
+export async function youEl(screen, fireEvent, id) {
+  const here = screen.queryByTestId(id)
+  if (here) return here
+  const section = YOU_SECTION_OF[id]
+  if (!screen.queryByTestId(`you-${section}`) && screen.queryByTestId('you-back')) await fireEvent.press(screen.getByTestId('you-back'))
+  await fireEvent.press(screen.getByTestId(`you-${section}`))
+  return screen.getByTestId(id)
+}

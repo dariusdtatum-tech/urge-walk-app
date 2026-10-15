@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from '@testing-library/react-native'
 import { AppRoot } from '../AppRoot.jsx'
 import { ENTITLEMENTS, FREE_FOREVER, canUse } from '../lib/entitlements.js'
-import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0 } from './helpers.js'
+import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0, youEl } from './helpers.js'
 
 beforeEach(() => { jest.useFakeTimers(); jest.setSystemTime(T0) })
 afterEach(() => { jest.useRealTimers() })
@@ -18,7 +18,7 @@ describe('Free forever', () => {
   it('You lists every free feature with the promise, and no Plus tag', async () => {
     await renderApp()
     await fireEvent.press(screen.getByRole('tab', { name: 'You' }))
-    await fireEvent.press(screen.getByTestId('free-row'))
+    await fireEvent.press((await youEl(screen, fireEvent, 'free-row')))
     expect(screen.getByTestId('free-promise')).toHaveTextContent(FREE_FOREVER.promise)
     for (const f of FREE_FOREVER.features) expect(screen.getByTestId(`free-${f.id}`)).toHaveTextContent(new RegExp(f.label.replace(/[()?]/g, '.')))
     expect(screen.queryByText('Plus')).toBeNull()
