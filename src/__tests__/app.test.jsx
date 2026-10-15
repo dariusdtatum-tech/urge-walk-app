@@ -233,13 +233,16 @@ describe('Ground', () => {
   })
   it('one line at a time, tap to continue, notes optional and never saved; logs a ground record', async () => {
     const { clock, storage, device } = await open()
-    const seen = [screen.getByTestId('ground-text').props.children]
+    const seen = [screen.getByTestId('ground-text').props.accessibilityLabel]
     expect(screen.queryByTestId('ground-note')).toBeNull()
+    expect(screen.getByTestId('ground-next')).toHaveTextContent('Begin 5-senses check-in')
+    expect(screen.getByTestId('ground-pebble', { includeHiddenElements: true })).toBeTruthy()
+    expect(screen.getByTestId('ground-dots').props.accessibilityLabel).toBe('0 of 5 senses')
     await fireEvent.press(screen.getByTestId('ground-line')) // tapping the line itself continues
-    seen.push(screen.getByTestId('ground-text').props.children)
+    seen.push(screen.getByTestId('ground-text').props.accessibilityLabel)
     expect(screen.getByTestId('ground-progress')).toHaveTextContent('1 of 5')
     await fireEvent.changeText(screen.getByTestId('ground-note'), 'lamp')
-    for (let i = 0; i < 5; i++) { clock.advance(20000); await fireEvent.press(screen.getByTestId('ground-next')); if (screen.queryByTestId('ground-text')) seen.push(screen.getByTestId('ground-text').props.children) }
+    for (let i = 0; i < 5; i++) { clock.advance(20000); await fireEvent.press(screen.getByTestId('ground-next')); if (screen.queryByTestId('ground-text')) seen.push(screen.getByTestId('ground-text').props.accessibilityLabel) }
     expect(seen).toEqual([
       'Let’s come back to right here. Five small steps, one at a time. Go as slowly as you like.',
       '5 things you can see', '4 things you can touch', '3 things you can hear',
