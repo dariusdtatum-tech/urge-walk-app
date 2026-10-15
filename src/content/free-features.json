@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "promise": "Anything on this list stays free. New Premium features are only ever added on top.",
+  "features": [
+    { "id": "ride-walk", "label": "Ride it out: Walk" },
+    { "id": "ride-breathe", "label": "Ride it out: Breathe" },
+    { "id": "ride-ground", "label": "Ride it out: Ground" },
+    { "id": "log-urge", "label": "Logging urges (Just log it)" },
+    { "id": "counters", "label": "Day counters and milestones" },
+    { "id": "urge-map", "label": "The Urge Map" },
+    { "id": "check-in", "label": "Daily check-in" },
+    { "id": "follow-up", "label": "“How did it go?” follow-up" },
+    { "id": "reasons", "label": "Your reasons" },
+    { "id": "contacts", "label": "Trusted contacts" },
+    { "id": "crisis", "label": "Crisis resources (988)" },
+    { "id": "undo", "label": "Undo after saving" },
+    { "id": "backup", "label": "Backup, restore and data export" },
+    { "id": "app-lock", "label": "App lock" },
+    { "id": "journal", "label": "Journal" },
+    { "id": "web-tools", "label": "Web tools: Breathe and Ground" }
+  ]
+}
