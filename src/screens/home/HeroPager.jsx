@@ -5,13 +5,14 @@ import { Ring } from '../../ui/Ring.jsx'
 import { T } from '../../ui/Text.jsx'
 import { MAX_SCALE, size as sz, type, useTheme } from '../../ui/theme.js'
 import { Badge } from './Milestones.jsx'
+import { HomeReason } from '../Reasons.jsx'
 
 // Home hero, two swipeable pages: 1 = the milestone ring + label (no rotating quote: your why is
 // permanent and already shows under the date as your identity line),
 // 2 = clean time (days and hours) with the last and next milestone cards.
 export const pageAt = (x, width) => Math.max(0, Math.min(1, Math.round(x / Math.max(1, width))))
 
-export function HeroPager({ hero, days, since, segment, label, milestones, today, profile, now }) {
+export function HeroPager({ hero, days, since, segment, label, milestones, today, profile, now, onOpenReason = () => {} }) {
   const { c } = useTheme()
   const [page, setPage] = useState(0)
   const [width, setWidth] = useState(0)
@@ -69,6 +70,7 @@ export function HeroPager({ hero, days, since, segment, label, milestones, today
 
       {page === 0 ? (
         <View style={{ alignItems: 'center', gap: 12 }}>
+          <HomeReason onOpen={onOpenReason} />
           <T size={15} color={c.muted} testID="ring-label" style={{ textAlign: 'center' }}>
             <T font="bold" size={15} color={c.title}>{label.lead}</T>{label.rest}
           </T>

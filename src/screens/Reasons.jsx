@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Animated, Image, Pressable, View } from 'react-native'
 import {
+  latestReason, loadReasons,
   MAX_REASONS, MAX_REASON_TEXT, MAX_VOICE_MS, addReason, formatVoiceLength, loadReasonsData, removeReason, setReasonsLock, takeNextReason,
 } from '../lib/reasons.js'
 import { Button } from '../ui/Button.jsx'
@@ -138,5 +139,35 @@ export function ReasonsSheet({ onClose }) {
       <ToggleRow title="Lock with Face ID" sub="Stays covered on Walk and Breathe until you unlock it." value={data.lock} testID="reasons-lock"
         onChange={(on) => { setReasonsLock(storage, on); refresh() }} />
     </Sheet>
+  )
+}
+
+// Home: your reason, quietly, above the next-milestone line. Fixed (the most recent one), no "Today"
+// label, nothing when there are none, nothing when reasons are locked with Face ID. Tapping it opens
+// You → Your why. A voice note gets its own small Play button.
+export function HomeReason({ onOpen }) {
+  const storage = useStorage()
+  const device = useDevice()
+  const { c } = useTheme()
+  const [{ reason, lock }] = useState(() => ({ reason: latestReason(loadReasons(storage)), lock: loadReasonsData(storage).lock }))
+  useEffect(() => () => device.stopPlaying(), [device])
+  if (!reason || lock) return null
+  const label = reason.kind === 'photo' ? 'Your reason: a photo you saved' : reason.kind === 'voice' ? `Your reason: a voice note, ${formatVoiceLength(reason.durationMs)}` : `Your reason: ${reason.text}`
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, alignSelf: 'stretch' }} testID="home-reason">
+      <Pressable onPress={onOpen} accessibilityRole="button" accessibilityLabel={label} accessibilityHint="Opens Your why in You" testID="home-reason-open"
+        style={{ minHeight: 44, flexShrink: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, paddingHorizontal: 12 }}>
+        {reason.kind === 'photo' ? (
+          <Image source={{ uri: reason.uri }} testID="home-reason-photo" style={{ width: 64, height: 64, borderRadius: 14, backgroundColor: c.sand }} resizeMode="cover" />
+        ) : reason.kind === 'voice' ? (
+          <T size={15} color={c.textSoft} testID="home-reason-voice">Your voice note · {formatVoiceLength(reason.durationMs)}</T>
+        ) : (
+          <T font="serifItalic" size={21} color={c.title} style={{ textAlign: 'center', flexShrink: 1 }} testID="home-reason-text">“{reason.text}”</T>
+        )}
+      </Pressable>
+      {reason.kind === 'voice' ? (
+        <SmallButton label="Play" accessibilityLabel={`Play your voice note, ${formatVoiceLength(reason.durationMs)}`} onPress={() => device.playVoice(reason.uri)} testID="home-reason-play" />
+      ) : null}
+    </View>
   )
 }

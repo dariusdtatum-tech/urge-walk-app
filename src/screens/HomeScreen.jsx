@@ -25,7 +25,9 @@ import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 // Home holds at most four things (Option C v2, written down in AGENTS.md and enforced by a test):
 //   1. the title, which is the tracker switcher (tap it, or swipe in from the left edge, to open the drawer)
 //   2. Ride it out (always one tap)
-//   3. the ring (two pages: milestone ring / clean time + milestone cards)
+//   3. the ring (two pages: milestone ring / clean time + milestone cards). Once you've saved a reason,
+//      the most recent one sits quietly above the next-milestone line (part of the ring item; nothing
+//      when there are none or when reasons are locked)
 //   4. check-in
 // Short-lived helpers (undo-reset banners, notices, the first-week card) come and go. There is no
 // rotating quote and no Your why line: reasons live in You and in Ride it out; money kept and time
@@ -161,7 +163,7 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
       </Pressable>
 
       {hero ? (
-        <HeroPager hero={hero} days={days} since={since} segment={segment} label={label} milestones={milestones} today={today} profile={profile} now={now} />
+        <HeroPager hero={hero} days={days} since={since} segment={segment} label={label} milestones={milestones} today={today} profile={profile} now={now} onOpenReason={() => onOpenYou('why')} />
       ) : (
         <View style={{ alignItems: 'center', gap: 12, paddingVertical: 24 }} testID="home-empty">
           <T accessibilityRole="header" font="serif" size={28} color={c.title}>Every day counts</T>

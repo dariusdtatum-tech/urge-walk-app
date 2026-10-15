@@ -157,7 +157,7 @@ function Shell({ clock, theme, onTheme }) {
 
   // First-week path steps deep-link to the feature.
   function onFirstWeek(id) {
-    if (id === 'reason' || id === 'contact') goTo('you', id === 'reason' ? 'reasons' : 'contacts')
+    if (id === 'contact') goTo('you', 'contacts')
     else if (id === 'breathe') { markStress(clock(), storage); breatheId.current = makeId(); setToast(null); setScreen('breathe') }
     else if (id === 'walk') { startWalkNow(storage, clock(), 5); setToast(null); setScreen('walk') }
     else if (id === 'checkin') setCheckIn(true)

@@ -42,6 +42,12 @@ export function sanitizeReasonsData(raw) {
 export const loadReasonsData = (storage) => sanitizeReasonsData(readObject(REASONS_KEY, storage)) ?? { version: 1, reasons: [], next: 0, lock: false }
 export const saveReasonsData = (data, storage) => writeObject(REASONS_KEY, sanitizeReasonsData(data), storage)
 export const loadReasons = (storage) => loadReasonsData(storage).reasons
+// Home's one fixed reason: the most recently added (there's no pinning). Same until you add another.
+export function latestReason(reasons) {
+  let best = null
+  for (const r of reasons) if (!best || r.at >= best.at) best = r
+  return best
+}
 
 // Returns { ok, error, reason }.
 export function addReason(storage, reason, now = new Date()) {

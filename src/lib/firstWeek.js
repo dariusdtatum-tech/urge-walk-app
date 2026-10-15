@@ -2,6 +2,8 @@
 // seven dots along a shoreline and one small optional step a day. Missed days just stay open:
 // no red marks, no streaks. After day 7 (or when every step is done or skipped) a calm
 // "Your setup is complete" note shows once, then the card is gone for good.
+// Six steps over seven days (day 7 is a rest day). Reasons are added only in You → Your why → Your
+// reasons, so there's no reason step; old stored IDs (e.g. 'reason' in skipped) are simply ignored.
 // urgewalk.v1.firstWeek  { shown, skipped: [id…], seenMap, completeDismissed }
 import { daysBetween, todayISO } from './cleanTime.js'
 import { readObject, writeObject } from './storage.js'
@@ -9,7 +11,6 @@ import { readObject, writeObject } from './storage.js'
 export const FIRST_WEEK_KEY = 'urgewalk.v1.firstWeek'
 export const FIRST_WEEK_STEPS = [
   { id: 'start', title: 'Set your start date', sub: 'So your counter can start counting.' },
-  { id: 'reason', title: 'Add one reason', sub: 'A photo, a voice note, or a few words.' },
   { id: 'breathe', title: 'Try Breathe once', sub: 'One quiet minute.' },
   { id: 'contact', title: 'Add a trusted contact', sub: 'Someone to text when it’s hard.' },
   { id: 'walk', title: 'Take a 5-minute walk', sub: 'Short counts.' },
@@ -25,11 +26,10 @@ export const saveFirstWeek = (changes, storage) => writeObject(FIRST_WEEK_KEY, {
 export const skipStep = (id, storage) => saveFirstWeek({ skipped: [...new Set([...loadFirstWeek(storage).skipped, id])] }, storage)
 
 // What's done, from the data the app already keeps.
-export function doneSteps({ habits = [], reasons = [], contacts = [], walks = [], checkins = {}, fw }) {
+export function doneSteps({ habits = [], contacts = [], walks = [], checkins = {}, fw }) {
   const kinds = new Set(walks.map((w) => w.kind ?? 'walk'))
   return {
     start: habits.length > 0,
-    reason: reasons.length > 0,
     breathe: kinds.has('breathe'),
     contact: contacts.length > 0,
     walk: kinds.has('walk'),

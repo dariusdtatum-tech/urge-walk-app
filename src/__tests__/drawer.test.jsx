@@ -201,7 +201,7 @@ describe('Home has no Your why line, quote or Add a habit; money and time live i
   it('none of the why pieces are on Home, even with reasons, a setup why and money set', async () => {
     await renderApp({ ...habitsSeed(), ...reasonsSeed(['First thing']), ...onboardedProfile({ why: 'A quiet example why', timeBack: { hoursPerTime: 1, moneyPerTime: 10 }, before: { daysPerWeek: 7, timesPerDay: 1 } }) })
     for (const id of ['why-line', 'why-open', 'why-add-habit', 'daily-line', 'money-card', 'kept-card']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
-    expect(screen.queryByText(/your why|Add a reason|Add a habit|A quiet example why/i)).toBeNull()
+    expect(screen.queryByText(/your why|Add a reason|Add a habit|A quiet example why|Today ·/i)).toBeNull() // only the saved reason itself may show
   })
 
   it('Add tracker stays reachable from the drawer', async () => {
@@ -422,5 +422,56 @@ describe('ring pager swipe, and how it shares Home with the edge swipe', () => {
     // 4. Inside the ring, sideways drags belong to the pager (direction-locked), not the drawer.
     expect(screen.getByTestId('hero-pager').props.directionalLockEnabled).toBe(true)
     expect(H.edgeIntent(-60, 2)).toBe(false) // swiping left to go back a page never opens the drawer
+  })
+})
+
+describe('your reason on Home', () => {
+  const R = (list, lock = false) => ({ 'urgewalk.v1.reasons': JSON.stringify({ version: 1, reasons: list, next: 0, lock }) })
+  const txt = (id, text, at) => ({ id, kind: 'text', text, at })
+  it('no reasons: nothing, and no empty prompt', async () => {
+    await renderApp()
+    expect(screen.queryByTestId('home-reason')).toBeNull()
+    expect(screen.queryByText(/reason/i)).toBeNull()
+  })
+  it('shows the most recently added reason, fixed (not rotating, no "Today"), just above the next-milestone line', async () => {
+    await renderApp({ ...habitsSeed(), ...R([txt('a', 'Older words', '2030-01-01T00:00:00.000Z'), txt('b', 'Newest words', '2030-04-01T00:00:00.000Z'), txt('c', 'Middle words', '2030-02-01T00:00:00.000Z')]) })
+    expect(screen.getByTestId('home-reason-text')).toHaveTextContent('“Newest words”')
+    expect(screen.queryByText(/Today/)).toBeNull()
+    const col = screen.getByTestId('ring-label').parent
+    const ids = col.children.map((k) => k.props?.testID)
+    expect(ids.indexOf('home-reason')).toBe(ids.indexOf('ring-label') - 1)
+  })
+  it('the same reason on another day', async () => {
+    const seed = { ...habitsSeed(), ...R([txt('a', 'One', '2030-01-01T00:00:00.000Z'), txt('b', 'Two', '2030-03-01T00:00:00.000Z')]) }
+    await render(<AppRoot storage={memoryStorage({ ...onboardedProfile(), ...seed })} device={stubDevice()} clock={fakeClock(T0 + 3 * DAY)} scheme="light" />)
+    expect(screen.getByTestId('home-reason-text')).toHaveTextContent('“Two”')
+  })
+  it('a photo shows as a small rounded thumbnail', async () => {
+    await renderApp({ ...habitsSeed(), ...R([{ id: 'p', kind: 'photo', text: '', uri: 'file:///docs/reasons/p.jpg', at: '2030-04-01T00:00:00.000Z' }]) })
+    const img = screen.getByTestId('home-reason-photo')
+    expect(img.props.source).toEqual({ uri: 'file:///docs/reasons/p.jpg' })
+    expect(require('react-native').StyleSheet.flatten(img.props.style)).toMatchObject({ width: 64, height: 64, borderRadius: 14 })
+  })
+  it('a voice note is a quiet play row', async () => {
+    const { device } = await renderApp({ ...habitsSeed(), ...R([{ id: 'v', kind: 'voice', text: '', uri: 'file:///docs/reasons/v.m4a', durationMs: 12000, at: '2030-04-01T00:00:00.000Z' }]) })
+    expect(screen.getByTestId('home-reason-voice')).toHaveTextContent('Your voice note · 0:12')
+    await press('home-reason-play')
+    expect(device.calls.played).toEqual(['file:///docs/reasons/v.m4a'])
+  })
+  it('locked with Face ID: nothing on Home', async () => {
+    await renderApp({ ...habitsSeed(), ...R([txt('a', 'Private words', '2030-01-01T00:00:00.000Z')], true) })
+    expect(screen.queryByTestId('home-reason')).toBeNull()
+    expect(screen.queryByText(/Private words/)).toBeNull()
+  })
+  it('tapping it opens You → Your why', async () => {
+    await renderApp({ ...habitsSeed(), ...R([txt('a', 'Some words', '2030-01-01T00:00:00.000Z')]) })
+    await press('home-reason-open')
+    expect(screen.getByTestId('you-back')).toBeTruthy()
+    expect(screen.getByTestId('reasons-row')).toBeTruthy()
+  })
+  it('the Home limit still holds: the reason is a conditional part of the ring item', async () => {
+    await renderApp({ ...habitsSeed(), ...R([txt('a', 'Some words', '2030-01-01T00:00:00.000Z')]) })
+    expect(HOME_ITEMS).toEqual(['home-title', 'ride-bar', 'hero', 'checkin-card'])
+    expect(within(screen.getByTestId('hero')).getByTestId('home-reason')).toBeTruthy()
   })
 })
