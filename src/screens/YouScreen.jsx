@@ -34,6 +34,7 @@ import { ReasonsSheet } from './Reasons.jsx'
 import { LOCK_ERRORS, loadAppLock, saveAppLock } from '../lib/appLock.js'
 import { DailyVerseCard } from './DailyVerse.jsx'
 import { DesignCheck } from './DesignCheck.jsx'
+import { FreeForeverSheet } from './FreeForever.jsx'
 import APP from '../../app.json'
 
 const APP_VERSION = APP.expo.version
@@ -88,6 +89,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [appLock, setAppLock] = useState(() => loadAppLock(storage))
   const [appLockNote, setAppLockNote] = useState('')
   const [designCheck, setDesignCheck] = useState(false)
+  const [showFree, setShowFree] = useState(false)
   // Turning the lock on needs a successful Face ID / passcode check first; turning it off doesn't.
   async function changeAppLock(on) {
     setAppLockNote('')
@@ -213,6 +215,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
 
         <GroupTitle>About</GroupTitle>
         <T size={14} color={c.muted}>No ads. No tracking. No account. For now, everything stays on this phone.</T>
+        <Row title="Free forever" sub="What stays free, always" testID="free-row" onPress={() => setShowFree(true)} />
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }} testID="legal-links">
           {LEGAL_LINKS.map((l, i) => (
             <View key={l.url} style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -228,6 +231,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
           <T size={type.footnote} color={c.muted}>Version {APP_VERSION}</T>
         </Pressable>
       </ScrollView>
+      {showFree ? <FreeForeverSheet onClose={() => setShowFree(false)} /> : null}
       {designCheck ? <DesignCheck onClose={() => setDesignCheck(false)} /> : null}
 
       {sheet?.mode === 'milestones' && hero ? <MilestonesList data={milestones} habit={hero} today={today} onClose={() => setSheet(null)} /> : null}
