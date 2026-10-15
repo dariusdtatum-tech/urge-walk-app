@@ -90,29 +90,25 @@ export function HeroPager({ hero, days, since, segment, milestones, today, profi
         ))}
       </View>
 
-      {/* Fixed milestone pair: always visible, never inside the ring. */}
-      <View style={{ flexDirection: 'row', gap: 10 }} testID="milestone-cards">
-        <MsCard testID="ms-last" k="Last milestone" name={cards.last ? cards.last.name : 'Not yet'}
-          sub={cards.last ? (cards.last.earlier ? 'reached · earlier count' : 'reached') : 'Your first is 7 days'} />
-        <MsCard testID="ms-next" k="Next" name={cards.next.name} sub={`in ${cards.next.inDays} ${cards.next.inDays === 1 ? 'day' : 'days'}`} progress={cards.next.progress} />
+      {/* ONE hairline milestone row (slim Home): Last on the left, Next on the right, a thin progress line.
+          No boxes, never inside the ring. */}
+      <View testID="milestone-row" style={{ alignSelf: 'stretch', borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.hairline, paddingVertical: 10, gap: 8 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
+          <View testID="ms-last" accessible accessibilityLabel={cards.last ? `Last milestone: ${cards.last.name}, reached` : 'No milestone yet. Your first is 7 days'} style={{ flexShrink: 1 }}>
+            <T size={13} color={c.textSoft}>Last</T>
+            <T font="semibold" size={14} color={c.title}>{cards.last ? `${cards.last.name} reached${cards.last.earlier ? ' · earlier count' : ''}` : 'Your first is 7 days'}</T>
+          </View>
+          <View testID="ms-next" accessible accessibilityLabel={`Next milestone: ${cards.next.name} in ${cards.next.inDays} ${cards.next.inDays === 1 ? 'day' : 'days'}`} style={{ flexShrink: 1, alignItems: 'flex-end' }}>
+            <T size={13} color={c.textSoft}>Next</T>
+            <T font="semibold" size={14} color={c.title} style={{ textAlign: 'right' }}>{cards.next.name} in {cards.next.inDays} {cards.next.inDays === 1 ? 'day' : 'days'}</T>
+          </View>
+        </View>
+        <View accessibilityRole="progressbar" accessibilityLabel={`Progress to ${cards.next.name}`} accessibilityValue={{ min: 0, max: 100, now: Math.round(cards.next.progress * 100) }} testID="ms-progress"
+          style={{ height: 3, borderRadius: 1.5, backgroundColor: c.ringTrack, overflow: 'hidden' }}>
+          <View style={{ width: `${Math.round(cards.next.progress * 100)}%`, height: 3, backgroundColor: c.ringA }} />
+        </View>
       </View>
     </View>
   )
 }
 
-function MsCard({ k, name, sub, progress, testID }) {
-  const { c } = useTheme()
-  return (
-    <View testID={testID} style={{ flex: 1, backgroundColor: c.card, borderRadius: 16, borderWidth: 1, borderColor: c.border, padding: 14, gap: 2 }}>
-      <T size={13} color={c.textSoft}>{k}</T>
-      <T font="semibold" size={type.bodyLg} color={c.title}>{name}</T>
-      <T size={13} color={c.textSoft}>{sub}</T>
-      {progress != null ? (
-        <View accessibilityRole="progressbar" accessibilityLabel={`Progress to ${name}`} accessibilityValue={{ min: 0, max: 100, now: Math.round(progress * 100) }}
-          style={{ height: 4, borderRadius: 2, backgroundColor: c.ringTrack, overflow: 'hidden', marginTop: 8, borderWidth: c.trackEdge ? 0.5 : 0, borderColor: c.trackEdge ?? 'transparent' }}>
-          <View style={{ width: `${Math.round(progress * 100)}%`, height: 4, backgroundColor: c.ringA }} />
-        </View>
-      ) : null}
-    </View>
-  )
-}

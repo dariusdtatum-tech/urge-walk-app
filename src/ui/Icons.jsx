@@ -67,3 +67,10 @@ export function HeartIcon({ color, size = 20 }) {
     </Svg>
   )
 }
+export function ChevronDownIcon({ color, size = 12 }) {
+  return (
+    <Svg width={size} height={size} viewBox="0 0 12 12" fill="none" stroke={color} strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" {...hide}>
+      <Path d="M2.5 4.5L6 8l3.5-3.5" />
+    </Svg>
+  )
+}

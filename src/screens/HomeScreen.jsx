@@ -7,32 +7,30 @@ import { cleanDays, shortDate } from '../lib/homeStats.js'
 import { loadMilestones, ringSegment, saveMilestones, syncMilestones } from '../lib/milestones.js'
 import { identityLine, loadProfile } from '../lib/profile.js'
 import { Button } from '../ui/Button.jsx'
-import { WaveIcon } from '../ui/Icons.jsx'
+import { ChevronDownIcon, WaveIcon } from '../ui/Icons.jsx'
 import { Notice } from '../ui/Row.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
 import { radius, space, type, useTheme } from '../ui/theme.js'
 import { HeroPager } from './home/HeroPager.jsx'
 import { MilestoneSheet } from './home/Milestones.jsx'
-import { CheckInCard } from './CheckInSheet.jsx'
 import { FirstWeekCard } from './home/FirstWeekCard.jsx'
 import { DrawerPeek, drawerWidth, TrackerDrawer, TrackerSheet } from './home/TrackerDrawer.jsx'
 import { loadSwitcher } from '../lib/switcher.js'
-import { loadWalks } from '../lib/walkStorage.js'
-import { MoneyCard, UrgeMapCard, WeekCard, WhyCard } from './home/HomeCards.jsx'
+import { HomePanel } from './home/HomeCards.jsx'
 import { useHomeReason } from './Reasons.jsx'
 import { useReducedMotion } from '../ui/motion.js'
 import { ReachOut } from './ReachOut.jsx'
 import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 
-// Fuller Home (approved Oct 15 2026; written down in AGENTS.md and enforced by tests):
+// Slim Home (Gemini review 2, approved Oct 15 2026; replaces the fuller Home; AGENTS.md + tests):
 //   1. the title, a 44pt pill that is the tracker switcher (tap: bottom sheet by default, or the drawer
 //      if picked in You → Appearance and lock; swiping in from the left edge always opens the drawer)
 //   2. the hero: ONLY the ring swipes (days clean / days and hours / Time back when estimated), page dots
-//      under it, then the fixed Last + Next milestone pair. Nothing milestone-related inside the ring.
-//   3. at most five cards, in HOME_CARDS order: your why · daily check-in · this week · Urge Map preview ·
-//      money kept (only when set up). A card with nothing honest to show hides itself.
+//      under it, then ONE hairline milestone row (Last left, Next right, a thin progress line, no boxes).
+//   3. ONE flat sand panel: Your why (latest reason, setup fallback, hidden when locked) over the Daily
+//      check-in row, split by a hairline. This week, Urge Map and Money kept stay in Track and You.
 //   4. a quiet "Hold the center button for a quick walk" hint
 // Ride it out is the raised center tab button only, always one tap. 988 is not a Home card. Short-lived
 // helpers (undo-reset banners, notices, the first-week card) come and go.
@@ -48,7 +46,6 @@ export function HomeScreen({ now, clock = Date.now, onOpenTrack = () => {}, onRi
   const { c } = useTheme()
   const today = todayISO(new Date(now))
   const [profile] = useState(() => loadProfile(storage))
-  const [walks] = useState(() => loadWalks(storage).walks)
   const reason = useHomeReason(profile)
   const [milestones, setMilestones] = useState(() => loadMilestones(storage))
   const storeMilestones = (next) => { saveMilestones(next, storage); setMilestones(next) }
@@ -141,9 +138,10 @@ export function HomeScreen({ now, clock = Date.now, onOpenTrack = () => {}, onRi
         <Pressable ref={titleRef} onPress={openSwitcher} testID="home-title" accessibilityRole="button"
           accessibilityActions={[{ name: 'activate' }, { name: 'openTrackers', label: 'Open trackers' }]} onAccessibilityAction={openSwitcher}
           accessibilityLabel={hero ? `${hero.name}. ${habits.length > 1 ? 'Switch or edit trackers' : 'Your trackers'}` : 'Your trackers'}
-          style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', marginLeft: -4, paddingLeft: 14, paddingRight: habits.length > 1 ? 12 : 14, borderRadius: 22, backgroundColor: c.sand }}>
+          style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', marginLeft: -4, paddingLeft: 14, paddingRight: 12, borderRadius: 22, backgroundColor: c.sand }}>
           <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title} numberOfLines={2} style={{ flexShrink: 1 }}>{hero ? hero.name : 'Home'}</T>
-          {habits.length > 1 ? <T size={20} color={c.title} testID="home-title-caret" accessibilityElementsHidden importantForAccessibility="no">▾</T> : null}
+          {/* A chevron so the chip reads as a picker (it opens the tracker switcher even with one tracker). */}
+          <View testID="home-title-caret"><ChevronDownIcon color={c.title} size={12} /></View>
         </Pressable>
       </View>
       {identity ? <T font="serifItalic" size={type.identity} color={c.title} testID="identity-line">{identity}</T> : null}
@@ -185,12 +183,8 @@ export function HomeScreen({ now, clock = Date.now, onOpenTrack = () => {}, onRi
 
       <FirstWeekCard now={now} onStep={(id) => (id === 'start' ? setSheet({ mode: 'add' }) : onFirstWeek(id))} />
       {/* At most five cards, in HOME_CARDS order. */}
-      <View style={{ gap: 12 }} testID="home-cards">
-        <WhyCard reason={reason} onOpen={() => onOpenYou('why')} />
-        <CheckInCard today={today} onOpen={onCheckIn} />
-        <WeekCard walks={walks} today={today} />
-        <UrgeMapCard walks={walks} today={today} now={now} onSeeTrack={onOpenTrack} />
-        <MoneyCard profile={profile} hero={hero} walks={walks} today={today} />
+      <View testID="home-cards">
+        <HomePanel reason={reason} onOpenWhy={() => onOpenYou('why')} today={today} onCheckIn={onCheckIn} />
       </View>
       {!liveWalk ? (
         <T size={13} color={c.muted} testID="hold-hint" style={{ textAlign: 'center', marginTop: 8 }}>Hold the center button for a quick walk</T>
