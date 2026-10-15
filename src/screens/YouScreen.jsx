@@ -33,6 +33,10 @@ import { ContactsSheet, ReachOut } from './ReachOut.jsx'
 import { ReasonsSheet } from './Reasons.jsx'
 import { LOCK_ERRORS, loadAppLock, saveAppLock } from '../lib/appLock.js'
 import { DailyVerseCard } from './DailyVerse.jsx'
+import { DesignCheck } from './DesignCheck.jsx'
+import APP from '../../app.json'
+
+const APP_VERSION = APP.expo.version
 import { loadVerseEnabled, saveVerseEnabled } from '../lib/verse.js'
 import { MoneySheet } from './MoneySheet.jsx'
 import { fmtMoney, loadGoal, moneyOn, moneyPerTime } from '../lib/money.js'
@@ -83,6 +87,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [showMoney, setShowMoney] = useState(false)
   const [appLock, setAppLock] = useState(() => loadAppLock(storage))
   const [appLockNote, setAppLockNote] = useState('')
+  const [designCheck, setDesignCheck] = useState(false)
   // Turning the lock on needs a successful Face ID / passcode check first; turning it off doesn't.
   async function changeAppLock(on) {
     setAppLockNote('')
@@ -218,7 +223,12 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
             </View>
           ))}
         </View>
+        <Pressable onLongPress={__DEV__ ? () => setDesignCheck(true) : undefined} delayLongPress={3000} testID="app-version"
+          accessibilityLabel={`Version ${APP_VERSION}`} style={{ minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' }}>
+          <T size={type.footnote} color={c.muted}>Version {APP_VERSION}</T>
+        </Pressable>
       </ScrollView>
+      {designCheck ? <DesignCheck onClose={() => setDesignCheck(false)} /> : null}
 
       {sheet?.mode === 'milestones' && hero ? <MilestonesList data={milestones} habit={hero} today={today} onClose={() => setSheet(null)} /> : null}
       {editor.sheets}

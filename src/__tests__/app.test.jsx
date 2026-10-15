@@ -1,4 +1,5 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
+import { StyleSheet } from 'react-native'
 import { AppRoot } from '../AppRoot.jsx'
 import { buildBackup } from '../lib/backup.js'
 import { BREATHE_LINES } from '../lib/encouragement.js'
@@ -264,6 +265,26 @@ describe('Ground', () => {
     await fireEvent.press(screen.getByTestId('ride-ground'))
     await fireEvent.press(screen.getByTestId('ground-cancel'))
     expect(loadWalks(storage).walks).toHaveLength(1)
+  })
+})
+
+describe('Design Check (dev only)', () => {
+  it('opens from a long-press on the version in You, with Light and Night, largest text and Reduce Motion', async () => {
+    await renderApp()
+    await fireEvent.press(screen.getByRole('tab', { name: 'You' }))
+    const v = screen.getByTestId('app-version')
+    expect(screen.getByText('Version 1.0.0')).toBeTruthy()
+    await fireEvent(v, 'longPress')
+    expect(screen.getByTestId('design-check')).toBeTruthy()
+    expect(screen.getByTestId('design-Light')).toBeTruthy()
+    expect(screen.getByTestId('design-Night')).toBeTruthy()
+    expect(screen.getAllByText('Reduce Motion: off')).toHaveLength(2)
+    await fireEvent(screen.getByTestId('design-still'), 'valueChange', true)
+    expect(screen.getAllByText('Reduce Motion: on')).toHaveLength(2)
+    await fireEvent(screen.getByTestId('design-big'), 'valueChange', true)
+    expect(StyleSheet.flatten(screen.getAllByText('Primary button')[0].props.style).fontSize).toBe(30) // 15 × 2x cap
+    await fireEvent.press(screen.getByTestId('design-done'))
+    expect(screen.queryByTestId('design-check')).toBeNull()
   })
 })
 
