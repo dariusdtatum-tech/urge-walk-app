@@ -57,8 +57,8 @@ export function HeroPager({ hero, days, since, segment, milestones, today, profi
           <View style={pageStyle} testID="clean-time" {...vis(1)}>
             <Ring value={segment.progress}>
               <T font="bold" {...small}>Clean for</T>
-              <View accessible accessibilityLabel={cleanTimeLabel(ct)} testID="clean-time-value">
-                <T font="serif" size={type.ringDaysMd} max={MAX_SCALE.ring} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{ct.days.toLocaleString()}d {ct.hours}h</T>
+              <View accessible accessibilityLabel={cleanTimeLabel(ct)} testID="clean-time-value" style={{ alignSelf: 'stretch', alignItems: 'center' }}>
+                <T font="serif" size={ct.days > 999 ? 30 : 38} max={MAX_SCALE.ring} color={c.title} numberOfLines={1} adjustsFontSizeToFit style={{ textAlign: 'center', flexShrink: 0, fontVariant: ['lining-nums'] }}>{ct.days.toLocaleString()}d {ct.hours}h</T>
               </View>
               <T font="serifItalic" size={type.ringLabel} max={MAX_SCALE.ringSmall} color={c.title}>days and hours</T>
             </Ring>
