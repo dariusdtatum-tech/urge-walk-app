@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen } from '@testing-library/react-native'
+import { act, fireEvent, render, screen, within } from '@testing-library/react-native'
 import { StyleSheet } from 'react-native'
 import { AppRoot } from '../AppRoot.jsx'
 import { sheetMaxHeight } from '../screens/RideSheet.jsx'
@@ -134,7 +134,12 @@ describe('Onboarding welcome', () => {
     const scene = screen.getByTestId('ob-scene', { includeHiddenElements: true })
     expect(scene.props.preserveAspectRatio).not.toBe('none')
     expect(screen.getByTestId('ob-sun', { includeHiddenElements: true }).props.fill.payload).toBe(0xffdec29b) // #dec29b
-    expect(screen.getByTestId('ob-path', { includeHiddenElements: true })).toBeTruthy()
+    const path = screen.getByTestId('ob-path', { includeHiddenElements: true })
+    expect(path.props.stroke).toBeFalsy() // flat and borderless
+    expect(path.props.fill.payload).toBe(0xfff1ebe0) // flat sand, no alpha
+    expect(JSON.stringify(screen.toJSON())).not.toContain('obFade') // no fade-out gradient
+    // the restore link is navy (palette token), not deep sea or sea glass
+    expect(StyleSheet.flatten(within(screen.getByTestId('ob-restore')).getByText('Restore from a backup').props.style).color).toBe('#24395c')
     expect(screen.getByTestId('ob-words')).toHaveTextContent(/You’re here\./)
     expect(screen.getByLabelText('Evenfaring')).toBeTruthy()
   })

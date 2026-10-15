@@ -30,8 +30,8 @@ const PRIVACY = [
 const joinNames = (n) => (n.length <= 1 ? n[0] || '' : `${n.slice(0, -1).join(', ')} and ${n.at(-1)}`)
 
 const SKY = {
-  light: { a: '#f6efe3', b: '#efe5d3', sun: '#dec29b', path: 'rgba(239,228,207,0.95)', pathEdge: 'rgba(141,135,120,0.35)', w1: 'rgba(127,174,159,0.6)', w2: 'rgba(169,203,192,0.85)', w3: 'rgba(211,230,223,0.9)', foam: 'rgba(253,251,247,0.9)', w4: 'rgba(230,216,191,0.9)' },
-  dark: { a: '#1b3152', b: '#0f1d33', sun: 'rgba(239,230,212,0.85)', path: 'rgba(169,203,192,0.35)', pathEdge: 'rgba(169,203,192,0.5)', w1: 'rgba(169,203,192,0.25)', w2: 'rgba(58,90,115,0.7)', w3: 'rgba(44,66,102,0.85)', foam: 'rgba(169,203,192,0.9)', w4: 'rgba(36,57,92,0.9)' },
+  light: { a: '#f6efe3', b: '#efe5d3', sun: '#dec29b', path: '#f1ebe0', w1: 'rgba(127,174,159,0.6)', w2: 'rgba(169,203,192,0.85)', w3: 'rgba(211,230,223,0.9)', foam: 'rgba(250,247,241,0.9)', w4: 'rgba(230,216,191,0.9)' },
+  dark: { a: '#1b3152', b: '#0f1d33', sun: 'rgba(239,230,212,0.85)', path: '#a9cbc0', w1: 'rgba(169,203,192,0.25)', w2: 'rgba(58,90,115,0.7)', w3: 'rgba(44,66,102,0.85)', foam: 'rgba(169,203,192,0.9)', w4: 'rgba(36,57,92,0.9)' },
 }
 // The welcome scene: sun (moon at night) over layered sea-glass waves, with a path tapering toward
 // the horizon. "slice" keeps the sun a true circle on any screen (it used to be stretched by "none").
@@ -43,7 +43,6 @@ function WelcomeScene() {
     <Svg width="100%" height="100%" viewBox="0 0 390 440" preserveAspectRatio={WELCOME_ASPECT} testID="ob-scene" accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
       <Defs>
         <LinearGradient id="obSky" x1="0" y1="0" x2="0" y2="1"><Stop offset="0" stopColor={s.a} /><Stop offset="1" stopColor={s.b} /></LinearGradient>
-        <LinearGradient id="obFade" x1="0" y1="0" x2="0" y2="1"><Stop offset="0.75" stopColor={c.bg} stopOpacity={0} /><Stop offset="1" stopColor={c.bg} stopOpacity={1} /></LinearGradient>
       </Defs>
       <Rect x="-400" width="1190" height="440" fill="url(#obSky)" />
       <Circle cx="270" cy="150" r="46" fill={s.sun} testID="ob-sun" />
@@ -52,23 +51,20 @@ function WelcomeScene() {
       <Path d="M-400 352 C 100 334 180 372 260 352 C 330 336 365 352 790 346 L790 440 L-400 440Z" fill={s.w3} />
       <Path d="M-400 352 C 100 334 180 372 260 352 C 330 336 365 352 790 346" stroke={s.foam} strokeWidth={2} fill="none" />
       <Path d="M-400 404 C 110 390 190 420 280 404 C 340 394 370 404 790 400 L790 440 L-400 440Z" fill={s.w4} />
-      {/* A gentle path: wide at the bottom, narrowing as it winds up toward the horizon. */}
-      <Path d="M150 440 C 175 400 215 372 206 336 C 200 312 222 292 236 282 L 240 283 C 230 296 214 316 220 338 C 230 378 210 410 240 440 Z" fill={s.path} stroke={s.pathEdge} strokeWidth={1} testID="ob-path" />
-      <Rect x="-400" width="1190" height="440" fill="url(#obFade)" />
+      {/* A flat, borderless path (like the A2 icon's): wide at the bottom, tapering to a clean point at the
+          horizon. It's drawn last, over every wave band, so no wave line crosses it. No stroke, no fade. */}
+      <Path d="M150 440 C 175 400 215 372 206 336 C 200 312 222 292 238 280 C 230 296 214 316 220 338 C 230 378 210 410 240 440 Z" fill={s.path} testID="ob-path" />
     </Svg>
   )
 }
 
-// Evenfaring placeholder mark (App Design will refine it): a small astrolabe ring with a four-point star.
+// The crosshair-like placeholder mark is gone (Gemini review 2). A quiet 12pt tracked wordmark keeps
+// the maker's name without a second circle competing with the sun.
 function EvenfaringMark() {
   const { c } = useTheme()
   return (
     <View accessible accessibilityRole="image" accessibilityLabel="Evenfaring" testID="ob-emblem" style={{ alignItems: 'center' }}>
-      <Svg width={36} height={36} viewBox="0 0 36 36">
-        <Circle cx="18" cy="18" r="15" stroke={c.title} strokeWidth={1.5} fill="none" />
-        <Circle cx="18" cy="18" r="10" stroke={c.title} strokeWidth={1} fill="none" opacity={0.6} />
-        <Path d="M18 6 L20 16 L30 18 L20 20 L18 30 L16 20 L6 18 L16 16 Z" fill={c.title} />
-      </Svg>
+      <T font="semibold" size={12} color={c.title} style={{ letterSpacing: 12 * 0.16, textTransform: 'uppercase' }}>Evenfaring</T>
     </View>
   )
 }
@@ -153,7 +149,7 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
         </View>
         <View style={{ padding: 24, paddingBottom: 24 + insets.bottom, gap: 6 }}>
           <Button label="Begin" onPress={() => setStep(2)} testID="ob-begin" />
-          {mode === 'new' ? <Button kind="quiet" label="Restore from a backup" onPress={onRestore} testID="ob-restore" /> : null}
+          {mode === 'new' ? <Button kind="quiet" label="Restore from a backup" textColor={c.title} onPress={onRestore} testID="ob-restore" /> : null}
         </View>
       </View>
     )

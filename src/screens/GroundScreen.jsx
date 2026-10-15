@@ -5,7 +5,7 @@ import { Button } from '../ui/Button.jsx'
 import { CheckIn } from '../ui/CheckIn.jsx'
 import { Field } from '../ui/Field.jsx'
 import { T } from '../ui/Text.jsx'
-import Svg, { Circle, Ellipse, Path } from 'react-native-svg'
+import Svg, { Ellipse, Path } from 'react-native-svg'
 import { HeaderButton } from '../ui/Sheet.jsx'
 import { radius, space, type, useTheme } from '../ui/theme.js'
 
@@ -42,15 +42,16 @@ export function GroundScreen({ onSave, onCancel, clock = Date.now }) {
           <SenseDots done={sense} />
           <HeaderButton label="✕" accessibilityLabel="Close. Nothing saved" onPress={onCancel} testID="ground-close" />
         </View>
-        <T size={type.footnote} color={c.muted} testID="ground-progress" style={{ textAlign: 'center' }}>{item.note ? groundProgress(sense) : ' '}</T>
+        <T size={type.footnote} color={c.muted} testID="ground-progress">{item.note ? groundProgress(sense) : ' '}</T>
         <Pressable onPress={next} accessibilityRole="button" accessibilityHint="Tap to continue" testID="ground-line"
-          style={{ flexGrow: 1, minHeight: 180, alignItems: 'center', justifyContent: 'center', gap: 14, borderRadius: radius.card, padding: space.card }}>
-          {!item.note ? <Pebble /> : null}
-          <View accessible accessibilityLabel={item.line} accessibilityLiveRegion="polite" testID="ground-text" style={{ alignItems: 'center', gap: 8 }}>
-            <T font={item.note ? 'serif' : 'serifItalic'} size={item.note ? 30 : 28} color={c.title} style={{ textAlign: 'center' }}>{head}</T>
-            {restParts.length ? <T size={type.bodyLg} color={c.text} style={{ textAlign: 'center' }}>{restParts.join(' ')}</T> : null}
+          style={{ flexGrow: 1, minHeight: 180, alignItems: 'stretch', justifyContent: 'center', gap: 14, borderRadius: radius.card, paddingVertical: space.card }}>
+          {!item.note ? <View style={{ alignItems: 'center' }}><Stones /></View> : null}
+          {/* Copy is left-aligned (DESIGN-RULES: no centered everything). */}
+          <View accessible accessibilityLabel={item.line} accessibilityLiveRegion="polite" testID="ground-text" style={{ alignItems: 'flex-start', gap: 8 }}>
+            <T font={item.note ? 'serif' : 'serifItalic'} size={item.note ? 30 : 28} color={c.title} style={{ textAlign: 'left' }}>{head}</T>
+            {restParts.length ? <T size={type.bodyLg} color={c.text} style={{ textAlign: 'left', lineHeight: 24 }}>{restParts.join(' ')}</T> : null}
           </View>
-          {item.hint ? <T size={type.body} color={c.text} style={{ textAlign: 'center' }}>{item.hint}</T> : null}
+          {item.hint ? <T size={type.body} color={c.text} style={{ textAlign: 'left' }}>{item.hint}</T> : null}
         </Pressable>
         {item.note ? (
           <View style={{ gap: 6 }}>
@@ -75,28 +76,31 @@ export function splitFirstSentence(line) {
   return m ? [m[1], m[2]] : [line]
 }
 
-// 5 · 4 · 3 · 2 · 1: one dot per sense, filled once you've reached it.
+// 5 · 4 · 3 · 2 · 1: one dot per sense, filled once you've reached it. The first dot is filled from the
+// start screen on, so it's clear you're at step one of five.
 function SenseDots({ done }) {
   const { c } = useTheme()
+  const filled = Math.max(1, done)
   return (
-    <View style={{ flexDirection: 'row', gap: 6 }} accessible accessibilityLabel={`${done} of 5 senses`} testID="ground-dots">
+    <View style={{ flexDirection: 'row', gap: 6 }} accessible accessibilityLabel={done ? `${done} of 5 senses` : 'Step 1 of 5'} testID="ground-dots">
       {[5, 4, 3, 2, 1].map((n, k) => (
-        <View key={n} testID={`ground-dot-${n}`} style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: k < done ? c.accent : 'transparent', borderWidth: 1.5, borderColor: k < done ? c.accent : c.cellEdge }} />
+        <View key={n} testID={`ground-dot-${n}`} style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: k < filled ? c.title : 'transparent', borderWidth: 1.5, borderColor: k < filled ? c.title : c.cellEdge }} />
       ))}
     </View>
   )
 }
 
-// A quiet focal point: a pebble resting in sea-glass ripples. Decorative.
-function Pebble() {
+// A quiet focal point: three flat stones stacked off-center, with two open ripple arcs beside them.
+// Flat fills only (no highlight, no shading, no rings around the base). Decorative.
+export function Stones() {
   const { c } = useTheme()
   return (
-    <Svg width={180} height={110} viewBox="0 0 180 110" accessibilityElementsHidden importantForAccessibility="no-hide-descendants" testID="ground-pebble">
-      <Ellipse cx={90} cy={74} rx={84} ry={26} fill="none" stroke={c.ringB} strokeWidth={1.5} opacity={0.45} />
-      <Ellipse cx={90} cy={74} rx={62} ry={19} fill="none" stroke={c.ringB} strokeWidth={1.5} opacity={0.7} />
-      <Ellipse cx={90} cy={74} rx={40} ry={12} fill="none" stroke={c.ringB} strokeWidth={2} />
-      <Path d="M58 70 C58 48 78 38 94 40 C114 42 124 56 120 68 C116 80 70 82 58 70 Z" fill={c.sand} stroke={c.cellEdge} strokeWidth={1.5} />
-      <Circle cx={84} cy={52} r={4} fill={c.surface} opacity={0.8} />
+    <Svg width={200} height={120} viewBox="0 0 200 120" accessibilityElementsHidden importantForAccessibility="no-hide-descendants" testID="ground-stones">
+      <Path d="M14 100 C30 90 52 90 66 100" fill="none" stroke={c.ripple} strokeWidth={1.5} strokeLinecap="round" opacity={0.55} />
+      <Path d="M4 110 C26 96 58 96 78 110" fill="none" stroke={c.ripple} strokeWidth={1.5} strokeLinecap="round" opacity={0.35} />
+      <Ellipse cx={132} cy={94} rx={46} ry={16} fill={c.stoneBase} />
+      <Ellipse cx={110} cy={70} rx={38} ry={14} fill={c.stoneMid} />
+      <Ellipse cx={116} cy={47} rx={24} ry={10} fill={c.stoneTop} />
     </Svg>
   )
 }

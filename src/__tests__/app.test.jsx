@@ -236,8 +236,14 @@ describe('Ground', () => {
     const seen = [screen.getByTestId('ground-text').props.accessibilityLabel]
     expect(screen.queryByTestId('ground-note')).toBeNull()
     expect(screen.getByTestId('ground-next')).toHaveTextContent('Begin 5-senses check-in')
-    expect(screen.getByTestId('ground-pebble', { includeHiddenElements: true })).toBeTruthy()
-    expect(screen.getByTestId('ground-dots').props.accessibilityLabel).toBe('0 of 5 senses')
+    expect(screen.getByTestId('ground-stones', { includeHiddenElements: true })).toBeTruthy()
+    expect(screen.queryByTestId('ground-pebble', { includeHiddenElements: true })).toBeNull() // the old dome is gone
+    expect(screen.getByTestId('ground-dots').props.accessibilityLabel).toBe('Step 1 of 5')
+    // first step dot filled, the rest open; copy left-aligned
+    const { StyleSheet } = require('react-native')
+    expect(StyleSheet.flatten(screen.getByTestId('ground-dot-5').props.style).backgroundColor).not.toBe('transparent')
+    expect(StyleSheet.flatten(screen.getByTestId('ground-dot-4').props.style).backgroundColor).toBe('transparent')
+    expect(StyleSheet.flatten(screen.getByTestId('ground-text').props.style).alignItems).toBe('flex-start')
     await fireEvent.press(screen.getByTestId('ground-line')) // tapping the line itself continues
     seen.push(screen.getByTestId('ground-text').props.accessibilityLabel)
     expect(screen.getByTestId('ground-progress')).toHaveTextContent('1 of 5')
