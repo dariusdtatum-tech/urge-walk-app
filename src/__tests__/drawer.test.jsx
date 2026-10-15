@@ -176,12 +176,12 @@ describe('tracker title and drawer', () => {
 })
 
 describe('Home holds four things', () => {
-  it('title, Ride it out, ring and check-in; the old cards live elsewhere even with lots of data', async () => {
+  it('title pill, ring, check-in and the hold hint; the old cards live elsewhere even with lots of data', async () => {
     const walks = { 'urgewalk.v1.walks': JSON.stringify({ version: 1, walks: [walk(0), walk(1), walk(1, 'no'), walk(2), walk(3)] }) }
     const seed = { ...habitsSeed(), ...onboardedProfile({ timeBack: { hoursPerTime: 1, moneyPerTime: 10 }, before: { daysPerWeek: 7, timesPerDay: 1 } }), ...walks,
       'urgewalk.v1.backupMeta': JSON.stringify({ lastBackupAt: iso(T0 - 30 * DAY) }), 'urgewalk.v1.firstWeek': JSON.stringify({ done: true }) }
     await renderApp(seed)
-    expect(HOME_ITEMS).toEqual(['home-title', 'ride-bar', 'hero', 'checkin-card'])
+    expect(HOME_ITEMS).toEqual(['home-title', 'hero', 'checkin-card', 'hold-hint'])
     for (const id of HOME_ITEMS) expect([id, Boolean(screen.queryByTestId(id))]).toEqual([id, true])
     for (const id of ['pattern-card', 'money-card', 'walks-card', 'never-zero', 'backup-nudge', 'home-edit']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
     await tab('Track')
@@ -190,10 +190,10 @@ describe('Home holds four things', () => {
     expect(screen.getByTestId('pattern-card')).toBeTruthy()
   })
 
-  it('keeps 5 tabs, with Ride it out in the tab bar and on Home', async () => {
+  it('keeps 5 tabs; Ride it out is the raised center tab button only (no second trigger on Home)', async () => {
     await renderApp()
     for (const id of ['tab-home', 'tab-track', 'tab-community', 'tab-you', 'ride-button']) expect(screen.getByTestId(id)).toBeTruthy()
-    expect(screen.getByTestId('ride-bar')).toBeTruthy()
+    expect(screen.queryByTestId('ride-bar')).toBeNull()
   })
 })
 
@@ -438,9 +438,10 @@ describe('your reason on Home', () => {
     await renderApp({ ...habitsSeed(), ...R([txt('a', 'Older words', '2030-01-01T00:00:00.000Z'), txt('b', 'Newest words', '2030-04-01T00:00:00.000Z'), txt('c', 'Middle words', '2030-02-01T00:00:00.000Z')]) })
     expect(screen.getByTestId('home-reason-text')).toHaveTextContent('“Newest words”')
     expect(screen.queryByText(/Today/)).toBeNull()
-    const col = screen.getByTestId('ring-label').parent
-    const ids = col.children.map((k) => k.props?.testID)
-    expect(ids.indexOf('home-reason')).toBe(ids.indexOf('ring-label') - 1)
+    // Gemini layout: the reason sits in the card below the ring, with the page dots; the next-milestone line is inside the ring.
+    expect(within(screen.getByTestId('hero-card')).getByTestId('home-reason')).toBeTruthy()
+    expect(within(screen.getByTestId('hero-card')).getByTestId('hero-tabs')).toBeTruthy()
+    expect(within(screen.getByTestId('hero-ring')).getByTestId('ring-label')).toBeTruthy()
   })
   it('the same reason on another day', async () => {
     const seed = { ...habitsSeed(), ...R([txt('a', 'One', '2030-01-01T00:00:00.000Z'), txt('b', 'Two', '2030-03-01T00:00:00.000Z')]) }
@@ -472,7 +473,7 @@ describe('your reason on Home', () => {
   })
   it('the Home limit still holds: the reason is a conditional part of the ring item', async () => {
     await renderApp({ ...habitsSeed(), ...R([txt('a', 'Some words', '2030-01-01T00:00:00.000Z')]) })
-    expect(HOME_ITEMS).toEqual(['home-title', 'ride-bar', 'hero', 'checkin-card'])
+    expect(HOME_ITEMS).toEqual(['home-title', 'hero', 'checkin-card', 'hold-hint'])
     expect(within(screen.getByTestId('hero')).getByTestId('home-reason')).toBeTruthy()
   })
 })

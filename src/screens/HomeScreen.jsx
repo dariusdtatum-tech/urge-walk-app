@@ -24,23 +24,24 @@ import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 
 // Home holds at most four things (Option C v2, written down in AGENTS.md and enforced by a test):
-//   1. the title, which is the tracker switcher (tap it, or swipe in from the left edge, to open the drawer)
-//   2. Ride it out (always one tap)
-//   3. the ring (two pages: milestone ring / clean time + milestone cards). Once you've saved a reason,
-//      the most recent one sits quietly above the next-milestone line (part of the ring item; nothing
-//      when there are none or when reasons are locked)
-//   4. check-in
+//   1. the title, a 44pt pill that is the tracker switcher (tap: bottom sheet by default, or the drawer
+//      if picked in You → Appearance and lock; swiping in from the left edge always opens the drawer)
+//   2. the ring (two pages: milestone ring with the next-milestone line inside its lower arc / clean time
+//      + milestone cards), with the page dots and your most recent reason in one card below it
+//   3. check-in
+//   4. a quiet "Hold the center button for a quick walk" hint
+// Ride it out is the raised center tab button only (Gemini review: one trigger), always one tap.
 // Short-lived helpers (undo-reset banners, notices, the first-week card) come and go. There is no
 // rotating quote and no Your why line: reasons live in You and in Ride it out; money kept and time
-// back live in You → Progress. Add tracker lives in the drawer. Anything new must replace one of the
-// four or live in the drawer, Track or You.
+// back live in You → Progress. Add tracker lives in the switcher. Anything new must replace one of the
+// four or live in the switcher, Track or You.
 // Edge swipe: a narrow strip along the left edge (the screen's side padding, so it never sits on top
 // of Ride it out or any other control). It only takes over once the drag is clearly sideways and
 // rightward, so vertical scrolling and the ring pager (which is inset from the edge) keep working.
 export const EDGE_ZONE = space.screen
 export const edgeIntent = (dx, dy) => dx > 8 && Math.abs(dx) > 2 * Math.abs(dy)
 export const edgeOpens = (dx, vx, width) => dx > width * 0.35 || vx > 0.5
-export const HOME_ITEMS = ['home-title', 'ride-bar', 'hero', 'checkin-card']
+export const HOME_ITEMS = ['home-title', 'hero', 'checkin-card', 'hold-hint']
 export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, onOpenBackup, onCheckIn = () => {}, onFirstWeek = () => {}, onOpenYou = () => {} }) {
   const storage = useStorage()
   const { c } = useTheme()
@@ -138,7 +139,7 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
         <Pressable ref={titleRef} onPress={openSwitcher} testID="home-title" accessibilityRole="button"
           accessibilityActions={[{ name: 'activate' }, { name: 'openTrackers', label: 'Open trackers' }]} onAccessibilityAction={openSwitcher}
           accessibilityLabel={hero ? `${hero.name}. ${habits.length > 1 ? 'Switch or edit trackers' : 'Your trackers'}` : 'Your trackers'}
-          style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}>
+          style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start', marginLeft: -4, paddingLeft: 14, paddingRight: habits.length > 1 ? 12 : 14, borderRadius: 22, backgroundColor: c.sand }}>
           <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title} numberOfLines={2} style={{ flexShrink: 1 }}>{hero ? hero.name : 'Home'}</T>
           {habits.length > 1 ? <T size={20} color={c.title} testID="home-title-caret" accessibilityElementsHidden importantForAccessibility="no">▾</T> : null}
         </Pressable>
@@ -156,18 +157,18 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
       <Notice text={notice} onDismiss={() => setNotice('')} />
       <ResetToast editor={editor} />
 
-      <Pressable onPress={liveWalk ? onResume : onRide} accessibilityRole="button" testID="ride-bar"
-        accessibilityLabel={liveWalk ? 'Back to your walk. Your walk is still going.' : 'Ride it out. Walk, breathe, ground, or just log it.'}
-        style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: sz.rideBar, paddingHorizontal: space.rowX, paddingVertical: space.rowY, borderRadius: radius.card, backgroundColor: c.action, opacity: pressed ? 0.9 : 1 })}>
-        <View style={{ width: sz.rideBarIcon, height: sz.rideBarIcon, borderRadius: sz.rideBarIcon / 2, borderWidth: 1.5, borderColor: c.onActionSoft, alignItems: 'center', justifyContent: 'center' }}>
+      {/* Ride it out lives only on the raised center tab button (one trigger). While a walk is running,
+          a slim bar here gets you back to it. */}
+      {liveWalk ? (
+        <Pressable onPress={onResume} accessibilityRole="button" testID="resume-bar" accessibilityLabel="Back to your walk. Your walk is still going."
+          style={({ pressed }) => ({ flexDirection: 'row', alignItems: 'center', gap: 12, minHeight: 56, paddingHorizontal: space.rowX, paddingVertical: space.rowY, borderRadius: radius.card, backgroundColor: c.action, opacity: pressed ? 0.9 : 1 })}>
           <WaveIcon color={c.onAction} size={18} />
-        </View>
-        <View style={{ flex: 1 }}>
-          <T font="bold" size={type.rideBar} color={c.onAction}>{liveWalk ? 'Back to your walk' : 'Ride it out'}</T>
-          <T size={type.rideBarSub} color={c.onActionSoft}>{liveWalk ? 'Your walk is still going.' : 'Walk, breathe, ground, or just log it.'}</T>
-        </View>
-        <T size={22} color={c.onAction} accessibilityElementsHidden importantForAccessibility="no">›</T>
-      </Pressable>
+          <View style={{ flex: 1 }}>
+            <T font="bold" size={type.rideBar} color={c.onAction}>Back to your walk</T>
+            <T size={type.rideBarSub} color={c.onActionSoft}>Your walk is still going.</T>
+          </View>
+        </Pressable>
+      ) : null}
 
       {hero ? (
         <HeroPager hero={hero} days={days} since={since} segment={segment} label={label} milestones={milestones} today={today} profile={profile} now={now} onOpenReason={() => onOpenYou('why')} />
@@ -182,6 +183,9 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
 
       <FirstWeekCard now={now} onStep={(id) => (id === 'start' ? setSheet({ mode: 'add' }) : onFirstWeek(id))} />
       <CheckInCard today={today} onOpen={onCheckIn} />
+      {!liveWalk ? (
+        <T size={13} color={c.muted} testID="hold-hint" style={{ textAlign: 'center', marginTop: 8 }}>Hold the center button for a quick walk</T>
+      ) : null}
 
       {drawer || trackerSheet ? (() => {
         const Switcher = drawer ? TrackerDrawer : TrackerSheet

@@ -21,9 +21,11 @@ beforeEach(() => { jest.useFakeTimers(); jest.setSystemTime(T0) })
 afterEach(() => { jest.useRealTimers() })
 
 describe('Home', () => {
-  it('shows the Ride it out bar, the day ring and the next milestone', async () => {
+  it('shows the day ring and the next milestone; Ride it out is only the center tab button, with a hold hint', async () => {
     await renderApp()
-    expect(screen.getByTestId('ride-bar')).toBeTruthy()
+    expect(screen.queryByTestId('ride-bar')).toBeNull()
+    expect(screen.getByTestId('ride-button')).toBeTruthy()
+    expect(screen.getByTestId('hold-hint')).toHaveTextContent('Hold the center button for a quick walk')
     expect(screen.getByTestId('hero-days').props.children).toBe('163')
     expect(screen.getByLabelText('163 days clean')).toBeTruthy()
     expect(screen.getByText(/to 6 months/)).toBeTruthy()
@@ -293,7 +295,7 @@ describe('Dynamic Type', () => {
     await renderApp()
     expect(screen.getByTestId('hero-days').props.maxFontSizeMultiplier).toBe(MAX_SCALE.ring)
     expect(MAX_SCALE.ring).toBeLessThanOrEqual(1.3)
-    expect(screen.getByText('17 days').props.maxFontSizeMultiplier).toBe(2)
+    expect(screen.getByTestId('ring-label').props.maxFontSizeMultiplier).toBeLessThanOrEqual(MAX_SCALE.ringSmall) // inside the ring's lower arc now
     for (const el of screen.getAllByText('Ride it out', { exact: true })) expect(el.props.maxFontSizeMultiplier).toBeLessThanOrEqual(2)
     expect(screen.getByText(/^since /).props.maxFontSizeMultiplier).toBeLessThanOrEqual(1.3)
   })

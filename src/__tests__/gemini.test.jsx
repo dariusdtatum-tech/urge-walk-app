@@ -96,3 +96,13 @@ describe('Ride it out sheet extras', () => {
     expect(screen.queryByTestId('ride-tip')).toBeNull()
   })
 })
+
+describe('top inset', () => {
+  test('phones use the system safe area; the web preview simulates the 59pt Dynamic Island', () => {
+    const { topInset, DYNAMIC_ISLAND_TOP } = require('../AppRoot.jsx')
+    expect(DYNAMIC_ISLAND_TOP).toBe(59)
+    expect(topInset(47, 'ios')).toBe(47)
+    expect(topInset(59, 'ios')).toBe(59)
+    expect(topInset(0, 'web')).toBe(59)
+  })
+})

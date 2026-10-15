@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useStorage as useStorageFromContext } from './ui/StorageContext.js'
-import { AppState, Pressable, View } from 'react-native'
+import { AppState, Platform, Pressable, View } from 'react-native'
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { loadTheme, saveTheme } from './lib/appearance.js'
@@ -280,7 +280,7 @@ function Shell({ clock, theme, onTheme }) {
   const showTabs = screen === 'tabs' && !(tab === 'track' && trackView === 'journal' && journalEditing && !backup)
 
   return (
-    <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
+    <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: topInset(insets.top) }}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <View style={{ flex: 1 }}><ScreenBoundary key={`${screen}-${tab}-${backup}`} onHome={() => { setBackup(false); backHome() }}>{body}</ScreenBoundary></View>
       {toast && screen === 'tabs' && (
@@ -318,6 +318,11 @@ function Shell({ clock, theme, onTheme }) {
 
 // The whole app. storage / device / scheme / clock are injectable for tests and previews.
 // scheme: 'system' follows the Appearance setting in You (System / Light / Dark); 'light' / 'dark' force it.
+// Top inset: the system's safe area on a phone (59pt on Dynamic Island iPhones). The web preview has no
+// status bar, so it simulates the 59pt Dynamic Island clearance to keep screenshots honest.
+export const DYNAMIC_ISLAND_TOP = 59
+export const topInset = (top, os = Platform.OS) => (os === 'web' ? Math.max(top, DYNAMIC_ISLAND_TOP) : top)
+
 export function AppRoot({ storage, device = noopDevice, scheme = 'system', clock = Date.now }) {
   const [theme, setTheme] = useState(() => (scheme === 'light' || scheme === 'dark' ? scheme : loadTheme(storage)))
   const onTheme = useCallback((t) => setTheme(saveTheme(t, storage)), [storage])
