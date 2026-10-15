@@ -20,6 +20,8 @@ const TEXT_PAIRS = [
   ['title', 'holdFill'],
   // Daily verse card
   ['verseLabel', 'verseBg'], ['verseText', 'verseBg'], ['verseRef', 'verseBg'],
+  // Component kit: Plus tag
+  ['onPlus', 'plusBg'],
 ]
 describe.each(['light', 'dark'])('%s palette meets WCAG AA', (s) => {
   it.each(TEXT_PAIRS)('%s on %s ≥ 4.5', (fg, bg) => {

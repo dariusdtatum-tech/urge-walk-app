@@ -1,0 +1,1565 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`component kit in dark Card matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "#182b47",
+        "borderColor": "#2a3f60",
+        "borderRadius": 16,
+        "borderWidth": 1,
+        "gap": 8,
+        "padding": 14,
+      },
+      undefined,
+    ]
+  }
+>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#f3ede2",
+          "fontFamily": "Jakarta-Regular",
+          "fontSize": 15,
+        },
+        undefined,
+      ]
+    }
+  >
+    Body
+  </Text>
+</View>
+`;
+
+exports[`component kit in dark Chart matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  accessibilityLabel="A 1, B 3"
+  accessibilityRole="image"
+  accessible={true}
+  style={
+    {
+      "gap": 6,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "flex-end",
+        "flexDirection": "row",
+        "gap": 6,
+        "height": 64,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "backgroundColor": "#22375a",
+          "borderRadius": 4,
+          "flex": 1,
+          "height": 64,
+          "justifyContent": "flex-end",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "backgroundColor": "#a9cbc0",
+            "borderRadius": 4,
+            "height": 21,
+          }
+        }
+      />
+    </View>
+    <View
+      style={
+        {
+          "backgroundColor": "#22375a",
+          "borderRadius": 4,
+          "flex": 1,
+          "height": 64,
+          "justifyContent": "flex-end",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "backgroundColor": "#a9cbc0",
+            "borderRadius": 4,
+            "height": 64,
+          }
+        }
+      />
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "gap": 6,
+      }
+    }
+  >
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#a7b0bf",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 12,
+          },
+          {
+            "flex": 1,
+            "textAlign": "center",
+          },
+        ]
+      }
+    >
+      A
+    </Text>
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#a7b0bf",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 12,
+          },
+          {
+            "flex": 1,
+            "textAlign": "center",
+          },
+        ]
+      }
+    >
+      B
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`component kit in dark EmptyState matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "gap": 8,
+      "padding": 14,
+    }
+  }
+>
+  <Text
+    accessibilityRole="header"
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#f3ede2",
+          "fontFamily": "Cormorant-SemiBold",
+          "fontSize": 24,
+        },
+        {
+          "textAlign": "center",
+        },
+      ]
+    }
+  >
+    Nothing yet
+  </Text>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#e2dccf",
+          "fontFamily": "Jakarta-Regular",
+          "fontSize": 15,
+        },
+        {
+          "textAlign": "center",
+        },
+      ]
+    }
+  >
+    One calm sentence.
+  </Text>
+  <View
+    accessibilityLabel="Add one"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "alignSelf": "flex-start",
+        "justifyContent": "center",
+        "minHeight": 44,
+        "minWidth": 44,
+      }
+    }
+  >
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#a9cbc0",
+            "fontFamily": "Jakarta-SemiBold",
+            "fontSize": 14,
+          },
+          {
+            "textDecorationLine": "underline",
+          },
+        ]
+      }
+    >
+      Add one
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`component kit in dark PlusTag matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    {
+      "alignSelf": "flex-start",
+      "backgroundColor": "#a9cbc0",
+      "borderRadius": 12,
+      "paddingHorizontal": 8,
+      "paddingVertical": 2,
+    }
+  }
+>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#0f1d33",
+          "fontFamily": "Jakarta-SemiBold",
+          "fontSize": 12,
+        },
+        undefined,
+      ]
+    }
+  >
+    Plus
+  </Text>
+</View>
+`;
+
+exports[`component kit in dark PrimaryButton matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  accessibilityLabel="Go"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#a9cbc0",
+        "borderColor": "#f3ede2",
+        "borderRadius": 12,
+        "borderWidth": 0,
+        "justifyContent": "center",
+        "minHeight": 48,
+        "minWidth": 44,
+        "opacity": 1,
+        "paddingHorizontal": 18,
+      },
+      undefined,
+    ]
+  }
+>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#0f1d33",
+          "fontFamily": "Jakarta-SemiBold",
+          "fontSize": 15,
+        },
+        undefined,
+      ]
+    }
+  >
+    Go
+  </Text>
+</View>
+`;
+
+exports[`component kit in dark QuietLink matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  accessibilityLabel="More"
+  accessibilityRole="link"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "alignSelf": "flex-start",
+      "justifyContent": "center",
+      "minHeight": 44,
+      "minWidth": 44,
+    }
+  }
+>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#a9cbc0",
+          "fontFamily": "Jakarta-SemiBold",
+          "fontSize": 14,
+        },
+        {
+          "textDecorationLine": "underline",
+        },
+      ]
+    }
+  >
+    More
+  </Text>
+</View>
+`;
+
+exports[`component kit in dark Row matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#182b47",
+      "borderColor": "#2a3f60",
+      "borderRadius": 14,
+      "borderWidth": 1,
+      "flexDirection": "row",
+      "gap": 12,
+      "minHeight": 48,
+      "opacity": 1,
+      "paddingHorizontal": 14,
+      "paddingVertical": 8,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flex": 1,
+        "gap": 2,
+      }
+    }
+  >
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#f3ede2",
+            "fontFamily": "Jakarta-SemiBold",
+            "fontSize": 15,
+          },
+          undefined,
+        ]
+      }
+    >
+      Row
+    </Text>
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#e2dccf",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 13,
+          },
+          undefined,
+        ]
+      }
+    >
+      Sub
+    </Text>
+  </View>
+  <Text
+    accessibilityElementsHidden={true}
+    importantForAccessibility="no"
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#a7b0bf",
+          "fontFamily": "Jakarta-Regular",
+          "fontSize": 20,
+        },
+        undefined,
+      ]
+    }
+  >
+    ›
+  </Text>
+</View>
+`;
+
+exports[`component kit in dark Sheet matches its snapshot and uses only tokens and palette colours 1`] = `
+<Modal
+  animationType="slide"
+  onRequestClose={[Function]}
+  transparent={true}
+  visible={true}
+>
+  <View
+    style={
+      {
+        "flex": 1,
+        "justifyContent": "flex-end",
+      }
+    }
+  >
+    <View
+      accessibilityLabel="Close"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "backgroundColor": "rgba(5, 12, 24, 0.5)",
+          "bottom": 0,
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 0,
+        }
+      }
+    />
+    <View
+      onLayout={[Function]}
+      style={
+        {
+          "paddingBottom": 0,
+        }
+      }
+    >
+      <View
+        accessibilityViewIsModal={true}
+        style={
+          {
+            "backgroundColor": "#182b47",
+            "borderTopLeftRadius": 24,
+            "borderTopRightRadius": 24,
+            "maxHeight": "92%",
+          }
+        }
+      >
+        <RCTScrollView
+          contentContainerStyle={
+            {
+              "gap": 14,
+              "padding": 16,
+              "paddingBottom": 36,
+            }
+          }
+          keyboardShouldPersistTaps="handled"
+        >
+          <View>
+            <View
+              style={
+                {
+                  "alignSelf": "center",
+                  "backgroundColor": "#3a5072",
+                  "borderRadius": 3,
+                  "height": 5,
+                  "width": 40,
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "gap": 12,
+                }
+              }
+            >
+              <Text
+                accessibilityRole="header"
+                maxFontSizeMultiplier={2}
+                style={
+                  [
+                    {
+                      "color": "#f3ede2",
+                      "fontFamily": "Cormorant-SemiBold",
+                      "fontSize": 24,
+                    },
+                    {
+                      "flex": 1,
+                    },
+                  ]
+                }
+              >
+                Sheet
+              </Text>
+            </View>
+            <Text
+              maxFontSizeMultiplier={2}
+              style={
+                [
+                  {
+                    "color": "#f3ede2",
+                    "fontFamily": "Jakarta-Regular",
+                    "fontSize": 15,
+                  },
+                  undefined,
+                ]
+              }
+            >
+              Inside
+            </Text>
+          </View>
+        </RCTScrollView>
+      </View>
+    </View>
+  </View>
+</Modal>
+`;
+
+exports[`component kit in dark Tag matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    {
+      "alignSelf": "flex-start",
+      "backgroundColor": "#1d3150",
+      "borderRadius": 12,
+      "paddingHorizontal": 8,
+      "paddingVertical": 2,
+    }
+  }
+>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#a7b0bf",
+          "fontFamily": "Jakarta-SemiBold",
+          "fontSize": 12,
+        },
+        undefined,
+      ]
+    }
+  >
+    Tag
+  </Text>
+</View>
+`;
+
+exports[`component kit in dark ToggleRow matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#182b47",
+      "borderColor": "#2a3f60",
+      "borderRadius": 14,
+      "borderWidth": 1,
+      "flexDirection": "row",
+      "gap": 12,
+      "minHeight": 48,
+      "paddingHorizontal": 14,
+      "paddingVertical": 8,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flex": 1,
+        "gap": 2,
+      }
+    }
+  >
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#f3ede2",
+            "fontFamily": "Jakarta-SemiBold",
+            "fontSize": 15,
+          },
+          undefined,
+        ]
+      }
+    >
+      Toggle
+    </Text>
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#e2dccf",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 13,
+          },
+          undefined,
+        ]
+      }
+    >
+      Sub
+    </Text>
+  </View>
+  <RCTSwitch
+    accessibilityLabel="Toggle"
+    accessibilityRole="switch"
+    onChange={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    onTintColor="#a9cbc0"
+    style={
+      [
+        {
+          "alignSelf": "flex-start",
+        },
+        {
+          "backgroundColor": "#22375a",
+          "borderRadius": 16,
+        },
+      ]
+    }
+    thumbTintColor="#182b47"
+    tintColor="#22375a"
+    value={true}
+  />
+</View>
+`;
+
+exports[`component kit in light Card matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "#fdfbf7",
+        "borderColor": "#e4dccd",
+        "borderRadius": 16,
+        "borderWidth": 1,
+        "gap": 8,
+        "padding": 14,
+      },
+      undefined,
+    ]
+  }
+>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#2b3445",
+          "fontFamily": "Jakarta-Regular",
+          "fontSize": 15,
+        },
+        undefined,
+      ]
+    }
+  >
+    Body
+  </Text>
+</View>
+`;
+
+exports[`component kit in light Chart matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  accessibilityLabel="A 1, B 3"
+  accessibilityRole="image"
+  accessible={true}
+  style={
+    {
+      "gap": 6,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "alignItems": "flex-end",
+        "flexDirection": "row",
+        "gap": 6,
+        "height": 64,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "backgroundColor": "#e9e1d2",
+          "borderRadius": 4,
+          "flex": 1,
+          "height": 64,
+          "justifyContent": "flex-end",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "backgroundColor": "#5d9384",
+            "borderRadius": 4,
+            "height": 21,
+          }
+        }
+      />
+    </View>
+    <View
+      style={
+        {
+          "backgroundColor": "#e9e1d2",
+          "borderRadius": 4,
+          "flex": 1,
+          "height": 64,
+          "justifyContent": "flex-end",
+        }
+      }
+    >
+      <View
+        style={
+          {
+            "backgroundColor": "#5d9384",
+            "borderRadius": 4,
+            "height": 64,
+          }
+        }
+      />
+    </View>
+  </View>
+  <View
+    style={
+      {
+        "flexDirection": "row",
+        "gap": 6,
+      }
+    }
+  >
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#6b7280",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 12,
+          },
+          {
+            "flex": 1,
+            "textAlign": "center",
+          },
+        ]
+      }
+    >
+      A
+    </Text>
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#6b7280",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 12,
+          },
+          {
+            "flex": 1,
+            "textAlign": "center",
+          },
+        ]
+      }
+    >
+      B
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`component kit in light EmptyState matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "gap": 8,
+      "padding": 14,
+    }
+  }
+>
+  <Text
+    accessibilityRole="header"
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#24395c",
+          "fontFamily": "Cormorant-SemiBold",
+          "fontSize": 24,
+        },
+        {
+          "textAlign": "center",
+        },
+      ]
+    }
+  >
+    Nothing yet
+  </Text>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#3a4357",
+          "fontFamily": "Jakarta-Regular",
+          "fontSize": 15,
+        },
+        {
+          "textAlign": "center",
+        },
+      ]
+    }
+  >
+    One calm sentence.
+  </Text>
+  <View
+    accessibilityLabel="Add one"
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "alignSelf": "flex-start",
+        "justifyContent": "center",
+        "minHeight": 44,
+        "minWidth": 44,
+      }
+    }
+  >
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#3f7a6b",
+            "fontFamily": "Jakarta-SemiBold",
+            "fontSize": 14,
+          },
+          {
+            "textDecorationLine": "underline",
+          },
+        ]
+      }
+    >
+      Add one
+    </Text>
+  </View>
+</View>
+`;
+
+exports[`component kit in light PlusTag matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    {
+      "alignSelf": "flex-start",
+      "backgroundColor": "#a9cbc0",
+      "borderRadius": 12,
+      "paddingHorizontal": 8,
+      "paddingVertical": 2,
+    }
+  }
+>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#24395c",
+          "fontFamily": "Jakarta-SemiBold",
+          "fontSize": 12,
+        },
+        undefined,
+      ]
+    }
+  >
+    Plus
+  </Text>
+</View>
+`;
+
+exports[`component kit in light PrimaryButton matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  accessibilityLabel="Go"
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": false,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    [
+      {
+        "alignItems": "center",
+        "backgroundColor": "#24395c",
+        "borderColor": "#24395c",
+        "borderRadius": 12,
+        "borderWidth": 0,
+        "justifyContent": "center",
+        "minHeight": 48,
+        "minWidth": 44,
+        "opacity": 1,
+        "paddingHorizontal": 18,
+      },
+      undefined,
+    ]
+  }
+>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#faf7f1",
+          "fontFamily": "Jakarta-SemiBold",
+          "fontSize": 15,
+        },
+        undefined,
+      ]
+    }
+  >
+    Go
+  </Text>
+</View>
+`;
+
+exports[`component kit in light QuietLink matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  accessibilityLabel="More"
+  accessibilityRole="link"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "alignSelf": "flex-start",
+      "justifyContent": "center",
+      "minHeight": 44,
+      "minWidth": 44,
+    }
+  }
+>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#3f7a6b",
+          "fontFamily": "Jakarta-SemiBold",
+          "fontSize": 14,
+        },
+        {
+          "textDecorationLine": "underline",
+        },
+      ]
+    }
+  >
+    More
+  </Text>
+</View>
+`;
+
+exports[`component kit in light Row matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  accessibilityRole="button"
+  accessibilityState={
+    {
+      "busy": undefined,
+      "checked": undefined,
+      "disabled": undefined,
+      "expanded": undefined,
+      "selected": undefined,
+    }
+  }
+  accessibilityValue={
+    {
+      "max": undefined,
+      "min": undefined,
+      "now": undefined,
+      "text": undefined,
+    }
+  }
+  accessible={true}
+  collapsable={false}
+  focusable={true}
+  onBlur={[Function]}
+  onClick={[Function]}
+  onFocus={[Function]}
+  onResponderGrant={[Function]}
+  onResponderMove={[Function]}
+  onResponderRelease={[Function]}
+  onResponderTerminate={[Function]}
+  onResponderTerminationRequest={[Function]}
+  onStartShouldSetResponder={[Function]}
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#fdfbf7",
+      "borderColor": "#e4dccd",
+      "borderRadius": 14,
+      "borderWidth": 1,
+      "flexDirection": "row",
+      "gap": 12,
+      "minHeight": 48,
+      "opacity": 1,
+      "paddingHorizontal": 14,
+      "paddingVertical": 8,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flex": 1,
+        "gap": 2,
+      }
+    }
+  >
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#24395c",
+            "fontFamily": "Jakarta-SemiBold",
+            "fontSize": 15,
+          },
+          undefined,
+        ]
+      }
+    >
+      Row
+    </Text>
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#3a4357",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 13,
+          },
+          undefined,
+        ]
+      }
+    >
+      Sub
+    </Text>
+  </View>
+  <Text
+    accessibilityElementsHidden={true}
+    importantForAccessibility="no"
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#6b7280",
+          "fontFamily": "Jakarta-Regular",
+          "fontSize": 20,
+        },
+        undefined,
+      ]
+    }
+  >
+    ›
+  </Text>
+</View>
+`;
+
+exports[`component kit in light Sheet matches its snapshot and uses only tokens and palette colours 1`] = `
+<Modal
+  animationType="slide"
+  onRequestClose={[Function]}
+  transparent={true}
+  visible={true}
+>
+  <View
+    style={
+      {
+        "flex": 1,
+        "justifyContent": "flex-end",
+      }
+    }
+  >
+    <View
+      accessibilityLabel="Close"
+      accessibilityRole="button"
+      accessibilityState={
+        {
+          "busy": undefined,
+          "checked": undefined,
+          "disabled": undefined,
+          "expanded": undefined,
+          "selected": undefined,
+        }
+      }
+      accessibilityValue={
+        {
+          "max": undefined,
+          "min": undefined,
+          "now": undefined,
+          "text": undefined,
+        }
+      }
+      accessible={true}
+      collapsable={false}
+      focusable={true}
+      onBlur={[Function]}
+      onClick={[Function]}
+      onFocus={[Function]}
+      onResponderGrant={[Function]}
+      onResponderMove={[Function]}
+      onResponderRelease={[Function]}
+      onResponderTerminate={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      style={
+        {
+          "backgroundColor": "rgba(36, 57, 92, 0.28)",
+          "bottom": 0,
+          "left": 0,
+          "position": "absolute",
+          "right": 0,
+          "top": 0,
+        }
+      }
+    />
+    <View
+      onLayout={[Function]}
+      style={
+        {
+          "paddingBottom": 0,
+        }
+      }
+    >
+      <View
+        accessibilityViewIsModal={true}
+        style={
+          {
+            "backgroundColor": "#fdfbf7",
+            "borderTopLeftRadius": 24,
+            "borderTopRightRadius": 24,
+            "maxHeight": "92%",
+          }
+        }
+      >
+        <RCTScrollView
+          contentContainerStyle={
+            {
+              "gap": 14,
+              "padding": 16,
+              "paddingBottom": 36,
+            }
+          }
+          keyboardShouldPersistTaps="handled"
+        >
+          <View>
+            <View
+              style={
+                {
+                  "alignSelf": "center",
+                  "backgroundColor": "#d9cfbd",
+                  "borderRadius": 3,
+                  "height": 5,
+                  "width": 40,
+                }
+              }
+            />
+            <View
+              style={
+                {
+                  "alignItems": "center",
+                  "flexDirection": "row",
+                  "gap": 12,
+                }
+              }
+            >
+              <Text
+                accessibilityRole="header"
+                maxFontSizeMultiplier={2}
+                style={
+                  [
+                    {
+                      "color": "#24395c",
+                      "fontFamily": "Cormorant-SemiBold",
+                      "fontSize": 24,
+                    },
+                    {
+                      "flex": 1,
+                    },
+                  ]
+                }
+              >
+                Sheet
+              </Text>
+            </View>
+            <Text
+              maxFontSizeMultiplier={2}
+              style={
+                [
+                  {
+                    "color": "#2b3445",
+                    "fontFamily": "Jakarta-Regular",
+                    "fontSize": 15,
+                  },
+                  undefined,
+                ]
+              }
+            >
+              Inside
+            </Text>
+          </View>
+        </RCTScrollView>
+      </View>
+    </View>
+  </View>
+</Modal>
+`;
+
+exports[`component kit in light Tag matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    {
+      "alignSelf": "flex-start",
+      "backgroundColor": "#f1ebe0",
+      "borderRadius": 12,
+      "paddingHorizontal": 8,
+      "paddingVertical": 2,
+    }
+  }
+>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#5b6270",
+          "fontFamily": "Jakarta-SemiBold",
+          "fontSize": 12,
+        },
+        undefined,
+      ]
+    }
+  >
+    Tag
+  </Text>
+</View>
+`;
+
+exports[`component kit in light ToggleRow matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    {
+      "alignItems": "center",
+      "backgroundColor": "#fdfbf7",
+      "borderColor": "#e4dccd",
+      "borderRadius": 14,
+      "borderWidth": 1,
+      "flexDirection": "row",
+      "gap": 12,
+      "minHeight": 48,
+      "paddingHorizontal": 14,
+      "paddingVertical": 8,
+    }
+  }
+>
+  <View
+    style={
+      {
+        "flex": 1,
+        "gap": 2,
+      }
+    }
+  >
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#24395c",
+            "fontFamily": "Jakarta-SemiBold",
+            "fontSize": 15,
+          },
+          undefined,
+        ]
+      }
+    >
+      Toggle
+    </Text>
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#3a4357",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 13,
+          },
+          undefined,
+        ]
+      }
+    >
+      Sub
+    </Text>
+  </View>
+  <RCTSwitch
+    accessibilityLabel="Toggle"
+    accessibilityRole="switch"
+    onChange={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    onTintColor="#24395c"
+    style={
+      [
+        {
+          "alignSelf": "flex-start",
+        },
+        {
+          "backgroundColor": "#e9e1d2",
+          "borderRadius": 16,
+        },
+      ]
+    }
+    thumbTintColor="#fdfbf7"
+    tintColor="#e9e1d2"
+    value={true}
+  />
+</View>
+`;

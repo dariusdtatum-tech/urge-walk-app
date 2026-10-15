@@ -47,6 +47,8 @@ export const light = {
   resNoText: '#5b6270',
   grab: '#d9cfbd',
   error: '#9b3b2f',
+  // Kit: the one small sea-glass "Plus" tag, and chart bars
+  plusBg: '#a9cbc0', onPlus: '#24395c', chartBar: '#5d9384', chartTrack: '#e9e1d2',
 }
 export const dark = {
   bg: '#0f1d33',
@@ -93,5 +95,6 @@ export const dark = {
   resNoText: '#a7b0bf',
   grab: '#3a5072',
   error: '#f0a59a',
+  plusBg: '#a9cbc0', onPlus: '#0f1d33', chartBar: '#a9cbc0', chartTrack: '#22375a',
 }
 export const palettes = { light, dark }
