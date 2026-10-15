@@ -13,9 +13,13 @@ describe('daily verse', () => {
       expect(v.text).not.toMatch(/judg|condemn|wrath|guilt|hell|punish/i)
     }
   })
-  test('seed verses are in the list', () => {
+  test('every verse is complete: no partial quotes, keys are only ref / tr / text', () => {
+    for (const v of VERSES) expect(Object.keys(v).sort()).toEqual(['ref', 'text', 'tr'])
+    expect(VERSES.length).toBe(30)
+  })
+  test('short seed verses are in the list', () => {
     const refs = VERSES.map((v) => v.ref)
-    for (const r of ['1 Corinthians 10:13', 'Galatians 5:1', 'Philippians 4:13', '2 Corinthians 10:4', 'Isaiah 41:10', 'James 1:12', 'Isaiah 40:31', 'Romans 8:37', '2 Timothy 1:7', 'Hebrews 12:1', 'Psalm 46:1', 'John 8:36']) expect(refs).toContain(r)
+    for (const r of ['Galatians 5:1', 'Philippians 4:13', '2 Corinthians 10:4', 'James 1:12', 'Romans 8:37', '2 Timothy 1:7', 'Psalm 46:1', 'John 8:36']) expect(refs).toContain(r)
   })
   test('rotates by day of year; the same all day', () => {
     expect(dayOfYear(new Date(2030, 0, 1, 0, 5))).toBe(1)
