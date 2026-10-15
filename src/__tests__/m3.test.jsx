@@ -115,7 +115,8 @@ describe('Log', () => {
     const seed = { ...habitsSeed(), ...walksSeed([logged(0, 'yes', 'Called a friend', 'a'), logged(1, 'kinda', '', 'b')]) }
     const { storage } = await renderApp({ storage: memoryStorage(seed) })
     await tab('Log')
-    expect(screen.getByTestId('summary-total')).toHaveTextContent('2 urges ridden out')
+    expect(screen.getByTestId('summary-total')).toHaveProp('accessibilityLabel', '2 urges ridden out')
+    expect(screen.getByTestId('summary-total')).toHaveTextContent('2urges ridden out')
     expect(screen.getAllByTestId('day-ring')).toHaveLength(7)
     expect(screen.getAllByTestId('log-entry')).toHaveLength(2)
     await fireEvent.press(screen.getAllByTestId('log-entry')[1])

@@ -9,16 +9,18 @@ import { T } from '../../ui/Text.jsx'
 import { useTheme } from '../../ui/theme.js'
 
 // onEditMoney (You → Progress) adds a button for the $ estimate; the card shows even with money off then.
-export function KeptCard({ profile, hero, walks, today, onEditMoney = null }) {
+// flat (You → Progress): no box; it sits under the Money kept label as plain rows.
+export function KeptCard({ profile, hero, walks, today, onEditMoney = null, flat = false }) {
   const storage = useStorage()
   const { c } = useTheme()
   const kept = moneyKept(profile, hero, walks, today)
   const goal = kept ? loadGoal(storage) : null
   const prog = goal ? goalProgress(goal, kept.total) : null
+  const Box = flat ? View : Card
   return (
     <>
       {kept || onEditMoney ? (
-        <Card testID="kept-card" style={{ gap: 8 }}>
+        <Box testID="kept-card" style={{ gap: 8, ...(flat ? { paddingTop: 10 } : null) }}>
           {!kept ? <T size={13} color={c.muted}>Money kept</T> : null}
           {kept ? (
             <View testID="kept-money" style={{ gap: 2 }}>
@@ -45,7 +47,7 @@ export function KeptCard({ profile, hero, walks, today, onEditMoney = null }) {
               <Button kind="quiet" label={kept ? 'Change money estimate' : 'Add money estimate'} onPress={onEditMoney} testID="kept-money-edit" />
             </View>
           ) : null}
-        </Card>
+        </Box>
       ) : null}
     </>
   )

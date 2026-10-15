@@ -13,7 +13,8 @@ import { loadWalkPrefs, saveWalkPrefs } from '../lib/walkStorage.js'
 import { Button } from '../ui/Button.jsx'
 import { Confirm } from '../ui/Confirm.jsx'
 import { useDevice } from '../ui/DeviceContext.js'
-import { Notice, Row } from '../ui/Row.jsx'
+import { Notice } from '../ui/Row.jsx'
+import { HairlineRow as Row, HeroStat, RowGroup, SectionLabel } from '../ui/kit.jsx'
 import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
@@ -41,6 +42,12 @@ import { loadContacts } from '../lib/contacts.js'
 
 export { CRISIS }
 export { LEGAL_LINKS } from './you/Sections.jsx'
+// You's six rows in three labelled groups (same order as SECTION_ORDER), plus Your plan.
+const YOU_GROUPS = [
+  { label: 'Help and reasons', ids: ['support', 'why'] },
+  { label: 'Progress', ids: ['progress'] },
+  { label: 'Settings', ids: ['reminders', 'appearance', 'data'], plan: true },
+]
 const ANSWER_TITLES = { before: 'Before you started', improve: 'What you want more of', importance: 'How important right now', identity: 'I see myself as', support: 'Who’s with you', why: 'Your why' }
 
 function answers(p) {
@@ -183,19 +190,29 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
         ) : null}
         <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>{Section ? SECTION_TITLES[section] : 'You'}</T>
         <Notice text={notice} onDismiss={() => setNotice('')} />
-        {!Section ? health.map((h) => (
-          <Row key={h.id} title={h.title} sub={h.action ? `${h.sub} ${h.action}.` : h.sub} testID={`health-${h.id}`}
-            chevron={h.action ? '›' : ''} accessibilityRole={h.action ? 'button' : 'text'}
-            onPress={h.action ? () => device.openSettings() : undefined} />
-        )) : null}
+        {!Section && hero ? <HeroStat value={days.toLocaleString()} label={days === 1 ? 'day clean' : 'days clean'} sub={hero.name} testID="you-hero" /> : null}
+        {!Section && health.length ? (
+          <RowGroup testID="you-health">
+            {health.map((h) => (
+              <Row key={h.id} title={h.title} sub={h.action ? `${h.sub} ${h.action}.` : h.sub} testID={`health-${h.id}`}
+                chevron={h.action ? '›' : ''} accessibilityRole={h.action ? 'button' : 'text'}
+                onPress={h.action ? () => device.openSettings() : undefined} />
+            ))}
+          </RowGroup>
+        ) : null}
         <ResetToast editor={editor} />
         {Section ? <Section {...props} /> : (
           <>
             {verseOn ? <DailyVerseCard date={new Date(now)} fadeIn={verseFade} /> : null}
-            {SECTION_ORDER.map((id) => (
-              <Row key={id} title={SECTION_TITLES[id]} sub={status[id]} testID={`you-${id}`} onPress={() => setSection(id)} />
+            {YOU_GROUPS.map((g) => (
+              <View key={g.label} style={{ gap: 0 }}>
+                <SectionLabel>{g.label}</SectionLabel>
+                <RowGroup>
+                  {g.ids.map((id) => <Row key={id} title={SECTION_TITLES[id]} sub={status[id]} testID={`you-${id}`} onPress={() => setSection(id)} />)}
+                  {g.plan ? <Row title="Your plan" sub="Free. Everything in Urge Walk is free to use." testID="you-plan" onPress={() => setShowFree(true)} /> : null}
+                </RowGroup>
+              </View>
             ))}
-            <Row title="Your plan" sub="Free. Everything in Urge Walk is free to use." testID="you-plan" onPress={() => setShowFree(true)} />
           </>
         )}
       </ScrollView>

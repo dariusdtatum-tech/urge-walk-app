@@ -19,5 +19,5 @@ export function TrackScreen({ view, onView, now, clock, onRide, focusWalkId, onE
   )
   return view === 'journal'
     ? <JournalScreen now={now} clock={clock} header={header} onEditingChange={onEditingChange} onOpenWalk={onOpenWalk} />
-    : <LogScreen now={now} onRide={onRide} initialSelectedId={focusWalkId} header={<View style={{ gap: 20 }}>{header}<TrackInsights now={now} /></View>} />
+    : <LogScreen now={now} onRide={onRide} initialSelectedId={focusWalkId} header={header} insights={<TrackInsights now={now} />} />
 }

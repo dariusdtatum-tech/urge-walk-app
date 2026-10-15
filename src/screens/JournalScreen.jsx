@@ -12,6 +12,7 @@ import { loadWalks } from '../lib/walkStorage.js'
 import { Button } from '../ui/Button.jsx'
 import { Confirm } from '../ui/Confirm.jsx'
 import { Notice } from '../ui/Row.jsx'
+import { RowGroup, SectionLabel } from '../ui/kit.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
 import { size as sz, space, type, useTheme } from '../ui/theme.js'
@@ -74,12 +75,13 @@ export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChan
             style={{ minHeight: 48, borderWidth: 1, borderColor: c.fieldBorder, borderRadius: 24, paddingHorizontal: 16, color: c.text, fontFamily: fonts.body, fontSize: 16, backgroundColor: c.card }} />
           {shown.length === 0 ? <T size={15} color={c.muted} testID="no-results">No entries match “{query.trim()}”.</T> : null}
           {groups.map((g) => (
-            <View key={g.key} style={{ gap: 8 }}>
-              <T accessibilityRole="header" font="bold" size={13} color={c.muted} style={{ letterSpacing: 1, textTransform: 'uppercase' }}>{g.label}</T>
+            <View key={g.key}>
+              <SectionLabel>{g.label}</SectionLabel>
+              <RowGroup>
               {g.walks.map((item) => (
                 <Pressable key={item.id} testID="journal-item" accessibilityRole="button"
                   onPress={() => (item.kind === 'entry' ? openEditor(draftFromEntry(item.entry)) : onOpenWalk(item.walk.id))}
-                  style={({ pressed }) => ({ minHeight: sz.row, backgroundColor: c.card, borderRadius: 14, borderWidth: 1, borderColor: c.border, padding: 12, gap: 4, opacity: pressed ? 0.85 : 1 })}>
+                  style={({ pressed }) => ({ minHeight: sz.row, borderBottomWidth: 1, borderBottomColor: c.hairline, paddingVertical: 12, gap: 4, opacity: pressed ? 0.7 : 1 })}>
                   {item.kind === 'entry' ? (
                     <>
                       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
@@ -103,6 +105,7 @@ export function JournalScreen({ now, clock = Date.now, onOpenWalk, onEditingChan
                   )}
                 </Pressable>
               ))}
+              </RowGroup>
             </View>
           ))}
           <T size={13} color={c.muted}>Notes from walks, breathing and logged urges come from your Log. Tap one to edit it there.</T>

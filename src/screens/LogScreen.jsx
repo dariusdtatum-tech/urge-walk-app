@@ -14,11 +14,12 @@ import { Button } from '../ui/Button.jsx'
 import { OutcomePicker } from '../ui/CheckIn.jsx'
 import { Confirm } from '../ui/Confirm.jsx'
 import { Field } from '../ui/Field.jsx'
-import { Card, Notice } from '../ui/Row.jsx'
+import { Notice } from '../ui/Row.jsx'
+import { RowGroup, SectionLabel } from '../ui/kit.jsx'
 import { Sheet } from '../ui/Sheet.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
-import { radius, size as sz, space, type, useTheme } from '../ui/theme.js'
+import { size as sz, space, type, useTheme } from '../ui/theme.js'
 
 export function useOutcomeColors() {
   const { c } = useTheme()
@@ -62,7 +63,9 @@ function DayRing({ d }) {
 }
 
 // Log: a summary of everything ridden out, this week's day marks, then the history grouped by day.
-export function LogScreen({ now, onRide, initialSelectedId = null, header = null }) {
+// insights (Track): the pattern / walks panels. They sit under the header when the log is empty, and
+// under the hero summary once there are entries, so the hero stat stays the first thing on the screen.
+export function LogScreen({ now, onRide, initialSelectedId = null, header = null, insights = null }) {
   const storage = useStorage()
   const device = useDevice()
   const { c } = useTheme()
@@ -84,6 +87,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
     return (
       <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="log">
         {header ?? <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Log</T>}
+        {insights}
         <Notice text={notice} onDismiss={() => setNotice('')} />
         <View style={{ alignItems: 'center', gap: 12, paddingVertical: 32 }} testID="log-empty">
           <T accessibilityRole="header" font="serif" size={26} color={c.title}>No urges logged yet</T>
@@ -104,40 +108,42 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
       <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="log">
         {header ?? <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Log</T>}
         <Notice text={notice} onDismiss={() => setNotice('')} />
-        <Card testID="summary">
-          <T size={18} color={c.text} testID="summary-total">
-            <T font="serif" size={type.statBig} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{s.total}</T>
-            {s.onlyWalks ? (s.total === 1 ? ' urge walked off' : ' urges walked off') : (s.total === 1 ? ' urge ridden out' : ' urges ridden out')}
-          </T>
+        <View testID="summary" style={{ gap: 6 }}>
+          <View testID="summary-total" accessible accessibilityLabel={`${s.total}${s.onlyWalks ? (s.total === 1 ? ' urge walked off' : ' urges walked off') : (s.total === 1 ? ' urge ridden out' : ' urges ridden out')}`}>
+            <T font="serifItalic" size={type.heroStat} color={c.title} style={{ lineHeight: type.heroStat + 4, fontVariant: ['lining-nums'] }}>{s.total}</T>
+            <T font="serifItalic" size={type.ringLabel} color={c.title}>{s.onlyWalks ? (s.total === 1 ? 'urge walked off' : 'urges walked off') : (s.total === 1 ? 'urge ridden out' : 'urges ridden out')}</T>
+          </View>
           <T size={14} color={c.muted} testID="summary-passed">{s.yes} passed · {s.totalMinutes} {s.totalMinutes === 1 ? 'minute' : 'minutes'} walked</T>
           {!s.onlyWalks ? (
             <T size={14} color={c.muted} testID="summary-kinds">
               {[`${s.kinds.walk} ${s.kinds.walk === 1 ? 'walk' : 'walks'}`, s.kinds.breathe ? `${s.kinds.breathe} breathing` : null, s.kinds.ground ? `${s.kinds.ground} ground` : null, s.kinds.logged ? `${s.kinds.logged} logged` : null].filter(Boolean).join(' · ')}
             </T>
           ) : null}
-          <View style={{ flexDirection: 'row', gap: 6 }}>
-            {cells.map(([key, n, label]) => (
+          <View style={{ flexDirection: 'row', paddingVertical: 10, marginTop: 6, borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.hairline }}>
+            {cells.map(([key, n, label], i) => (
               <View key={key} testID="outcome-cell" accessible accessibilityLabel={`${n} ${OUTCOME_LABELS[key]}`}
-                style={{ flex: 1, alignItems: 'center', paddingVertical: 8, borderRadius: 12, backgroundColor: c.surface, borderWidth: 1, borderColor: c.border }}>
+                style={{ flex: 1, alignItems: 'flex-start', paddingLeft: i ? 10 : 0, borderLeftWidth: i ? 1 : 0, borderLeftColor: c.hairline }}>
                 <T font="serif" size={type.statCell} color={colors[key]} style={{ fontVariant: ['lining-nums'] }}>{n}</T>
                 <T size={12} max={1.4} color={c.muted} numberOfLines={1}>{label}</T>
               </View>
             ))}
           </View>
           <T font="serifItalic" size={17} color={c.title}>Every walk is proof an urge doesn’t get the final say.</T>
-        </Card>
+        </View>
+        {insights}
 
-        <Card>
-          <T accessibilityRole="header" font="semibold" size={type.body} color={c.title}>This week</T>
-          <View style={{ flexDirection: 'row' }}>{week.map((d) => <DayRing key={d.key} d={d} />)}</View>
-        </Card>
+        <View testID="log-week">
+          <SectionLabel>This week</SectionLabel>
+          <View style={{ flexDirection: 'row', paddingVertical: 8, borderTopWidth: 1, borderBottomWidth: 1, borderColor: c.hairline }}>{week.map((d) => <DayRing key={d.key} d={d} />)}</View>
+        </View>
 
         {groups.map((g) => (
-          <View key={g.key} style={{ gap: 8 }}>
-            <T accessibilityRole="header" font="bold" size={13} color={c.muted} style={{ letterSpacing: 1, textTransform: 'uppercase' }}>{g.label}</T>
+          <View key={g.key}>
+            <SectionLabel>{g.label}</SectionLabel>
+            <RowGroup>
             {g.walks.map((w) => (
               <Pressable key={w.id} onPress={() => setSelectedId(w.id)} testID="log-entry" accessibilityRole="button"
-                style={({ pressed }) => ({ minHeight: sz.row, backgroundColor: c.card, borderRadius: radius.row, borderWidth: 1, borderColor: c.border, padding: space.cardDense, gap: 4, flexDirection: 'row', opacity: pressed ? 0.85 : 1 })}>
+                style={({ pressed }) => ({ minHeight: sz.row, borderBottomWidth: 1, borderBottomColor: c.hairline, paddingVertical: space.cardDense, gap: 4, flexDirection: 'row', opacity: pressed ? 0.7 : 1 })}>
                 <View style={{ width: 12, height: 12, borderRadius: 6, borderWidth: 2.5, borderColor: colors[outcomeKey(w.result)], marginTop: 4, marginRight: 10 }} />
                 <View style={{ flex: 1, gap: 4 }}>
                   <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -151,6 +157,7 @@ export function LogScreen({ now, onRide, initialSelectedId = null, header = null
                 </View>
               </Pressable>
             ))}
+            </RowGroup>
           </View>
         ))}
       </ScrollView>

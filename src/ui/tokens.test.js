@@ -22,7 +22,8 @@ describe('density tokens', () => {
     expect([size.ring, size.ringStroke, size.row, size.rideBar, size.rideTile, size.tabCenter, size.button]).toEqual([164, 8, 48, 56, 96, 56, 48])
   })
   test('no text size under 12pt', () => {
-    expect(Math.min(...Object.values(theme.type))).toBeGreaterThanOrEqual(12)
+    expect(Math.min(...Object.entries(theme.type).filter(([k]) => k !== 'label').map(([, v]) => v))).toBeGreaterThanOrEqual(12)
+    expect(theme.type.label).toBe(11) // small-caps section labels only
     for (const f of files) {
       for (const m of readFileSync(f, 'utf8').matchAll(/<T\b[^>]*\bsize=\{(\d+)\}/g)) expect({ f, ok: Number(m[1]) >= 12 }).toEqual({ f, ok: true })
     }

@@ -10,6 +10,9 @@ export const type = {
   rideTile: 18, statCell: 20,
   sheetTitle: 24, rideSheetTitle: 26, rideTileIcon: 26,
   screenTitle: 28, statBig: 34,
+  heroStat: 56, statPair: 30,
+  // The one exception to 12pt+: small-caps section labels (uppercase, tracked 0.08em), editorial lists.
+  label: 11,
   ringDays: 56, ringDaysMd: 46, ringDaysSm: 36,
 }
 export const space = {

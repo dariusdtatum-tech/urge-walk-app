@@ -8,7 +8,7 @@ import { lastBackupLabel, loadBackupMeta } from '../../lib/backup.js'
 import { DEFAULT_REMINDER, reminderLabel, stepReminder } from '../../lib/checkin.js'
 import { clearPendingFollowUp, saveFollowUpEnabled } from '../../lib/followUp.js'
 import { DEFAULT_HOURS_PER_TIME, timeBack } from '../../lib/homeIdeas.js'
-import { shortDate } from '../../lib/homeStats.js'
+import { cleanDays, shortDate } from '../../lib/homeStats.js'
 import { fmtMoney, loadGoal, moneyOn, moneyPerTime } from '../../lib/money.js'
 import { saveVerseEnabled } from '../../lib/verse.js'
 import { CUSTOM_MAX, CUSTOM_MIN, WALK_OPTIONS, clampCustomMinutes } from '../../lib/walkTimer.js'
@@ -17,7 +17,7 @@ import { MAX_CONTACTS } from '../../lib/contacts.js'
 import { Button } from '../../ui/Button.jsx'
 import { Field } from '../../ui/Field.jsx'
 import { KeptCard } from '../home/KeptCard.jsx'
-import { Card, GroupTitle, Row, ToggleRow } from '../../ui/Row.jsx'
+import { FeaturedPanel, HairlineRow as Row, HairlineToggle as ToggleRow, HeroStat, RowGroup, SectionLabel, StatPair } from '../../ui/kit.jsx'
 import { Seg } from '../../ui/Seg.jsx'
 import { loadSwitcher, saveSwitcher } from '../../lib/switcher.js'
 import { Sheet } from '../../ui/Sheet.jsx'
@@ -43,9 +43,13 @@ export const SECTION_TITLES = {
 function SupportSection({ c, people, contactsVer, setShowCrisis, setShowContacts }) {
   return (
     <>
-      <Row title="Crisis resources" sub="988, SAMHSA helpline, 911" testID="crisis-row" onPress={() => setShowCrisis(true)} />
-      <Card><ReachOut key={contactsVer} testID="you-reach" title={null} onSetup={() => setShowContacts(true)} /></Card>
-      <Row title="Trusted contacts" sub={people.length ? people.map((p) => p.name).join(' · ') : `Up to ${MAX_CONTACTS} people and a message ready to go`} testID="contacts-row" onPress={() => setShowContacts(true)} />
+      <HeroStat value="988" label="Call or text, any time" sub="Suicide & Crisis Lifeline, free and confidential" testID="support-hero" />
+      <FeaturedPanel testID="support-featured"><ReachOut key={contactsVer} testID="you-reach" title={null} onPanel onSetup={() => setShowContacts(true)} /></FeaturedPanel>
+      <SectionLabel>Help</SectionLabel>
+      <RowGroup>
+        <Row title="Crisis resources" sub="988, SAMHSA helpline, 911" testID="crisis-row" onPress={() => setShowCrisis(true)} />
+        <Row title="Trusted contacts" sub={people.length ? people.map((p) => p.name).join(' · ') : `Up to ${MAX_CONTACTS} people and a message ready to go`} testID="contacts-row" onPress={() => setShowContacts(true)} />
+      </RowGroup>
     </>
   )
 }
@@ -53,27 +57,51 @@ function SupportSection({ c, people, contactsVer, setShowCrisis, setShowContacts
 function WhySection({ storage, profile, hero, today, reasonCount, setShowReasons, setShowMoney, changeProfile, list, showAnswers, setShowAnswers, setAnswer, onRedo }) {
   return (
     <>
-      <Row title="Your reasons" sub={reasonCount ? `${reasonCount} saved · one shows when you ride it out` : 'A photo, a voice note, or a few words'} testID="reasons-row" onPress={() => setShowReasons(true)} />
-      <GroupTitle>About you</GroupTitle>
+      <HeroStat value={String(reasonCount)} label={reasonCount === 1 ? 'reason saved' : 'reasons saved'} sub="One shows when you ride it out" testID="why-hero" />
+      <SectionLabel>Reasons</SectionLabel>
+      <RowGroup>
+        <Row title="Your reasons" sub={reasonCount ? `${reasonCount} saved · one shows when you ride it out` : 'A photo, a voice note, or a few words'} testID="reasons-row" onPress={() => setShowReasons(true)} />
+      </RowGroup>
+      <SectionLabel>About you</SectionLabel>
+      <RowGroup>
       <Row title="Your answers" sub={`${list.filter((a) => a.value).length} of ${list.length} answered`} testID="answers-toggle" chevron={showAnswers ? '⌃' : '›'} onPress={() => setShowAnswers(!showAnswers)} />
       {showAnswers ? list.map((a) => <Row key={a.field} title={a.title} sub={a.value || 'Not set'} subMuted={!a.value} testID={`answer-${a.field}`} onPress={() => setAnswer(a.field)} />) : null}
       <Row title="Redo setup" testID="redo-setup" onPress={onRedo}
         sub={`Go through the questions again${profile.onboardedAt && !profile.skipped ? ` · last done ${shortDate(profile.onboardedAt.slice(0, 10), today)}` : ''}`} />
+      </RowGroup>
     </>
   )
 }
 
 function ProgressSection({ storage, profile, today, walks, changeProfile, setShowMoney, habits, hero, earned, setSheet, prefs, showLengths, setShowLengths, changePrefs }) {
+  const days = hero ? cleanDays(hero, today) : 0
+  const tb = hero ? timeBack(profile, hero, today) : null
   return (
     <>
-      <Row title="Trackers" sub={habits.length === 0 ? 'Add the date you started' : habits.map((h) => h.name).join(' · ')} testID="trackers-row" onPress={() => setSheet({ mode: 'manage' })} />
-      {hero ? <Row title="Milestones" sub={`${earned === 1 ? '1 earned' : `${earned} earned`} · ${hero.name}`} testID="milestones-row" onPress={() => setSheet({ mode: 'milestones' })} /> : null}
-      <ToggleRow title="Money kept" sub={moneyOn(profile) ? `${fmtMoney(moneyPerTime(profile))} each time${loadGoal(storage)?.name ? ` · toward ${loadGoal(storage).name}` : ''}` : 'Off. A private running total, if it helps.'}
-        value={moneyOn(profile)} testID="money-toggle" onChange={(on) => (on ? setShowMoney(true) : changeProfile({ timeBack: { ...(profile.timeBack || { hoursPerTime: 1 }), moneyPerTime: null } }))} />
-      {moneyOn(profile) ? <Row title="Money kept settings" sub="Amount and goal" testID="money-row" onPress={() => setShowMoney(true)} /> : null}
-      <KeptCard profile={profile} hero={hero} walks={walks} today={today} onEditMoney={() => setShowMoney(true)} />
+      {hero ? <HeroStat value={days.toLocaleString()} label={days === 1 ? 'day clean' : 'days clean'} sub={`${hero.name} · since ${shortDate(hero.startDate, today)}`} testID="progress-hero" /> : null}
+      {hero ? (
+        <StatPair testID="progress-pair" items={[
+          { value: String(earned), label: earned === 1 ? 'milestone earned' : 'milestones earned', testID: 'pair-milestones' },
+          tb ? { value: tb.hours.toLocaleString(), label: 'hours back, estimated', testID: 'pair-hours' } : { value: String(habits.length), label: habits.length === 1 ? 'tracker' : 'trackers', testID: 'pair-trackers' },
+        ]} />
+      ) : null}
+      <SectionLabel>Trackers</SectionLabel>
+      <RowGroup>
+        <Row title="Trackers" sub={habits.length === 0 ? 'Add the date you started' : habits.map((h) => h.name).join(' · ')} testID="trackers-row" onPress={() => setSheet({ mode: 'manage' })} />
+        {hero ? <Row title="Milestones" sub={`${earned === 1 ? '1 earned' : `${earned} earned`} · ${hero.name}`} testID="milestones-row" onPress={() => setSheet({ mode: 'milestones' })} /> : null}
+      </RowGroup>
+      <SectionLabel>Money kept</SectionLabel>
+      <RowGroup>
+        <ToggleRow title="Money kept" sub={moneyOn(profile) ? `${fmtMoney(moneyPerTime(profile))} each time${loadGoal(storage)?.name ? ` · toward ${loadGoal(storage).name}` : ''}` : 'Off. A private running total, if it helps.'}
+          value={moneyOn(profile)} testID="money-toggle" onChange={(on) => (on ? setShowMoney(true) : changeProfile({ timeBack: { ...(profile.timeBack || { hoursPerTime: 1 }), moneyPerTime: null } }))} />
+        {moneyOn(profile) ? <Row title="Money kept settings" sub="Amount and goal" testID="money-row" onPress={() => setShowMoney(true)} /> : null}
+      </RowGroup>
+      <KeptCard flat profile={profile} hero={hero} walks={walks} today={today} onEditMoney={() => setShowMoney(true)} />
       <TimeBackCard profile={profile} hero={hero} today={today} onChange={changeProfile} />
-      <Row title="Walk length" sub={`${lengthLabel(prefs)} · for Walk`} testID="walk-length" chevron={showLengths ? '⌃' : '›'} onPress={() => setShowLengths(!showLengths)} />
+      <SectionLabel>Walks</SectionLabel>
+      <RowGroup>
+        <Row title="Walk length" sub={`${lengthLabel(prefs)} · for Walk`} testID="walk-length" chevron={showLengths ? '⌃' : '›'} onPress={() => setShowLengths(!showLengths)} />
+      </RowGroup>
       {showLengths ? <WalkLengthPicker prefs={prefs} onChange={changePrefs} /> : null}
     </>
   )
@@ -82,14 +110,18 @@ function ProgressSection({ storage, profile, today, walks, changeProfile, setSho
 function RemindersSection({ c, storage, device, followUpOn, setFollowUpOn, reminder, changeReminder, setShowNotify }) {
   return (
     <>
+      <HeroStat value={reminder ? reminderLabel(reminder) : 'Off'} label="daily check-in reminder" sub="At most one notification a day" testID="reminders-hero" />
+      <SectionLabel>Notifications</SectionLabel>
+      <RowGroup>
       <Row title="Notifications" sub="At most one a day. See what they’ll say." testID="notify-row" onPress={() => setShowNotify(true)} />
       <ToggleRow title="Check in after an urge" sub="One quiet notification about 30 minutes later. Never more than one per urge."
         value={followUpOn} testID="followup-toggle"
         onChange={(on) => { saveFollowUpEnabled(on, storage); setFollowUpOn(on); if (!on) { clearPendingFollowUp(storage); device.cancelFollowUp() } }} />
       <ToggleRow title="Daily check-in reminder" sub={reminder ? `Every day at ${reminderLabel(reminder)}` : 'Off. You can still check in from Home.'}
         value={!!reminder} testID="checkin-reminder" onChange={(on) => changeReminder(on ? DEFAULT_REMINDER : null)} />
+      </RowGroup>
       {reminder ? (
-        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 12 }} testID="checkin-time">
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-start', gap: 12, paddingTop: 10 }} testID="checkin-time">
           <Button kind="secondary" label="−" accessibilityLabel="15 minutes earlier" onPress={() => changeReminder(stepReminder(reminder, -1))} testID="checkin-time-less" />
           <T font="semibold" size={18} color={c.title} style={{ minWidth: 96, textAlign: 'center' }} accessibilityLiveRegion="polite">{reminderLabel(reminder)}</T>
           <Button kind="secondary" label="+" accessibilityLabel="15 minutes later" onPress={() => changeReminder(stepReminder(reminder, 1))} testID="checkin-time-more" />
@@ -102,11 +134,16 @@ function RemindersSection({ c, storage, device, followUpOn, setFollowUpOn, remin
 function AppearanceSection({ c, storage, theme, onTheme, verseOn, setVerseOn, setVerseFade, appLock, appLockNote, changeAppLock }) {
   return (
     <>
+      <HeroStat value={THEMES.find((t) => t.id === theme)?.label ?? 'System'} label="appearance" sub={appLock ? 'App lock on' : 'App lock off'} testID="appearance-hero" />
+      <SectionLabel>Theme</SectionLabel>
       <Seg items={THEMES} value={theme} onChange={onTheme} label="Appearance" testID="theme" />
+      <SectionLabel>Home and lock</SectionLabel>
+      <RowGroup>
       <ToggleRow title="Daily verse" sub="One short verse a day on endurance and freedom." value={verseOn} testID="verse-toggle"
         onChange={(on) => { saveVerseEnabled(on, storage); setVerseFade(on); setVerseOn(on) }} />
       <ToggleRow title="App lock" sub={appLock ? 'Face ID or your passcode when you open Urge Walk. 988 stays one tap away.' : 'Off. Ask for Face ID or your passcode when you open Urge Walk.'}
         value={appLock} testID="app-lock-toggle" onChange={changeAppLock} />
+      </RowGroup>
       {appLockNote ? <T size={type.sub} color={c.textSoft} accessibilityRole="alert" testID="app-lock-note">{appLockNote}</T> : null}
       <SwitcherPicker c={c} storage={storage} />
     </>
@@ -118,7 +155,7 @@ function SwitcherPicker({ c, storage }) {
   const [style, setStyle] = useState(() => loadSwitcher(storage))
   return (
     <View style={{ gap: 6 }} testID="switcher-setting">
-      <T font="semibold" size={type.rowTitle} color={c.title}>Tracker switcher</T>
+      <SectionLabel>Tracker switcher</SectionLabel>
       <Seg items={[{ id: 'drawer', label: 'Drawer' }, { id: 'sheet', label: 'Sheet' }]} value={style} onChange={(v) => { saveSwitcher(v, storage); setStyle(v) }} label="Tracker switcher" testID="switcher" small />
       <T size={type.sub} color={c.textSoft}>{style === 'sheet' ? 'Tap the tracker name on Home to open a sheet from the bottom.' : 'Tap the tracker name on Home, or swipe in from the left edge, to open a side drawer.'}</T>
     </View>
@@ -128,11 +165,17 @@ function SwitcherPicker({ c, storage }) {
 function DataSection({ c, storage, device, now, onOpenBackup, setReset, setShowFree, setDesignCheck }) {
   return (
     <>
-      <Row title="Backup & restore" sub={lastBackupLabel(loadBackupMeta(storage), now)} testID="backup-row" onPress={onOpenBackup} />
-      <Row title="Reset app" sub="Saves a backup file first, then starts fresh" testID="reset-app" danger onPress={() => setReset('confirm')} />
-      <GroupTitle>Privacy</GroupTitle>
-      <T size={14} color={c.muted}>No ads. No tracking. No account. For now, everything stays on this phone.</T>
-      <Row title="Free forever" sub="What stays free, always" testID="free-row" onPress={() => setShowFree(true)} />
+      <HeroStat value="On this phone" label="where your data lives" sub="No ads. No tracking. No account." testID="data-hero" />
+      <SectionLabel>Backup</SectionLabel>
+      <RowGroup>
+        <Row title="Backup & restore" sub={lastBackupLabel(loadBackupMeta(storage), now)} testID="backup-row" onPress={onOpenBackup} />
+        <Row title="Reset app" sub="Saves a backup file first, then starts fresh" testID="reset-app" danger onPress={() => setReset('confirm')} />
+      </RowGroup>
+      <SectionLabel>Privacy</SectionLabel>
+      <T size={14} color={c.muted} style={{ paddingVertical: 6 }}>No ads. No tracking. No account. For now, everything stays on this phone.</T>
+      <RowGroup>
+        <Row title="Free forever" sub="What stays free, always" testID="free-row" onPress={() => setShowFree(true)} />
+      </RowGroup>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center' }} testID="legal-links">
         {LEGAL_LINKS.map((l, i) => (
           <View key={l.url} style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -163,14 +206,14 @@ function WalkLengthPicker({ prefs, onChange }) {
     { id: 'open', label: 'Open', sub: 'no timer', a11y: 'Open walk' },
   ]
   return (
-    <Card testID="walk-options">
+    <View testID="walk-options" style={{ gap: 8, paddingTop: 10 }}>
       <Seg items={items} value={prefs.choice} onChange={(choice) => set({ choice })} label="Walk length" testID="length" small />
       {prefs.choice === 'custom' ? (
         <Stepper value={prefs.customMinutes} min={CUSTOM_MIN} max={CUSTOM_MAX} unit="minutes" testID="custom-minutes"
           onChange={(v) => set({ customMinutes: clampCustomMinutes(v) })} />
       ) : null}
       {prefs.choice === 'open' ? <T size={14} color={c.muted}>No timer. Walk as long as you like, then tap Finish walk.</T> : null}
-    </Card>
+    </View>
   )
 }
 
@@ -191,23 +234,26 @@ function TimeBackCard({ profile, hero, today, onChange }) {
     setAdjust(null)
   }
   return (
-    <Card testID="time-back">
+    <>
+    <SectionLabel>Time back</SectionLabel>
+    <FeaturedPanel testID="time-back">
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
-        <T accessibilityRole="header" font="semibold" size={17} color={c.title} style={{ flex: 1 }}>Time back</T>
-        <T font="semibold" size={12} color={c.mutedSand} style={{ backgroundColor: c.sand, paddingHorizontal: 8, paddingVertical: 2, borderRadius: 8 }}>Estimate</T>
+        <T font="semibold" size={type.rowTitle} color={c.title} style={{ flex: 1 }}>Your estimate</T>
+        <T font="semibold" size={12} color={c.mutedSand}>Estimate</T>
       </View>
-      <T size={type.body} color={c.muted}>about <T font="semibold" size={type.screenTitle} color={c.title} testID="tb-hours" style={{ fontVariant: ['lining-nums', 'tabular-nums'] }}>{tb.hours.toLocaleString()}</T> <T size={type.body} color={c.text}>hours</T></T>
-      {tb.money != null ? <T size={type.body} color={c.muted}>and about <T font="serif" size={type.rideSheetTitle} color={c.title} testID="tb-money" style={{ fontVariant: ['lining-nums'] }}>${tb.money.toLocaleString()}</T> <T size={type.body} color={c.text}>kept</T></T> : null}
-      <T size={13} color={c.muted} testID="tb-formula">
+      <T size={type.body} color={c.mutedSand}>about <T font="semibold" size={type.screenTitle} color={c.title} testID="tb-hours" style={{ fontVariant: ['lining-nums', 'tabular-nums'] }}>{tb.hours.toLocaleString()}</T> <T size={type.body} color={c.text}>hours</T></T>
+      {tb.money != null ? <T size={type.body} color={c.mutedSand}>and about <T font="serif" size={type.rideSheetTitle} color={c.title} testID="tb-money" style={{ fontVariant: ['lining-nums'] }}>${tb.money.toLocaleString()}</T> <T size={type.body} color={c.text}>kept</T></T> : null}
+      <T size={13} color={c.mutedSand} testID="tb-formula">
         Since {shortDate(hero.startDate, today)}, based on what you told us: {plural(tb.daysPerWeek, 'day', 'days')} a week,{' '}
         {tb.timesPerDay === 7 ? '7+ times' : plural(tb.timesPerDay, 'time', 'times')} a day, about {fmtHours(tb.hoursPerTime)} each
         {tb.moneyPerTime != null ? ` and $${tb.moneyPerTime} each time` : ''}.
       </T>
       <View style={{ flexDirection: 'row', gap: 8 }}>
-        <Button kind="quiet" label="Adjust time estimate" onPress={() => setAdjust('hours')} testID="tb-adjust" />
+        <Button kind="quiet" label="Adjust time estimate" textColor={c.title} onPress={() => setAdjust('hours')} testID="tb-adjust" />
       </View>
       {adjust ? <AdjustSheet kind={adjust} value={adjust === 'hours' ? tb.hoursPerTime : tb.moneyPerTime} onSave={save} onClose={() => setAdjust(null)} /> : null}
-    </Card>
+    </FeaturedPanel>
+    </>
   )
 }
 

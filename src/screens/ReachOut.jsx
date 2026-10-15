@@ -25,14 +25,17 @@ export function SmallButton({ label, onPress, testID, accessibilityLabel, primar
 }
 
 // The list itself. `onSetup` shows an "Add someone you trust" link when nobody is set up yet.
-export function ReachOut({ testID = 'reach', onSetup = null, title = 'Reach out' }) {
+// onPanel: it sits in a sand featured panel (You → Support), so soft text uses the sand-safe colours.
+export function ReachOut({ testID = 'reach', onSetup = null, title = 'Reach out', onPanel = false }) {
   const storage = useStorage()
   const device = useDevice()
   const { c } = useTheme()
+  const soft = onPanel ? c.mutedSand : c.muted
+  const link = onPanel ? c.title : c.accent
   const [{ contacts, message }] = useState(() => loadContactsData(storage))
   return (
     <View style={{ gap: 8 }} testID={testID}>
-      {title ? <T accessibilityRole="header" font="bold" size={13} color={c.muted} style={{ letterSpacing: 1, textTransform: 'uppercase' }}>{title}</T> : null}
+      {title ? <T accessibilityRole="header" font="bold" size={13} color={soft} style={{ letterSpacing: 1, textTransform: 'uppercase' }}>{title}</T> : null}
       {contacts.map((p, i) => (
         <View key={p.id} style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }} testID={`${testID}-person-${i}`}>
           <T font="semibold" size={type.body} color={c.title} style={{ flex: 1 }} numberOfLines={1}>{p.name}</T>
@@ -43,14 +46,14 @@ export function ReachOut({ testID = 'reach', onSetup = null, title = 'Reach out'
       <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }} testID={`${testID}-988`}>
         <View style={{ flex: 1 }}>
           <T font="semibold" size={type.body} color={c.title}>988 Lifeline</T>
-          <T size={13} color={c.muted}>{CRISIS_LINE.note}</T>
+          <T size={13} color={soft}>{CRISIS_LINE.note}</T>
         </View>
         <SmallButton label="Text" accessibilityLabel="Text 988" onPress={() => device.openURL('sms:988')} testID={`${testID}-988-text`} />
         <SmallButton label="Call" accessibilityLabel="Call 988" onPress={() => device.openURL('tel:988')} testID={`${testID}-988-call`} />
       </View>
       {contacts.length === 0 && onSetup ? (
         <Pressable onPress={onSetup} accessibilityRole="button" testID={`${testID}-setup`} style={{ minHeight: 44, justifyContent: 'center' }}>
-          <T font="semibold" size={15} color={c.accent} style={{ textDecorationLine: 'underline' }}>Add someone you trust</T>
+          <T font="semibold" size={15} color={link} style={{ textDecorationLine: 'underline' }}>Add someone you trust</T>
         </Pressable>
       ) : null}
     </View>

@@ -253,6 +253,292 @@ exports[`component kit in dark EmptyState matches its snapshot and uses only tok
 </View>
 `;
 
+exports[`component kit in dark FeaturedPanel matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "#182b47",
+        "borderRadius": 16,
+        "gap": 8,
+        "padding": 14,
+      },
+      undefined,
+    ]
+  }
+>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#f3ede2",
+          "fontFamily": "Jakarta-Regular",
+          "fontSize": 15,
+        },
+        undefined,
+      ]
+    }
+  >
+    Featured
+  </Text>
+</View>
+`;
+
+exports[`component kit in dark HairlineRows matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    {
+      "borderTopColor": "rgba(243, 237, 226, 0.10)",
+      "borderTopWidth": 1,
+    }
+  }
+>
+  <View
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "alignItems": "center",
+        "borderBottomColor": "rgba(243, 237, 226, 0.10)",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "gap": 12,
+        "minHeight": 48,
+        "opacity": 1,
+        "paddingVertical": 10,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flex": 1,
+          "gap": 2,
+        }
+      }
+    >
+      <Text
+        maxFontSizeMultiplier={2}
+        style={
+          [
+            {
+              "color": "#f3ede2",
+              "fontFamily": "Jakarta-SemiBold",
+              "fontSize": 15,
+            },
+            undefined,
+          ]
+        }
+      >
+        Row
+      </Text>
+      <Text
+        maxFontSizeMultiplier={2}
+        style={
+          [
+            {
+              "color": "#e2dccf",
+              "fontFamily": "Jakarta-Regular",
+              "fontSize": 13,
+            },
+            undefined,
+          ]
+        }
+      >
+        Sub
+      </Text>
+    </View>
+    <Text
+      accessibilityElementsHidden={true}
+      importantForAccessibility="no"
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#a7b0bf",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 20,
+          },
+          undefined,
+        ]
+      }
+    >
+      ›
+    </Text>
+  </View>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "borderBottomColor": "rgba(243, 237, 226, 0.10)",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "gap": 12,
+        "minHeight": 48,
+        "paddingVertical": 10,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flex": 1,
+          "gap": 2,
+        }
+      }
+    >
+      <Text
+        maxFontSizeMultiplier={2}
+        style={
+          [
+            {
+              "color": "#f3ede2",
+              "fontFamily": "Jakarta-SemiBold",
+              "fontSize": 15,
+            },
+            undefined,
+          ]
+        }
+      >
+        Toggle
+      </Text>
+      <Text
+        maxFontSizeMultiplier={2}
+        style={
+          [
+            {
+              "color": "#e2dccf",
+              "fontFamily": "Jakarta-Regular",
+              "fontSize": 13,
+            },
+            undefined,
+          ]
+        }
+      >
+        Sub
+      </Text>
+    </View>
+    <RCTSwitch
+      accessibilityLabel="Toggle"
+      accessibilityRole="switch"
+      onChange={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      onTintColor="#a9cbc0"
+      style={
+        [
+          {
+            "alignSelf": "flex-start",
+          },
+          {
+            "backgroundColor": "#6b7d99",
+            "borderRadius": 16,
+          },
+        ]
+      }
+      thumbTintColor="#182b47"
+      tintColor="#6b7d99"
+      value={true}
+    />
+  </View>
+</View>
+`;
+
+exports[`component kit in dark HeroStat matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  accessibilityLabel="163 days clean Habit A"
+  accessible={true}
+  style={
+    {
+      "gap": 2,
+      "paddingBottom": 8,
+      "paddingTop": 4,
+    }
+  }
+  testID="hero-stat"
+>
+  <Text
+    maxFontSizeMultiplier={1.6}
+    style={
+      [
+        {
+          "color": "#f3ede2",
+          "fontFamily": "Cormorant-Italic",
+          "fontSize": 56,
+        },
+        {
+          "fontVariant": [
+            "lining-nums",
+          ],
+          "lineHeight": 60,
+        },
+      ]
+    }
+  >
+    163
+  </Text>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#f3ede2",
+          "fontFamily": "Cormorant-Italic",
+          "fontSize": 17,
+        },
+        undefined,
+      ]
+    }
+  >
+    days clean
+  </Text>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#e2dccf",
+          "fontFamily": "Jakarta-Regular",
+          "fontSize": 14,
+        },
+        undefined,
+      ]
+    }
+  >
+    Habit A
+  </Text>
+</View>
+`;
+
 exports[`component kit in dark PlusTag matches its snapshot and uses only tokens and palette colours 1`] = `
 <View
   style={
@@ -521,6 +807,30 @@ exports[`component kit in dark Row matches its snapshot and uses only tokens and
 </View>
 `;
 
+exports[`component kit in dark SectionLabel matches its snapshot and uses only tokens and palette colours 1`] = `
+<Text
+  accessibilityRole="header"
+  maxFontSizeMultiplier={2}
+  style={
+    [
+      {
+        "color": "#afafae",
+        "fontFamily": "Jakarta-SemiBold",
+        "fontSize": 11,
+      },
+      {
+        "letterSpacing": 0.88,
+        "marginBottom": 2,
+        "marginTop": 18,
+        "textTransform": "uppercase",
+      },
+    ]
+  }
+>
+  Trackers
+</Text>
+`;
+
 exports[`component kit in dark Sheet matches its snapshot and uses only tokens and palette colours 1`] = `
 <Modal
   animationType="slide"
@@ -669,6 +979,118 @@ exports[`component kit in dark Sheet matches its snapshot and uses only tokens a
     </View>
   </View>
 </Modal>
+`;
+
+exports[`component kit in dark StatPair matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    {
+      "borderBottomWidth": 1,
+      "borderColor": "rgba(243, 237, 226, 0.10)",
+      "borderTopWidth": 1,
+      "flexDirection": "row",
+      "paddingVertical": 12,
+    }
+  }
+  testID="stat-pair"
+>
+  <View
+    accessibilityLabel="4 milestones earned"
+    accessible={true}
+    style={
+      {
+        "borderLeftColor": "rgba(243, 237, 226, 0.10)",
+        "borderLeftWidth": 0,
+        "flex": 1,
+        "gap": 2,
+        "paddingLeft": 0,
+      }
+    }
+  >
+    <Text
+      maxFontSizeMultiplier={1.6}
+      style={
+        [
+          {
+            "color": "#f3ede2",
+            "fontFamily": "Cormorant-Italic",
+            "fontSize": 30,
+          },
+          {
+            "fontVariant": [
+              "lining-nums",
+            ],
+          },
+        ]
+      }
+    >
+      4
+    </Text>
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#e2dccf",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 13,
+          },
+          undefined,
+        ]
+      }
+    >
+      milestones earned
+    </Text>
+  </View>
+  <View
+    accessibilityLabel="230 hours back"
+    accessible={true}
+    style={
+      {
+        "borderLeftColor": "rgba(243, 237, 226, 0.10)",
+        "borderLeftWidth": 1,
+        "flex": 1,
+        "gap": 2,
+        "paddingLeft": 16,
+      }
+    }
+  >
+    <Text
+      maxFontSizeMultiplier={1.6}
+      style={
+        [
+          {
+            "color": "#f3ede2",
+            "fontFamily": "Cormorant-Italic",
+            "fontSize": 30,
+          },
+          {
+            "fontVariant": [
+              "lining-nums",
+            ],
+          },
+        ]
+      }
+    >
+      230
+    </Text>
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#e2dccf",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 13,
+          },
+          undefined,
+        ]
+      }
+    >
+      hours back
+    </Text>
+  </View>
+</View>
 `;
 
 exports[`component kit in dark Tag matches its snapshot and uses only tokens and palette colours 1`] = `
@@ -1035,6 +1457,292 @@ exports[`component kit in light EmptyState matches its snapshot and uses only to
 </View>
 `;
 
+exports[`component kit in light FeaturedPanel matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    [
+      {
+        "backgroundColor": "#f1ebe0",
+        "borderRadius": 16,
+        "gap": 8,
+        "padding": 14,
+      },
+      undefined,
+    ]
+  }
+>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#2b3445",
+          "fontFamily": "Jakarta-Regular",
+          "fontSize": 15,
+        },
+        undefined,
+      ]
+    }
+  >
+    Featured
+  </Text>
+</View>
+`;
+
+exports[`component kit in light HairlineRows matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    {
+      "borderTopColor": "rgba(36, 57, 92, 0.10)",
+      "borderTopWidth": 1,
+    }
+  }
+>
+  <View
+    accessibilityRole="button"
+    accessibilityState={
+      {
+        "busy": undefined,
+        "checked": undefined,
+        "disabled": undefined,
+        "expanded": undefined,
+        "selected": undefined,
+      }
+    }
+    accessibilityValue={
+      {
+        "max": undefined,
+        "min": undefined,
+        "now": undefined,
+        "text": undefined,
+      }
+    }
+    accessible={true}
+    collapsable={false}
+    focusable={true}
+    onBlur={[Function]}
+    onClick={[Function]}
+    onFocus={[Function]}
+    onResponderGrant={[Function]}
+    onResponderMove={[Function]}
+    onResponderRelease={[Function]}
+    onResponderTerminate={[Function]}
+    onResponderTerminationRequest={[Function]}
+    onStartShouldSetResponder={[Function]}
+    style={
+      {
+        "alignItems": "center",
+        "borderBottomColor": "rgba(36, 57, 92, 0.10)",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "gap": 12,
+        "minHeight": 48,
+        "opacity": 1,
+        "paddingVertical": 10,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flex": 1,
+          "gap": 2,
+        }
+      }
+    >
+      <Text
+        maxFontSizeMultiplier={2}
+        style={
+          [
+            {
+              "color": "#24395c",
+              "fontFamily": "Jakarta-SemiBold",
+              "fontSize": 15,
+            },
+            undefined,
+          ]
+        }
+      >
+        Row
+      </Text>
+      <Text
+        maxFontSizeMultiplier={2}
+        style={
+          [
+            {
+              "color": "#3a4357",
+              "fontFamily": "Jakarta-Regular",
+              "fontSize": 13,
+            },
+            undefined,
+          ]
+        }
+      >
+        Sub
+      </Text>
+    </View>
+    <Text
+      accessibilityElementsHidden={true}
+      importantForAccessibility="no"
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#6b7280",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 20,
+          },
+          undefined,
+        ]
+      }
+    >
+      ›
+    </Text>
+  </View>
+  <View
+    style={
+      {
+        "alignItems": "center",
+        "borderBottomColor": "rgba(36, 57, 92, 0.10)",
+        "borderBottomWidth": 1,
+        "flexDirection": "row",
+        "gap": 12,
+        "minHeight": 48,
+        "paddingVertical": 10,
+      }
+    }
+  >
+    <View
+      style={
+        {
+          "flex": 1,
+          "gap": 2,
+        }
+      }
+    >
+      <Text
+        maxFontSizeMultiplier={2}
+        style={
+          [
+            {
+              "color": "#24395c",
+              "fontFamily": "Jakarta-SemiBold",
+              "fontSize": 15,
+            },
+            undefined,
+          ]
+        }
+      >
+        Toggle
+      </Text>
+      <Text
+        maxFontSizeMultiplier={2}
+        style={
+          [
+            {
+              "color": "#3a4357",
+              "fontFamily": "Jakarta-Regular",
+              "fontSize": 13,
+            },
+            undefined,
+          ]
+        }
+      >
+        Sub
+      </Text>
+    </View>
+    <RCTSwitch
+      accessibilityLabel="Toggle"
+      accessibilityRole="switch"
+      onChange={[Function]}
+      onResponderTerminationRequest={[Function]}
+      onStartShouldSetResponder={[Function]}
+      onTintColor="#24395c"
+      style={
+        [
+          {
+            "alignSelf": "flex-start",
+          },
+          {
+            "backgroundColor": "#8d8778",
+            "borderRadius": 16,
+          },
+        ]
+      }
+      thumbTintColor="#fdfbf7"
+      tintColor="#8d8778"
+      value={true}
+    />
+  </View>
+</View>
+`;
+
+exports[`component kit in light HeroStat matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  accessibilityLabel="163 days clean Habit A"
+  accessible={true}
+  style={
+    {
+      "gap": 2,
+      "paddingBottom": 8,
+      "paddingTop": 4,
+    }
+  }
+  testID="hero-stat"
+>
+  <Text
+    maxFontSizeMultiplier={1.6}
+    style={
+      [
+        {
+          "color": "#24395c",
+          "fontFamily": "Cormorant-Italic",
+          "fontSize": 56,
+        },
+        {
+          "fontVariant": [
+            "lining-nums",
+          ],
+          "lineHeight": 60,
+        },
+      ]
+    }
+  >
+    163
+  </Text>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#24395c",
+          "fontFamily": "Cormorant-Italic",
+          "fontSize": 17,
+        },
+        undefined,
+      ]
+    }
+  >
+    days clean
+  </Text>
+  <Text
+    maxFontSizeMultiplier={2}
+    style={
+      [
+        {
+          "color": "#3a4357",
+          "fontFamily": "Jakarta-Regular",
+          "fontSize": 14,
+        },
+        undefined,
+      ]
+    }
+  >
+    Habit A
+  </Text>
+</View>
+`;
+
 exports[`component kit in light PlusTag matches its snapshot and uses only tokens and palette colours 1`] = `
 <View
   style={
@@ -1303,6 +2011,30 @@ exports[`component kit in light Row matches its snapshot and uses only tokens an
 </View>
 `;
 
+exports[`component kit in light SectionLabel matches its snapshot and uses only tokens and palette colours 1`] = `
+<Text
+  accessibilityRole="header"
+  maxFontSizeMultiplier={2}
+  style={
+    [
+      {
+        "color": "#3f7a6b",
+        "fontFamily": "Jakarta-SemiBold",
+        "fontSize": 11,
+      },
+      {
+        "letterSpacing": 0.88,
+        "marginBottom": 2,
+        "marginTop": 18,
+        "textTransform": "uppercase",
+      },
+    ]
+  }
+>
+  Trackers
+</Text>
+`;
+
 exports[`component kit in light Sheet matches its snapshot and uses only tokens and palette colours 1`] = `
 <Modal
   animationType="slide"
@@ -1451,6 +2183,118 @@ exports[`component kit in light Sheet matches its snapshot and uses only tokens 
     </View>
   </View>
 </Modal>
+`;
+
+exports[`component kit in light StatPair matches its snapshot and uses only tokens and palette colours 1`] = `
+<View
+  style={
+    {
+      "borderBottomWidth": 1,
+      "borderColor": "rgba(36, 57, 92, 0.10)",
+      "borderTopWidth": 1,
+      "flexDirection": "row",
+      "paddingVertical": 12,
+    }
+  }
+  testID="stat-pair"
+>
+  <View
+    accessibilityLabel="4 milestones earned"
+    accessible={true}
+    style={
+      {
+        "borderLeftColor": "rgba(36, 57, 92, 0.10)",
+        "borderLeftWidth": 0,
+        "flex": 1,
+        "gap": 2,
+        "paddingLeft": 0,
+      }
+    }
+  >
+    <Text
+      maxFontSizeMultiplier={1.6}
+      style={
+        [
+          {
+            "color": "#24395c",
+            "fontFamily": "Cormorant-Italic",
+            "fontSize": 30,
+          },
+          {
+            "fontVariant": [
+              "lining-nums",
+            ],
+          },
+        ]
+      }
+    >
+      4
+    </Text>
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#3a4357",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 13,
+          },
+          undefined,
+        ]
+      }
+    >
+      milestones earned
+    </Text>
+  </View>
+  <View
+    accessibilityLabel="230 hours back"
+    accessible={true}
+    style={
+      {
+        "borderLeftColor": "rgba(36, 57, 92, 0.10)",
+        "borderLeftWidth": 1,
+        "flex": 1,
+        "gap": 2,
+        "paddingLeft": 16,
+      }
+    }
+  >
+    <Text
+      maxFontSizeMultiplier={1.6}
+      style={
+        [
+          {
+            "color": "#24395c",
+            "fontFamily": "Cormorant-Italic",
+            "fontSize": 30,
+          },
+          {
+            "fontVariant": [
+              "lining-nums",
+            ],
+          },
+        ]
+      }
+    >
+      230
+    </Text>
+    <Text
+      maxFontSizeMultiplier={2}
+      style={
+        [
+          {
+            "color": "#3a4357",
+            "fontFamily": "Jakarta-Regular",
+            "fontSize": 13,
+          },
+          undefined,
+        ]
+      }
+    >
+      hours back
+    </Text>
+  </View>
+</View>
 `;
 
 exports[`component kit in light Tag matches its snapshot and uses only tokens and palette colours 1`] = `

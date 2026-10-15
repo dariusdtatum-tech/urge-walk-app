@@ -22,6 +22,8 @@ const TEXT_PAIRS = [
   ['verseLabel', 'verseBg'], ['verseText', 'verseBg'], ['verseRef', 'verseBg'],
   // Component kit: Plus tag
   ['onPlus', 'plusBg'],
+  // Editorial lists: section labels on the background, text in the flat featured panel
+  ['sectionLabel', 'bg'], ['title', 'featured'], ['text', 'featured'], ['textSoft', 'featured'], ['mutedSand', 'featured'],
 ]
 describe.each(['light', 'dark'])('%s palette meets WCAG AA', (s) => {
   it.each(TEXT_PAIRS)('%s on %s ≥ 4.5', (fg, bg) => {
@@ -37,6 +39,15 @@ it('verse reference colour is the navy/cream at 70% blended on the card', () => 
   const blend = (f, b, a) => '#' + [1, 3, 5].map((i) => Math.round(a * parseInt(f.slice(i, i + 2), 16) + (1 - a) * parseInt(b.slice(i, i + 2), 16)).toString(16).padStart(2, '0')).join('')
   expect(palette.light.verseRef).toBe(blend('#24395c', '#faf7f1', 0.7))
   expect(palette.dark.verseRef).toBe(blend('#f3ede2', '#182b47', 0.7))
+})
+
+it('editorial colours: deep sea labels in light, cream at 70% in dark, hairlines at 10%, featured panel sand / #182b47', () => {
+  const blend = (f, b, a) => '#' + [1, 3, 5].map((i) => Math.round(a * parseInt(f.slice(i, i + 2), 16) + (1 - a) * parseInt(b.slice(i, i + 2), 16)).toString(16).padStart(2, '0')).join('')
+  expect(palette.light.sectionLabel).toBe('#3f7a6b')
+  expect(palette.dark.sectionLabel).toBe(blend('#f3ede2', '#0f1d33', 0.7))
+  expect(palette.light.hairline).toBe('rgba(36, 57, 92, 0.10)')
+  expect(palette.dark.hairline).toBe('rgba(243, 237, 226, 0.10)')
+  expect([palette.light.featured, palette.dark.featured]).toEqual(['#f1ebe0', '#182b47'])
 })
 
 it('every theme defines every colour token (no theme falls back to a missing colour)', () => {

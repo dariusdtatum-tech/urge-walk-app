@@ -1,6 +1,6 @@
 import { fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet } from 'react-native'
-import { Card, Chart, EmptyState, PrimaryButton, QuietLink, Row, Sheet, Tag, ToggleRow } from './kit.jsx'
+import { Card, Chart, EmptyState, FeaturedPanel, HairlineRow, HairlineToggle, HeroStat, PrimaryButton, QuietLink, Row, RowGroup, SectionLabel, Sheet, StatPair, Tag, ToggleRow } from './kit.jsx'
 import { palettes } from './palette.js'
 import { PreviewFontScale, T } from './Text.jsx'
 import { SchemeContext, type, size as sz } from './theme.js'
@@ -17,6 +17,11 @@ const KIT = {
   EmptyState: () => <EmptyState title="Nothing yet" body="One calm sentence." actionLabel="Add one" onAction={noop} />,
   Chart: () => <Chart data={[{ label: 'A', value: 1 }, { label: 'B', value: 3 }]} summary="A 1, B 3" />,
   Sheet: () => <Sheet title="Sheet" onClose={noop}><T>Inside</T></Sheet>,
+  HeroStat: () => <HeroStat value="163" label="days clean" sub="Habit A" />,
+  SectionLabel: () => <SectionLabel>Trackers</SectionLabel>,
+  HairlineRows: () => <RowGroup><HairlineRow title="Row" sub="Sub" onPress={noop} /><HairlineToggle title="Toggle" sub="Sub" value onChange={noop} /></RowGroup>,
+  StatPair: () => <StatPair items={[{ value: '4', label: 'milestones earned' }, { value: '230', label: 'hours back' }]} />,
+  FeaturedPanel: () => <FeaturedPanel><T>Featured</T></FeaturedPanel>,
 }
 const FONT_SIZES = new Set(Object.values(type).concat([20])) // 20 = the Row chevron
 const colorsOf = (s) => new Set(Object.values(palettes[s]).map((v) => String(v).toLowerCase()))
