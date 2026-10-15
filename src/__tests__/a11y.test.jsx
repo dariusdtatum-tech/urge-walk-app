@@ -1,10 +1,10 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import { StyleSheet } from 'react-native'
 import { AppRoot } from '../AppRoot.jsx'
-import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0, youEl } from './helpers.js'
+import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0, youEl, drawerPref } from './helpers.js'
 
 const renderApp = async (scheme = 'light') => {
-  const storage = memoryStorage({ ...habitsSeed(), ...onboardedProfile() })
+  const storage = memoryStorage({ ...habitsSeed(), ...onboardedProfile(), ...drawerPref() })
   await render(<AppRoot storage={storage} device={stubDevice()} clock={fakeClock()} scheme={scheme} />)
 }
 beforeEach(() => { jest.useFakeTimers(); jest.setSystemTime(T0) })

@@ -1,4 +1,5 @@
-// Left drawer (Option C). Opened only by tapping the tracker title on Home; there is no edge swipe.
+// Tracker switcher. Default: a bottom sheet (TrackerSheet). The left drawer (Option C) stays behind
+// You → Appearance and lock → Tracker switcher: Drawer. Both share DrawerBody.
 // Top: Reach out. Middle: your trackers (your own names and day counts, a check on the one Home shows),
 // Edit and + Add tracker. Bottom: one honest status row about where your data lives.
 // Never holds Ride it out, and never shows Premium, Plus, upgrades or prices (tests enforce this).
@@ -7,7 +8,9 @@ import { Animated, Modal, PanResponder, Pressable, ScrollView, useWindowDimensio
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { lastBackupLabel, loadBackupMeta } from '../../lib/backup.js'
 import { cleanDays } from '../../lib/homeStats.js'
+import { HeartIcon } from '../../ui/Icons.jsx'
 import { useReducedMotion } from '../../ui/motion.js'
+import { HeaderButton } from '../../ui/Sheet.jsx'
 import { useStorage } from '../../ui/StorageContext.js'
 import { T } from '../../ui/Text.jsx'
 import { radius, size as sz, space, type, useTheme } from '../../ui/theme.js'
@@ -76,7 +79,7 @@ function DrawerBody({ habits, activeId, today, backup, onSelect, onEdit, onManag
   const tid = (id) => (peek ? undefined : id)
   return (
       <ScrollView contentContainerStyle={{ paddingHorizontal: space.screen, gap: 10, flexGrow: 1 }}>
-        <DrawerRow testID={tid("drawer-reach")} title="Reach out" sub="988 and your trusted people" onPress={onReachOut} />
+        <DrawerRow testID={tid("drawer-reach")} title="Reach out" sub="988 and your trusted people" onPress={onReachOut} badge />
 
         <T accessibilityRole="header" font="bold" size={13} color={c.mutedSand} style={{ letterSpacing: 1, textTransform: 'uppercase', marginTop: 10 }}>Your trackers</T>
         {habits.map((h) => {
@@ -100,16 +103,18 @@ function DrawerBody({ habits, activeId, today, backup, onSelect, onEdit, onManag
             </Pressable>
           )
         })}
-        <View style={{ alignItems: 'flex-start' }}>
-          <LinkButton testID={tid("drawer-add")} label="+ Add tracker" onPress={onAdd} />
-          {habits.length ? <LinkButton testID={tid("home-edit")} label="Edit trackers" onPress={onManage} /> : null}
+        <View style={{ flexDirection: 'row', gap: 10 }}>
+          <PillButton testID={tid("drawer-add")} label="+ Add tracker" onPress={onAdd} />
+          {habits.length ? <PillButton testID={tid("home-edit")} label="Edit trackers" onPress={onManage} /> : null}
         </View>
 
         <View style={{ flex: 1, paddingTop: 16 }} />
         <Pressable onPress={onBackup} testID={tid("drawer-backup")} accessibilityRole="button" accessibilityLabel={`On this phone only. ${backup}. Back up`}
-          style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 8, paddingVertical: 8, borderTopWidth: 1, borderTopColor: c.border }}>
+          style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 8, paddingTop: 10, borderTopWidth: 1, borderTopColor: c.border }}>
           <T size={14} color={c.mutedSand} style={{ flex: 1 }}>On this phone only · {backup}</T>
-          <T font="semibold" size={14} color={c.title}>Back up</T>
+          <View style={{ minHeight: 44, paddingHorizontal: 16, borderRadius: 22, borderWidth: 1.5, borderColor: c.title, alignItems: 'center', justifyContent: 'center' }}>
+            <T font="semibold" size={14} color={c.title}>Back up</T>
+          </View>
         </Pressable>
       </ScrollView>
   )
@@ -134,22 +139,61 @@ export function DrawerPeek({ x, width, habits, activeId, today, now = Date.now()
   )
 }
 
-function DrawerRow({ title, sub, onPress, testID }) {
+function DrawerRow({ title, sub, onPress, testID, badge = false }) {
   const { c } = useTheme()
   return (
-    <Pressable onPress={onPress} testID={testID} accessibilityRole="button"
-      style={({ pressed }) => ({ minHeight: sz.row, justifyContent: 'center', gap: 2, paddingHorizontal: space.rowX, paddingVertical: space.rowY, backgroundColor: c.card, borderRadius: radius.row, borderWidth: 1, borderColor: c.border, opacity: pressed ? 0.85 : 1 })}>
-      <T font="semibold" size={type.rowTitle} color={c.title}>{title}</T>
-      <T size={14} color={c.muted}>{sub}</T>
+    <Pressable onPress={onPress} testID={testID} accessibilityRole="button" accessibilityLabel={`${title}. ${sub}`}
+      style={({ pressed }) => ({ minHeight: sz.row, flexDirection: 'row', alignItems: 'center', gap: 12, paddingHorizontal: space.rowX, paddingVertical: space.rowY, backgroundColor: c.card, borderRadius: radius.row, borderWidth: 1, borderColor: c.border, opacity: pressed ? 0.85 : 1 })}>
+      {badge ? (
+        <View testID={testID ? `${testID}-badge` : undefined} style={{ width: 36, height: 36, borderRadius: 18, backgroundColor: c.sand, borderWidth: 1, borderColor: c.cellEdge, alignItems: 'center', justifyContent: 'center' }}>
+          <HeartIcon color={c.accent} />
+        </View>
+      ) : null}
+      <View style={{ flex: 1, gap: 2 }}>
+        <T font="semibold" size={type.rowTitle} color={c.title}>{title}</T>
+        <T size={14} color={c.muted}>{sub}</T>
+      </View>
     </Pressable>
   )
 }
 
-function LinkButton({ label, onPress, testID }) {
+// 48pt pill: + Add tracker / Edit trackers sit side by side.
+export const PILL_HEIGHT = 48
+function PillButton({ label, onPress, testID }) {
   const { c } = useTheme()
   return (
-    <Pressable onPress={onPress} testID={testID} accessibilityRole="button" style={{ minHeight: 44, justifyContent: 'center', paddingHorizontal: 4 }}>
-      <T font="semibold" size={type.body} color={c.title} style={{ textDecorationLine: 'underline' }}>{label}</T>
+    <Pressable onPress={onPress} testID={testID} accessibilityRole="button"
+      style={({ pressed }) => ({ flex: 1, minHeight: PILL_HEIGHT, borderRadius: PILL_HEIGHT / 2, borderWidth: 1.5, borderColor: c.title, backgroundColor: c.card, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 12, opacity: pressed ? 0.85 : 1 })}>
+      <T font="semibold" size={type.body} color={c.title}>{label}</T>
     </Pressable>
+  )
+}
+
+// The default switcher: a bottom sheet with a grabber and a 44x44 close button over the same body.
+export function TrackerSheet({ habits, activeId, today, now = Date.now(), onSelect, onEdit, onManage, onAdd, onReachOut, onBackup, onClose }) {
+  const { c } = useTheme()
+  const storage = useStorage()
+  const reduced = useReducedMotion()
+  const insets = useSafeAreaInsets()
+  const { height } = useWindowDimensions()
+  const backup = lastBackupLabel(loadBackupMeta(storage), now)
+  return (
+    <Modal visible transparent animationType={reduced ? 'fade' : 'slide'} onRequestClose={onClose} testID="tracker-sheet-modal">
+      <View style={{ flex: 1, justifyContent: 'flex-end' }}>
+        <Pressable style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: c.overlay }} onPress={onClose}
+          accessibilityRole="button" accessibilityLabel="Close trackers" testID="tracker-sheet-backdrop" />
+        <View testID="tracker-sheet" accessibilityViewIsModal
+          style={{ backgroundColor: c.sand, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: Math.round(height - Math.max(insets.top, 24) - 16), paddingTop: 8, paddingBottom: Math.max(insets.bottom, 12) + 8 }}>
+          <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: c.grab }} testID="tracker-sheet-grabber" />
+          <View style={{ flexDirection: 'row', alignItems: 'center', paddingLeft: space.screen, paddingRight: 8 }}>
+            <T accessibilityRole="header" font="serif" size={type.sheetTitle} color={c.title} style={{ flex: 1 }}>Trackers</T>
+            <HeaderButton label="✕" accessibilityLabel="Close trackers" onPress={onClose} testID="tracker-sheet-close" />
+          </View>
+          <View style={{ flexShrink: 1 }}>
+            <DrawerBody habits={habits} activeId={activeId} today={today} backup={backup} onSelect={onSelect} onEdit={onEdit} onManage={onManage} onAdd={onAdd} onReachOut={onReachOut} onBackup={onBackup} />
+          </View>
+        </View>
+      </View>
+    </Modal>
   )
 }

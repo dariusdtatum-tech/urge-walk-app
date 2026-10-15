@@ -8,7 +8,7 @@ import { ACTIVE_TRACKER_KEY } from '../lib/activeTracker.js'
 import { todayISO } from '../lib/cleanTime.js'
 import { HOME_ITEMS } from '../screens/HomeScreen.jsx'
 import { dayCount, swipeCloses } from '../screens/home/TrackerDrawer.jsx'
-import { DAY, fakeClock, habitsSeed, iso, memoryStorage, onboardedProfile, stubDevice, T0 } from './helpers.js'
+import { DAY, fakeClock, habitsSeed, iso, memoryStorage, onboardedProfile, stubDevice, T0, drawerPref } from './helpers.js'
 
 const twoHabits = (extra = []) => ({ 'urgewalk.v1.habits': JSON.stringify({ habits: [
   { id: 'h1', name: 'Habit A', startDate: '2029-12-02' }, { id: 'h2', name: 'Something else', startDate: '2030-05-10' }, ...extra] }) })
@@ -18,7 +18,7 @@ const walk = (daysAgo, result = 'yes') => {
   return { id: `w${daysAgo}${result}`, kind: 'logged', startedAt: at, endedAt: at, mode: 'open', plannedMinutes: null, actualSeconds: 0, endedEarly: false, result, note: '' }
 }
 const renderApp = async (seed = habitsSeed()) => {
-  const storage = memoryStorage({ ...onboardedProfile(), ...seed })
+  const storage = memoryStorage({ ...onboardedProfile(), ...drawerPref(), ...seed })
   const device = stubDevice()
   const clock = fakeClock()
   const r = await render(<AppRoot storage={storage} device={device} clock={clock} scheme="light" />)

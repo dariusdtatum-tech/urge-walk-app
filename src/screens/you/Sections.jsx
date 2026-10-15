@@ -19,6 +19,7 @@ import { Field } from '../../ui/Field.jsx'
 import { KeptCard } from '../home/KeptCard.jsx'
 import { Card, GroupTitle, Row, ToggleRow } from '../../ui/Row.jsx'
 import { Seg } from '../../ui/Seg.jsx'
+import { loadSwitcher, saveSwitcher } from '../../lib/switcher.js'
 import { Sheet } from '../../ui/Sheet.jsx'
 import { Stepper } from '../../ui/Stepper.jsx'
 import { T } from '../../ui/Text.jsx'
@@ -107,7 +108,20 @@ function AppearanceSection({ c, storage, theme, onTheme, verseOn, setVerseOn, se
       <ToggleRow title="App lock" sub={appLock ? 'Face ID or your passcode when you open Urge Walk. 988 stays one tap away.' : 'Off. Ask for Face ID or your passcode when you open Urge Walk.'}
         value={appLock} testID="app-lock-toggle" onChange={changeAppLock} />
       {appLockNote ? <T size={type.sub} color={c.textSoft} accessibilityRole="alert" testID="app-lock-note">{appLockNote}</T> : null}
+      <SwitcherPicker c={c} storage={storage} />
     </>
+  )
+}
+
+// Tracker switcher: how tapping the tracker name on Home opens your trackers. Sheet is the default.
+function SwitcherPicker({ c, storage }) {
+  const [style, setStyle] = useState(() => loadSwitcher(storage))
+  return (
+    <View style={{ gap: 6 }} testID="switcher-setting">
+      <T font="semibold" size={type.rowTitle} color={c.title}>Tracker switcher</T>
+      <Seg items={[{ id: 'drawer', label: 'Drawer' }, { id: 'sheet', label: 'Sheet' }]} value={style} onChange={(v) => { saveSwitcher(v, storage); setStyle(v) }} label="Tracker switcher" testID="switcher" small />
+      <T size={type.sub} color={c.textSoft}>{style === 'sheet' ? 'Tap the tracker name on Home to open a sheet from the bottom.' : 'Tap the tracker name on Home, or swipe in from the left edge, to open a side drawer.'}</T>
+    </View>
   )
 }
 

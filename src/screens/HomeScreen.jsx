@@ -16,7 +16,8 @@ import { HeroPager } from './home/HeroPager.jsx'
 import { MilestoneSheet } from './home/Milestones.jsx'
 import { CheckInCard } from './CheckInSheet.jsx'
 import { FirstWeekCard } from './home/FirstWeekCard.jsx'
-import { DrawerPeek, drawerWidth, TrackerDrawer } from './home/TrackerDrawer.jsx'
+import { DrawerPeek, drawerWidth, TrackerDrawer, TrackerSheet } from './home/TrackerDrawer.jsx'
+import { loadSwitcher } from '../lib/switcher.js'
 import { useReducedMotion } from '../ui/motion.js'
 import { ReachOut } from './ReachOut.jsx'
 import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
@@ -50,7 +51,12 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
   const editor = useTrackerEditor({ today, now: clock, onOpenBackup, onMilestones: storeMilestones })
   const { habits, notice, setNotice, sheet, setSheet, hero, activeId, setActive } = editor
   const [celebrations, setCelebrations] = useState([])
-  const [drawer, setDrawer] = useState(null) // null | { fromX? }
+  const [drawer, setDrawer] = useState(null) // null | { fromX? }   (the drawer)
+  const [trackerSheet, setTrackerSheet] = useState(false) // the bottom-sheet switcher (default)
+  const [switcher] = useState(() => loadSwitcher(storage))
+  // Title tap and the a11y action open whichever switcher You → Appearance and lock picked; the
+  // left-edge swipe always opens the drawer (it's a drawer gesture).
+  const openSwitcher = () => (switcher === 'drawer' ? setDrawer({}) : setTrackerSheet(true))
   const reduced = useReducedMotion()
   const { width: screenW } = useWindowDimensions()
   const panelW = drawerWidth(screenW)
@@ -94,6 +100,7 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
   // Closing the drawer puts screen-reader focus back on the title that opened it.
   const closeDrawer = (then) => {
     setDrawer(null)
+    setTrackerSheet(false)
     // After the modal is gone (iOS needs a beat), move VoiceOver / TalkBack focus back to the title.
     setTimeout(() => {
       const el = titleRef.current
@@ -128,8 +135,8 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
     <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="home">
       <View style={{ gap: 2 }}>
         <T font="medium" size={15} color={c.muted}>{dateLine}</T>
-        <Pressable ref={titleRef} onPress={() => setDrawer({})} testID="home-title" accessibilityRole="button"
-          accessibilityActions={[{ name: 'activate' }, { name: 'openTrackers', label: 'Open trackers' }]} onAccessibilityAction={() => setDrawer({})}
+        <Pressable ref={titleRef} onPress={openSwitcher} testID="home-title" accessibilityRole="button"
+          accessibilityActions={[{ name: 'activate' }, { name: 'openTrackers', label: 'Open trackers' }]} onAccessibilityAction={openSwitcher}
           accessibilityLabel={hero ? `${hero.name}. ${habits.length > 1 ? 'Switch or edit trackers' : 'Your trackers'}` : 'Your trackers'}
           style={{ minHeight: 44, flexDirection: 'row', alignItems: 'center', gap: 6, alignSelf: 'flex-start' }}>
           <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title} numberOfLines={2} style={{ flexShrink: 1 }}>{hero ? hero.name : 'Home'}</T>
@@ -176,15 +183,18 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
       <FirstWeekCard now={now} onStep={(id) => (id === 'start' ? setSheet({ mode: 'add' }) : onFirstWeek(id))} />
       <CheckInCard today={today} onOpen={onCheckIn} />
 
-      {drawer ? (
-        <TrackerDrawer fromX={drawer.fromX ?? null} habits={habits} activeId={activeId} today={today} now={now} onClose={() => closeDrawer()}
-          onSelect={(id) => closeDrawer(() => setActive(id))}
-          onEdit={(habit) => closeDrawer(() => setSheet({ mode: 'edit', habit, from: 'manage' }))}
-          onManage={() => closeDrawer(() => setSheet({ mode: 'manage' }))}
-          onAdd={() => closeDrawer(() => setSheet({ mode: 'add' }))}
-          onReachOut={() => closeDrawer(() => setPanel('reach'))}
-          onBackup={() => closeDrawer(onOpenBackup)} />
-      ) : null}
+      {drawer || trackerSheet ? (() => {
+        const Switcher = drawer ? TrackerDrawer : TrackerSheet
+        return (
+          <Switcher {...(drawer ? { fromX: drawer.fromX ?? null } : {})} habits={habits} activeId={activeId} today={today} now={now} onClose={() => closeDrawer()}
+            onSelect={(id) => closeDrawer(() => setActive(id))}
+            onEdit={(habit) => closeDrawer(() => setSheet({ mode: 'edit', habit, from: 'manage' }))}
+            onManage={() => closeDrawer(() => setSheet({ mode: 'manage' }))}
+            onAdd={() => closeDrawer(() => setSheet({ mode: 'add' }))}
+            onReachOut={() => closeDrawer(() => setPanel('reach'))}
+            onBackup={() => closeDrawer(onOpenBackup)} />
+        )
+      })() : null}
       {panel === 'reach' ? (
         <Sheet onClose={() => setPanel(null)} title="Reach out" testID="home-reach-sheet" right={<HeaderButton label="Done" onPress={() => setPanel(null)} testID="home-reach-done" />}>
           <ReachOut testID="home-reach" title="" onSetup={() => { setPanel(null); onOpenYou('contacts') }} />
@@ -197,7 +207,7 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
       {editor.sheets}
     </ScrollView>
     {peeking ? <DrawerPeek x={peekX} width={panelW} habits={habits} activeId={activeId} today={today} now={now} /> : null}
-    {!drawer ? <View {...edge.panHandlers} testID="home-edge" accessibilityElementsHidden importantForAccessibility="no"
+    {!drawer && !trackerSheet ? <View {...edge.panHandlers} testID="home-edge" accessibilityElementsHidden importantForAccessibility="no"
       style={{ position: 'absolute', top: 0, bottom: 0, left: 0, width: EDGE_ZONE }} /> : null}
     </View>
   )

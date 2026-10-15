@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, useWindowDimensions, View } from 'react-native'
+import { HeaderButton } from '../ui/Sheet.jsx'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { STACK_FONT_SCALE, useReducedMotion } from '../ui/motion.js'
 import { loadProfile } from '../lib/profile.js'
@@ -51,8 +52,15 @@ export function RideSheet({ visible, onWalk, onBreathe, onGround, onLog, onClose
           <View testID="ride-sheet" accessibilityViewIsModal style={{ backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: sheetMaxHeight(win.height, insets.top) }}>
             <ScrollView contentContainerStyle={{ padding: space.sheet, paddingBottom: 34 + insets.bottom, gap: space.section }} keyboardShouldPersistTaps="handled">
               <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: c.grab }} />
-              <T accessibilityRole="header" font="serif" size={type.rideSheetTitle} color={c.title}>Ride it out</T>
-              {why && !logging ? <T font="serifItalic" size={type.why} color={c.title} testID="ride-why">“{why}”</T> : null}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+                <T accessibilityRole="header" font="serif" size={type.rideSheetTitle} color={c.title} style={{ flex: 1 }}>Ride it out</T>
+                <HeaderButton label="✕" accessibilityLabel="Close" onPress={close} testID="ride-close" />
+              </View>
+              {why && !logging ? (
+                <View style={{ alignSelf: 'flex-start', backgroundColor: c.sand, borderRadius: 18, paddingHorizontal: 14, paddingVertical: 8 }} testID="ride-why-pill">
+                  <T font="serifItalic" size={type.why} color={c.title} testID="ride-why">“{why}”</T>
+                </View>
+              ) : null}
               {!logging ? (
                 <>
                   <View style={{ flexDirection: stack ? 'column' : 'row', gap: 12 }} testID="ride-tiles">

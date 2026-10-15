@@ -3,7 +3,8 @@ import { StyleSheet } from 'react-native'
 import { AppRoot } from '../AppRoot.jsx'
 import { sheetMaxHeight } from '../screens/RideSheet.jsx'
 import { avgChip } from '../screens/home/WalksCard.jsx'
-import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0 } from './helpers.js'
+import { drawerPref, fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice, T0, youEl } from './helpers.js'
+import { PILL_HEIGHT } from '../screens/home/TrackerDrawer.jsx'
 
 const renderApp = async (extra = {}, scheme = 'light') => {
   const storage = memoryStorage({ ...habitsSeed(), ...onboardedProfile(), ...extra })
@@ -32,5 +33,66 @@ describe('Your walks', () => {
     expect(avgChip(450)).toMatchObject({ n: 8, label: 'Avg walk', sub: 'minutes', a11y: 'Average walk 8 minutes' })
     expect(avgChip(20)).toMatchObject({ n: 1, sub: 'minute' })
     expect(avgChip(null)).toMatchObject({ n: '–', label: 'Avg walk' })
+  })
+})
+
+const two = { 'urgewalk.v1.habits': JSON.stringify({ habits: [{ id: 'h1', name: 'Habit A', startDate: '2029-12-02' }, { id: 'h2', name: 'Habit B', startDate: '2030-04-01' }] }) }
+const tab = async (name) => { await act(async () => { fireEvent.press(screen.getByTestId(`tab-${name}`)) }) }
+
+describe('tracker switcher: bottom sheet by default, drawer behind the setting', () => {
+  test('title tap opens the sheet: grabber, 44x44 close, 48pt side-by-side pills, Reach out badge first, Back up pill', async () => {
+    await renderApp(two)
+    await act(async () => { fireEvent.press(screen.getByTestId('home-title')) })
+    expect(screen.getByTestId('tracker-sheet')).toBeTruthy()
+    expect(screen.queryByTestId('drawer')).toBeNull()
+    expect(screen.getByTestId('tracker-sheet-grabber')).toBeTruthy()
+    const x = StyleSheet.flatten(screen.getByTestId('tracker-sheet-close').props.style)
+    expect(x.minHeight).toBeGreaterThanOrEqual(44); expect(x.minWidth).toBeGreaterThanOrEqual(44)
+    for (const id of ['drawer-add', 'home-edit']) {
+      const st = StyleSheet.flatten(screen.getByTestId(id).props.style)
+      expect(st.minHeight).toBe(PILL_HEIGHT); expect(st.flex).toBe(1)
+    }
+    expect(PILL_HEIGHT).toBe(48)
+    expect(screen.getByTestId('drawer-reach-badge')).toBeTruthy()
+    expect(screen.getByTestId('drawer-reach')).toHaveTextContent(/988/)
+    await act(async () => { fireEvent.press(screen.getByTestId('drawer-tracker-h2')) })
+    expect(screen.queryByTestId('tracker-sheet')).toBeNull()
+    expect(screen.getByTestId('home-title')).toHaveTextContent(/Habit B/)
+  })
+  test('the X and the backdrop close it; the a11y action opens it too', async () => {
+    await renderApp(two)
+    await act(async () => { fireEvent.press(screen.getByTestId('home-title')) })
+    await act(async () => { fireEvent.press(screen.getByTestId('tracker-sheet-close')) })
+    expect(screen.queryByTestId('tracker-sheet')).toBeNull()
+    await act(async () => { fireEvent(screen.getByTestId('home-title'), 'accessibilityAction', { nativeEvent: { actionName: 'openTrackers' } }) })
+    await act(async () => { fireEvent.press(screen.getByTestId('tracker-sheet-backdrop', { includeHiddenElements: true })) })
+    expect(screen.queryByTestId('tracker-sheet')).toBeNull()
+  })
+  test('You > Appearance and lock: Tracker switcher Drawer / Sheet, default Sheet, persisted', async () => {
+    const storage = await renderApp(two)
+    await tab('you')
+    expect((await youEl(screen, fireEvent, 'switcher-setting'))).toHaveTextContent(/Tracker switcher/)
+    expect(screen.getByTestId('switcher-sheet').props.accessibilityState).toMatchObject({ checked: true })
+    await act(async () => { fireEvent.press(screen.getByTestId('switcher-drawer')) })
+    expect(JSON.parse(storage.getItem('urgewalk.v1.switcherPrefs'))).toEqual({ style: 'drawer' })
+  })
+  test('with Drawer picked, the title opens the drawer', async () => {
+    await renderApp({ ...two, ...drawerPref() })
+    await act(async () => { fireEvent.press(screen.getByTestId('home-title')) })
+    expect(screen.getByTestId('drawer')).toBeTruthy()
+    expect(screen.queryByTestId('tracker-sheet')).toBeNull()
+  })
+})
+
+describe('Ride it out sheet extras', () => {
+  test('44x44 close, the reason in a sand pill, and the 988 row above the tip', async () => {
+    await renderApp(onboardedProfile({ why: 'Clear head' }))
+    await act(async () => { fireEvent.press(screen.getByTestId('ride-button')) })
+    const x = StyleSheet.flatten(screen.getByTestId('ride-close').props.style)
+    expect(x.minHeight).toBeGreaterThanOrEqual(44); expect(x.minWidth).toBeGreaterThanOrEqual(44)
+    expect(screen.getByTestId('ride-why-pill')).toHaveTextContent('“Clear head”')
+    expect(screen.getByTestId('ride-reach-988')).toHaveTextContent(/988 Lifeline/)
+    await act(async () => { fireEvent.press(screen.getByTestId('ride-close')) })
+    expect(screen.queryByTestId('ride-tip')).toBeNull()
   })
 })
