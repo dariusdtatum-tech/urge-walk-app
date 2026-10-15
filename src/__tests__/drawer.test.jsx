@@ -429,10 +429,26 @@ describe('ring pager swipe, and how it shares Home with the edge swipe', () => {
 describe('your reason on Home', () => {
   const R = (list, lock = false) => ({ 'urgewalk.v1.reasons': JSON.stringify({ version: 1, reasons: list, next: 0, lock }) })
   const txt = (id, text, at) => ({ id, kind: 'text', text, at })
-  it('no reasons: nothing, and no empty prompt', async () => {
+  it('no reasons: nothing, and no empty prompt; the page dots stand alone with no card around them', async () => {
     await renderApp()
     expect(screen.queryByTestId('home-reason')).toBeNull()
     expect(screen.queryByText(/reason/i)).toBeNull()
+    expect(screen.queryByTestId('hero-card')).toBeNull()
+    expect(screen.getByTestId('hero-tabs')).toBeTruthy()
+  })
+  it('regression: a "Your why" answer saved in setup shows in the card even with no reasons in the list', async () => {
+    await renderApp({ ...habitsSeed(), ...onboardedProfile({ why: 'Setup words' }) })
+    expect(within(screen.getByTestId('hero-card')).getByTestId('home-reason-text')).toHaveTextContent('“Setup words”')
+    expect(within(screen.getByTestId('hero-card')).getByTestId('hero-tabs')).toBeTruthy()
+  })
+  it('regression: a saved reason wins over the setup answer and shows in the card', async () => {
+    await renderApp({ ...habitsSeed(), ...onboardedProfile({ why: 'Setup words' }), ...R([txt('a', 'Saved words', '2030-01-01T00:00:00.000Z')]) })
+    expect(within(screen.getByTestId('hero-card')).getByTestId('home-reason-text')).toHaveTextContent('“Saved words”')
+  })
+  it('locked reasons hide the setup answer on Home too', async () => {
+    await renderApp({ ...habitsSeed(), ...onboardedProfile({ why: 'Setup words' }), ...R([], true) })
+    expect(screen.queryByTestId('home-reason')).toBeNull()
+    expect(screen.queryByTestId('hero-card')).toBeNull()
   })
   it('shows the most recently added reason, fixed (not rotating, no "Today"), just above the next-milestone line', async () => {
     await renderApp({ ...habitsSeed(), ...R([txt('a', 'Older words', '2030-01-01T00:00:00.000Z'), txt('b', 'Newest words', '2030-04-01T00:00:00.000Z'), txt('c', 'Middle words', '2030-02-01T00:00:00.000Z')]) })
@@ -441,7 +457,10 @@ describe('your reason on Home', () => {
     // Gemini layout: the reason sits in the card below the ring, with the page dots; the next-milestone line is inside the ring.
     expect(within(screen.getByTestId('hero-card')).getByTestId('home-reason')).toBeTruthy()
     expect(within(screen.getByTestId('hero-card')).getByTestId('hero-tabs')).toBeTruthy()
-    expect(within(screen.getByTestId('hero-ring')).getByTestId('ring-label')).toBeTruthy()
+    // The next-milestone line sits under the ring, never inside it (it clipped into the ring on iPhone).
+    expect(within(screen.getByTestId('hero-ring')).queryByTestId('ring-label')).toBeNull()
+    expect(within(screen.getByTestId('hero-ring')).queryByText(/days to/)).toBeNull()
+    expect(screen.getByTestId('ring-label')).toHaveTextContent(/days to/)
   })
   it('the same reason on another day', async () => {
     const seed = { ...habitsSeed(), ...R([txt('a', 'One', '2030-01-01T00:00:00.000Z'), txt('b', 'Two', '2030-03-01T00:00:00.000Z')]) }

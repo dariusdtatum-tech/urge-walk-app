@@ -298,7 +298,7 @@ describe('Dynamic Type', () => {
     await renderApp()
     expect(screen.getByTestId('hero-days').props.maxFontSizeMultiplier).toBe(MAX_SCALE.ring)
     expect(MAX_SCALE.ring).toBeLessThanOrEqual(1.3)
-    expect(screen.getByTestId('ring-label').props.maxFontSizeMultiplier).toBeLessThanOrEqual(MAX_SCALE.ringSmall) // inside the ring's lower arc now
+    expect(screen.getByTestId('ring-label').props.maxFontSizeMultiplier).toBe(2) // under the ring, free to grow
     for (const el of screen.getAllByText('Ride it out', { exact: true })) expect(el.props.maxFontSizeMultiplier).toBeLessThanOrEqual(2)
     expect(screen.getByText(/^since /).props.maxFontSizeMultiplier).toBeLessThanOrEqual(1.3)
   })

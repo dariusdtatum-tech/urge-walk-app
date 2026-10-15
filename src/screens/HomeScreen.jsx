@@ -26,8 +26,8 @@ import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 // Home holds at most four things (Option C v2, written down in AGENTS.md and enforced by a test):
 //   1. the title, a 44pt pill that is the tracker switcher (tap: bottom sheet by default, or the drawer
 //      if picked in You → Appearance and lock; swiping in from the left edge always opens the drawer)
-//   2. the ring (two pages: milestone ring with the next-milestone line inside its lower arc / clean time
-//      + milestone cards), with the page dots and your most recent reason in one card below it
+//   2. the ring (two pages: milestone ring with the next-milestone line under it / clean time
+//      + milestone cards), with the page dots and your reason in one card below it (dots alone if none)
 //   3. check-in
 //   4. a quiet "Hold the center button for a quick walk" hint
 // Ride it out is the raised center tab button only (Gemini review: one trigger), always one tap.

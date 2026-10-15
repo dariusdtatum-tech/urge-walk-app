@@ -70,3 +70,16 @@ describe('reasons vault', () => {
     expect(REASONS_KEY).toBe('urgewalk.v1.reasons')
   })
 })
+
+describe('homeReasonOf', () => {
+  test('latest saved reason, else the setup why, else null; never while locked', async () => {
+    const { homeReasonOf } = await import('./reasons.js')
+    const d = (reasons, lock = false) => ({ version: 1, reasons, next: 0, lock })
+    const r = { id: 'a', kind: 'text', text: 'Saved', at: '2030-01-01T00:00:00.000Z' }
+    expect(homeReasonOf(d([r]), { why: 'Setup' })).toBe(r)
+    expect(homeReasonOf(d([]), { why: '  Setup  ' })).toMatchObject({ kind: 'text', text: 'Setup' })
+    expect(homeReasonOf(d([]), { why: '' })).toBeNull()
+    expect(homeReasonOf(d([]), null)).toBeNull()
+    expect(homeReasonOf(d([r], true), { why: 'Setup' })).toBeNull()
+  })
+})

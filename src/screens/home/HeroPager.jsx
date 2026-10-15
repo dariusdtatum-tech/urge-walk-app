@@ -5,7 +5,7 @@ import { Ring } from '../../ui/Ring.jsx'
 import { T } from '../../ui/Text.jsx'
 import { MAX_SCALE, size as sz, type, useTheme } from '../../ui/theme.js'
 import { Badge } from './Milestones.jsx'
-import { HomeReason } from '../Reasons.jsx'
+import { HomeReason, useHomeReason } from '../Reasons.jsx'
 
 // Home hero, two swipeable pages: 1 = the milestone ring + label (no rotating quote: your why is
 // permanent and already shows under the date as your identity line),
@@ -19,6 +19,7 @@ export function HeroPager({ hero, days, since, segment, label, milestones, today
   const track = useRef(null)
   const ct = { ...cleanTime(hero, now), days }
   const cards = milestoneCards(hero, milestones, today)
+  const reason = useHomeReason(profile)
 
   function go(i) {
     setPage(i)
@@ -58,11 +59,6 @@ export function HeroPager({ hero, days, since, segment, label, milestones, today
                 accessibilityLabel={`${days} ${days === 1 ? 'day' : 'days'} clean`} style={{ lineHeight: type.ringDays + 4, fontVariant: ['lining-nums', 'tabular-nums'] }}>{days.toLocaleString()}</T>
               <T font="serif" size={type.ringLabel} max={MAX_SCALE.ringSmall} color={c.title}>{days === 1 ? 'day clean' : 'days clean'}</T>
               <T size={12} max={MAX_SCALE.ringSmall} color={c.muted}>{since}</T>
-              {/* The next-milestone line sits in the ring's lower arc. */}
-              <T size={12} max={MAX_SCALE.ringSmall} color={c.muted} testID="ring-label" numberOfLines={2} accessibilityLabel={`${label.lead}${label.rest}`}
-                style={{ textAlign: 'center', marginTop: 6 }}>
-                <T font="bold" size={12} max={MAX_SCALE.ringSmall} color={c.title}>{label.lead}</T>{label.rest}
-              </T>
             </Ring>
           </View>
           <View style={pageStyle} testID="clean-time" importantForAccessibility={page === 1 ? 'auto' : 'no-hide-descendants'} accessibilityElementsHidden={page !== 1}>
@@ -76,10 +72,18 @@ export function HeroPager({ hero, days, since, segment, label, milestones, today
         </ScrollView>
       </View>
       {page === 0 ? (
-        // One card holds the page dots and your reason, so it's clear what the swipe moves.
-        <View testID="hero-card" style={{ alignItems: 'center', gap: 4, backgroundColor: c.card, borderRadius: 20, borderWidth: 1, borderColor: c.border, paddingHorizontal: 16, paddingVertical: 8 }}>
-          {dotsRow}
-          <HomeReason onOpen={onOpenReason} />
+        <View style={{ gap: 10 }}>
+          {/* The next-milestone line sits under the ring (never inside it: it clipped into the ring on iPhone). */}
+          <T size={15} color={c.muted} testID="ring-label" style={{ textAlign: 'center' }}>
+            <T font="bold" size={15} color={c.title}>{label.lead}</T>{label.rest}
+          </T>
+          {reason ? (
+            // One card holds the page dots and your reason, so it's clear what the swipe moves.
+            <View testID="hero-card" style={{ alignItems: 'center', gap: 4, backgroundColor: c.card, borderRadius: 20, borderWidth: 1, borderColor: c.border, paddingHorizontal: 16, paddingVertical: 8 }}>
+              {dotsRow}
+              <HomeReason reason={reason} onOpen={onOpenReason} />
+            </View>
+          ) : dotsRow}
         </View>
       ) : (
         <View style={{ flexDirection: 'row', gap: 10 }} testID="milestone-cards">

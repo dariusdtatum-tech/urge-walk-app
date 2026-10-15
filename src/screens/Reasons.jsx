@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Animated, Image, Pressable, View } from 'react-native'
 import {
-  latestReason, loadReasons,
+  homeReasonOf,
   MAX_REASONS, MAX_REASON_TEXT, MAX_VOICE_MS, addReason, formatVoiceLength, loadReasonsData, removeReason, setReasonsLock, takeNextReason,
 } from '../lib/reasons.js'
 import { Button } from '../ui/Button.jsx'
@@ -145,13 +145,19 @@ export function ReasonsSheet({ onClose }) {
 // Home: your reason, quietly, above the next-milestone line. Fixed (the most recent one), no "Today"
 // label, nothing when there are none, nothing when reasons are locked with Face ID. Tapping it opens
 // You → Your why. A voice note gets its own small Play button.
-export function HomeReason({ onOpen }) {
+// Home's reason (see homeReasonOf). The caller reads it once with useHomeReason and passes it in, so it
+// can drop the card around the page dots when there's nothing to show.
+export function useHomeReason(profile) {
   const storage = useStorage()
+  const [reason] = useState(() => homeReasonOf(loadReasonsData(storage), profile))
+  return reason
+}
+
+export function HomeReason({ reason, onOpen }) {
   const device = useDevice()
   const { c } = useTheme()
-  const [{ reason, lock }] = useState(() => ({ reason: latestReason(loadReasons(storage)), lock: loadReasonsData(storage).lock }))
   useEffect(() => () => device.stopPlaying(), [device])
-  if (!reason || lock) return null
+  if (!reason) return null
   const label = reason.kind === 'photo' ? 'Your reason: a photo you saved' : reason.kind === 'voice' ? `Your reason: a voice note, ${formatVoiceLength(reason.durationMs)}` : `Your reason: ${reason.text}`
   return (
     <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10, alignSelf: 'stretch' }} testID="home-reason">

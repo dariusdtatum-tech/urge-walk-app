@@ -49,6 +49,16 @@ export function latestReason(reasons) {
   return best
 }
 
+// What Home shows under the ring: the most recently added reason; if the list is empty, the "Your why"
+// answer from setup (profile.why, the same words Ride it out shows). Nothing while reasons are locked.
+export function homeReasonOf(data, profile) {
+  if (!data || data.lock) return null
+  const latest = latestReason(data.reasons)
+  if (latest) return latest
+  const why = cleanText(profile?.why)
+  return why ? { id: 'setup-why', kind: 'text', text: why, at: '' } : null
+}
+
 // Returns { ok, error, reason }.
 export function addReason(storage, reason, now = new Date()) {
   const data = loadReasonsData(storage)
