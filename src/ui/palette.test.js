@@ -18,6 +18,8 @@ const TEXT_PAIRS = [
   ['toastText', 'toastBg'], ['toastAct', 'toastBg'], ['mutedSand', 'seg'], ['onActionSoft', 'action'],
   // Phase 1: text on the hold button's sea-glass fill
   ['title', 'holdFill'],
+  // Daily verse card
+  ['verseLabel', 'verseBg'], ['verseText', 'verseBg'], ['verseRef', 'verseBg'],
 ]
 describe.each(['light', 'dark'])('%s palette meets WCAG AA', (s) => {
   it.each(TEXT_PAIRS)('%s on %s ≥ 4.5', (fg, bg) => {
@@ -27,4 +29,10 @@ describe.each(['light', 'dark'])('%s palette meets WCAG AA', (s) => {
 it('deep sea #3f7a6b is never paired with sand as text', () => {
   expect(ratio('#3f7a6b', palette.light.sand)).toBeLessThan(4.5)
   expect(palette.light.mutedSand.toLowerCase()).not.toBe('#3f7a6b')
+})
+
+it('verse reference colour is the navy/cream at 70% blended on the card', () => {
+  const blend = (f, b, a) => '#' + [1, 3, 5].map((i) => Math.round(a * parseInt(f.slice(i, i + 2), 16) + (1 - a) * parseInt(b.slice(i, i + 2), 16)).toString(16).padStart(2, '0')).join('')
+  expect(palette.light.verseRef).toBe(blend('#24395c', '#faf7f1', 0.7))
+  expect(palette.dark.verseRef).toBe(blend('#f3ede2', '#182b47', 0.7))
 })

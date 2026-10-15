@@ -6,6 +6,8 @@ export const light = {
   surface: '#fdfbf7',
   border: '#e4dccd',
   fieldBorder: '#8d8778',
+  // Daily verse card (You, opt-in)
+  verseBg: '#faf7f1', verseBorder: '#f1ebe0', verseLabel: '#3f7a6b', verseText: '#24395c', verseRef: '#647289', // ref = navy at 70% on cream
   card: '#fdfbf7',
   cardBorder: '#e4dccd',
   sand: '#f1ebe0',
@@ -51,6 +53,7 @@ export const dark = {
   surface: '#182b47',
   border: '#2a3f60',
   fieldBorder: '#6b7d99',
+  verseBg: '#182b47', verseBorder: 'rgba(255,255,255,0.08)', verseLabel: '#a9cbc0', verseText: '#f3ede2', verseRef: '#b1b3b4', // ref = cream at 70% on night
   card: '#182b47',
   cardBorder: '#2a3f60',
   sand: '#1d3150',
