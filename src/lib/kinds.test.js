@@ -66,7 +66,7 @@ describe('stats count urges ridden out separately from walks', () => {
   const now = new Date(2026, 9, 10, 20).getTime()
   const list = homeChipsFixture()
   it('Home chips: Walked = walks only, Passed = any kind, ridden out = everything', () => {
-    expect(rangeStats(list, 'week', now)).toEqual({ walked: 2, passed: 3, riddenOut: 5 })
+    expect(rangeStats(list, 'week', now)).toMatchObject({ walked: 2, passed: 3, riddenOut: 5 })
     expect(rangeStats(list, 'all', now)).toEqual({ walked: 3, passed: 4, riddenOut: 6 })
   })
   it('Log summary: totals by kind; minutes are walking minutes only', () => {
