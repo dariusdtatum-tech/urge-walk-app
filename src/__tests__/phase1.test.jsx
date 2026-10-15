@@ -475,3 +475,79 @@ describe('Gemini r5: follow-ups never outlive their urge', () => {
     expect(screen.getByText('Stays covered on Walk and Breathe until you unlock it.')).toBeTruthy()
   })
 })
+
+describe('optional whole-app lock', () => {
+  const lockedStorage = () => memoryStorage({ ...habitsSeed(), ...onboardedProfile(), 'urgewalk.v1.appLock': JSON.stringify({ enabled: true }) })
+  const spyAppState = () => {
+    const handlers = new Set()
+    jest.spyOn(AppState, 'addEventListener').mockImplementation((_e, f) => { handlers.add(f); return { remove() { handlers.delete(f) } } })
+    return async (s) => { await act(async () => { handlers.forEach((f) => f(s)) }) }
+  }
+
+  test('off by default: no cover, no prompt', async () => {
+    const { device } = await renderApp()
+    expect(screen.queryByTestId('lock-cover')).toBeNull()
+    expect(device.calls.appAuths).toBe(0)
+    await tab('You')
+    expect(screen.getByTestId('app-lock-toggle').props.value).toBe(false)
+  })
+
+  test('turning it on needs a successful check first', async () => {
+    let result = { ok: false, reason: 'failed' }
+    const device = stubDevice({ appAuth: () => result })
+    const { storage } = await renderApp({ device })
+    await tab('You')
+    await act(async () => { fireEvent(screen.getByTestId('app-lock-toggle'), 'valueChange', true) })
+    expect(screen.getByTestId('app-lock-note')).toHaveTextContent('That didn’t unlock. You can try again.')
+    expect(screen.getByTestId('app-lock-toggle').props.value).toBe(false)
+    expect(storage.getItem('urgewalk.v1.appLock')).toBeFalsy()
+    result = { ok: false, reason: 'unavailable' }
+    await act(async () => { fireEvent(screen.getByTestId('app-lock-toggle'), 'valueChange', true) })
+    expect(screen.getByTestId('app-lock-note')).toHaveTextContent(/Set up Face ID or a passcode/)
+    result = { ok: true }
+    await act(async () => { fireEvent(screen.getByTestId('app-lock-toggle'), 'valueChange', true) })
+    expect(screen.getByTestId('app-lock-toggle').props.value).toBe(true)
+    expect(JSON.parse(storage.getItem('urgewalk.v1.appLock')).enabled).toBe(true)
+    expect(screen.queryByTestId('lock-cover')).toBeNull()
+    await act(async () => { fireEvent(screen.getByTestId('app-lock-toggle'), 'valueChange', false) })
+    expect(JSON.parse(storage.getItem('urgewalk.v1.appLock')).enabled).toBe(false)
+    expect(device.calls.appAuths).toBe(3)
+  })
+
+  test('cold start asks; a failed check keeps the cover with Unlock and 988', async () => {
+    let result = { ok: false, reason: 'failed' }
+    const device = stubDevice({ appAuth: () => result })
+    await renderApp({ storage: lockedStorage(), device })
+    await act(async () => {})
+    expect(device.calls.appAuths).toBe(1)
+    expect(screen.getByTestId('lock-cover')).toBeTruthy()
+    expect(screen.getByTestId('lock-error')).toHaveTextContent('That didn’t unlock. You can try again.')
+    expect(screen.getByTestId('lock-988')).toHaveTextContent(/988/)
+    await press('lock-988-call')
+    expect(device.calls.urls).toContain('tel:988')
+    await press('lock-988-text')
+    expect(device.calls.urls).toContain('sms:988')
+    result = { ok: true }
+    await act(async () => { fireEvent.press(screen.getByTestId('lock-unlock')) })
+    expect(screen.queryByTestId('lock-cover')).toBeNull()
+  })
+
+  test('background then active locks again and asks; inactive only hides', async () => {
+    const send = spyAppState()
+    const { device } = await renderApp({ storage: lockedStorage() })
+    await act(async () => {})
+    expect(screen.queryByTestId('lock-cover')).toBeNull()
+    await send('inactive')
+    expect(screen.getByTestId('lock-cover')).toBeTruthy()
+    expect(screen.queryByTestId('lock-unlock')).toBeNull()
+    expect(screen.getByTestId('lock-988')).toBeTruthy()
+    await send('active')
+    expect(screen.queryByTestId('lock-cover')).toBeNull()
+    expect(device.calls.appAuths).toBe(1)
+    await send('background')
+    expect(screen.getByTestId('lock-cover')).toBeTruthy()
+    await send('active')
+    expect(device.calls.appAuths).toBe(2)
+    expect(screen.queryByTestId('lock-cover')).toBeNull()
+  })
+})

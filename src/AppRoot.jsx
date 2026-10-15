@@ -16,6 +16,8 @@ import { appendWalk, buildBreatheRecord, buildLoggedRecord, loadActiveWalk, remo
 import { isEnded } from './lib/walkTimer.js'
 import { withKept } from './lib/money.js'
 import { loadProfile } from './lib/profile.js'
+import { LOCK_ERRORS, loadAppLock, lockView } from './lib/appLock.js'
+import { LockCover } from './screens/LockCover.jsx'
 import { BreatheScreen } from './screens/BreatheScreen.jsx'
 import { BackupScreen } from './screens/BackupScreen.jsx'
 import { HomeScreen } from './screens/HomeScreen.jsx'
@@ -58,6 +60,30 @@ function Shell({ clock, theme, onTheme }) {
   const [journalEditing, setJournalEditing] = useState(false)
   const [focusWalkId, setFocusWalkId] = useState(null)
   const [checkIn, setCheckIn] = useState(false)
+  // Optional app lock (off by default). Locks at cold start and when coming back from the background.
+  const [lockOn, setLockOn] = useState(() => loadAppLock(storage))
+  const [locked, setLocked] = useState(() => loadAppLock(storage))
+  const [appState, setAppState] = useState('active')
+  const [lockError, setLockError] = useState('')
+  const lastAppState = useRef('active')
+  const unlockApp = useCallback(async () => {
+    const r = await device.authenticateApp()
+    if (r?.ok) { setLocked(false); setLockError('') } else setLockError(LOCK_ERRORS[r?.reason] ?? LOCK_ERRORS.failed)
+  }, [device])
+  useEffect(() => { if (loadAppLock(storage)) unlockApp() }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    // Only a real trip to the background re-locks (the Face ID prompt itself makes the app 'inactive').
+    const sub = AppState.addEventListener?.('change', (st) => {
+      const prev = lastAppState.current
+      lastAppState.current = st
+      setAppState(st)
+      if (!loadAppLock(storage)) return
+      if (st === 'background') setLocked(true)
+      if (st === 'active' && prev === 'background') unlockApp()
+    })
+    return () => sub?.remove?.()
+  }, [storage, unlockApp])
+  const lock = lockView({ enabled: lockOn, locked, appState })
   const [followUpFor, setFollowUpFor] = useState(null) // urge id when the follow-up sheet is open
   const breatheId = useRef(null) // the urge id for the Breathe minute in progress
   const screenRef = useRef(screen)
@@ -156,6 +182,7 @@ function Shell({ clock, theme, onTheme }) {
     return (
       <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+        {lock.cover ? <LockCover unlockable={lock.unlockable} error={lockError} onUnlock={unlockApp} /> : null}
         <BackupScreen clock={clock} backLabel="Back" onBack={() => setObBackup(false)}
           onRestored={(text) => {
             setObBackup(false)
@@ -168,6 +195,7 @@ function Shell({ clock, theme, onTheme }) {
     return (
       <View style={{ flex: 1, backgroundColor: c.bg }}>
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+        {lock.cover ? <LockCover unlockable={lock.unlockable} error={lockError} onUnlock={unlockApp} /> : null}
         <Onboarding key={onboarding} mode={onboarding} now={clock()} onRestore={() => setObBackup(true)}
           onCancel={() => { setOnboarding(null); goTo('you') }}
           onDone={() => {
@@ -195,7 +223,7 @@ function Shell({ clock, theme, onTheme }) {
   else {
     body = (
       <YouScreen key={dataVer} now={now} clock={clock} theme={theme} onTheme={onTheme} onOpenBackup={openBackup}
-        onRedo={() => setOnboarding('redo')}
+        onRedo={() => setOnboarding('redo')} onAppLock={setLockOn}
         onErased={() => { onTheme('system'); setToast(null); setScreen('tabs'); setTab('home'); setBackup(false); setOnboarding('new') }} />
     )
   }
@@ -232,6 +260,7 @@ function Shell({ clock, theme, onTheme }) {
           onRide={() => { setCheckIn(false); setDataVer((v) => v + 1); onRide() }} />
       ) : null}
       {followUpFor ? <FollowUpSheet onAnswer={(a) => applyFollowUp(followUpFor, a)} onClose={() => setFollowUpFor(null)} /> : null}
+      {lock.cover ? <LockCover unlockable={lock.unlockable} error={lockError} onUnlock={unlockApp} /> : null}
     </View>
   )
 }

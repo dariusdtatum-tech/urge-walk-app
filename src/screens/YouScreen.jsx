@@ -31,6 +31,7 @@ import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 import { CRISIS, CrisisSheet } from './Crisis.jsx'
 import { ContactsSheet, ReachOut } from './ReachOut.jsx'
 import { ReasonsSheet } from './Reasons.jsx'
+import { LOCK_ERRORS, loadAppLock, saveAppLock } from '../lib/appLock.js'
 import { DailyVerseCard } from './DailyVerse.jsx'
 import { loadVerseEnabled, saveVerseEnabled } from '../lib/verse.js'
 import { MoneySheet } from './MoneySheet.jsx'
@@ -63,7 +64,7 @@ function answers(p) {
 
 // You: help now, trackers + milestones, walk length, time back, your answers + Redo setup,
 // Appearance, Backup & restore, a safe Reset, and the Privacy / Terms / Support links.
-export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup, onRedo, onErased }) {
+export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup, onRedo, onErased, onAppLock = () => {} }) {
   const storage = useStorage()
   const device = useDevice()
   const { c } = useTheme()
@@ -80,6 +81,17 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [showContacts, setShowContacts] = useState(false)
   const [showReasons, setShowReasons] = useState(false)
   const [showMoney, setShowMoney] = useState(false)
+  const [appLock, setAppLock] = useState(() => loadAppLock(storage))
+  const [appLockNote, setAppLockNote] = useState('')
+  // Turning the lock on needs a successful Face ID / passcode check first; turning it off doesn't.
+  async function changeAppLock(on) {
+    setAppLockNote('')
+    if (on) {
+      const r = await device.authenticateApp()
+      if (!r?.ok) { setAppLockNote(LOCK_ERRORS[r?.reason] ?? LOCK_ERRORS.failed); return }
+    }
+    saveAppLock(on, storage); setAppLock(on); onAppLock(on)
+  }
   const [verseOn, setVerseOn] = useState(() => loadVerseEnabled(storage))
   const [verseFade, setVerseFade] = useState(false)
   const reasonCount = loadReasons(storage).length
@@ -156,6 +168,9 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
         <GroupTitle>Your recovery</GroupTitle>
         <Row title="Trackers" sub={habits.length === 0 ? 'Add the date you started' : habits.map((h) => h.name).join(' · ')} testID="trackers-row" onPress={() => setSheet({ mode: 'manage' })} />
         <Row title="Your reasons" sub={reasonCount ? `${reasonCount} saved · one shows when you ride it out` : 'A photo, a voice note, or a few words'} testID="reasons-row" onPress={() => setShowReasons(true)} />
+        <ToggleRow title="App lock" sub={appLock ? 'Face ID or your passcode when you open Urge Walk. 988 stays one tap away.' : 'Off. Ask for Face ID or your passcode when you open Urge Walk.'}
+          value={appLock} testID="app-lock-toggle" onChange={changeAppLock} />
+        {appLockNote ? <T size={type.sub} color={c.textSoft} accessibilityRole="alert" testID="app-lock-note">{appLockNote}</T> : null}
         {hero ? <Row title="Milestones" sub={`${earned === 1 ? '1 earned' : `${earned} earned`} · ${hero.name}`} testID="milestones-row" onPress={() => setSheet({ mode: 'milestones' })} /> : null}
         <Row title="Walk length" sub={`${lengthLabel(prefs)} · for Walk`} testID="walk-length" chevron={showLengths ? '⌃' : '›'} onPress={() => setShowLengths(!showLengths)} />
         {showLengths ? <WalkLengthPicker prefs={prefs} onChange={changePrefs} /> : null}
