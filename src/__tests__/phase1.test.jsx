@@ -1,4 +1,4 @@
-import { act, fireEvent, render, screen, within } from '@testing-library/react-native'
+import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import { AppState } from 'react-native'
 import { AppRoot } from '../AppRoot.jsx'
 import { loadWalks } from '../lib/walkStorage.js'
@@ -402,7 +402,7 @@ describe('daily verse (You, opt-in)', () => {
     expect((await youEl(screen, fireEvent, 'verse-toggle')).props.value).toBe(false)
   })
 
-  test('toggle on (in You → Your why): card at the top of You and with your why on Home; never inside Ride it out', async () => {
+  test('toggle on: card at the top of You with one combined label; never on Home or Ride it out', async () => {
     const { storage } = await renderApp()
     await tab('You')
     await fireEvent((await youEl(screen, fireEvent, 'verse-toggle')), 'valueChange', true)
@@ -416,9 +416,9 @@ describe('daily verse (You, opt-in)', () => {
     expect(screen.getByTestId('daily-verse-ref')).toHaveTextContent(refLine(v))
     expect(JSON.parse(storage.getItem('urgewalk.v1.versePrefs'))).toEqual({ enabled: true })
     await tab('Home')
-    expect(within(screen.getByTestId('why-line')).getByTestId('daily-verse')).toHaveTextContent(v.text, { exact: false })
+    expect(screen.queryByTestId('daily-verse')).toBeNull()
     await press('ride-button')
-    expect(within(screen.getByTestId('ride-sheet')).queryByTestId('daily-verse')).toBeNull()
+    expect(screen.queryByTestId('daily-verse')).toBeNull()
   })
 
   test('toggle off: no verse on Home or You', async () => {

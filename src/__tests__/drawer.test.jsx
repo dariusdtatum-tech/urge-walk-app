@@ -385,14 +385,14 @@ describe('ring pager and Your why fixes (device feedback)', () => {
     expect(screen.queryByTestId('why-reason-setup')).toBeNull()
   })
 
-  it('daily verse: the toggle lives in You → Your why, and the verse shows in the Your why area on Home', async () => {
+  it('daily verse stays where it was: card at the top of You, toggle in Appearance, never on Home', async () => {
     await renderApp({ ...habitsSeed(), 'urgewalk.v1.versePrefs': JSON.stringify({ enabled: true }) })
-    expect(within(screen.getByTestId('why-line')).getByTestId('daily-verse')).toBeTruthy()
-    for (const id of HOME_ITEMS) expect(screen.getByTestId(id)).toBeTruthy()
+    expect(screen.queryByTestId('daily-verse')).toBeNull()
     await tab('You')
     expect(screen.getByTestId('daily-verse')).toBeTruthy()
-    expect(screen.getByTestId('you-why')).toHaveTextContent(/daily verse on/)
-    await press('you-why')
+    expect(screen.getByTestId('you-appearance')).toHaveTextContent(/Daily verse on/)
+    await press('you-appearance')
     expect(screen.getByTestId('verse-toggle').props.value).toBe(true)
   })
+
 })

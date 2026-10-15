@@ -48,12 +48,10 @@ function SupportSection({ c, people, contactsVer, setShowCrisis, setShowContacts
   )
 }
 
-function WhySection({ storage, profile, hero, today, reasonCount, verseOn, setVerseOn, setVerseFade, setShowReasons, setShowMoney, changeProfile, list, showAnswers, setShowAnswers, setAnswer, onRedo }) {
+function WhySection({ storage, profile, hero, today, reasonCount, setShowReasons, setShowMoney, changeProfile, list, showAnswers, setShowAnswers, setAnswer, onRedo }) {
   return (
     <>
       <Row title="Your reasons" sub={reasonCount ? `${reasonCount} saved · one shows when you ride it out` : 'A photo, a voice note, or a few words'} testID="reasons-row" onPress={() => setShowReasons(true)} />
-      <ToggleRow title="Daily verse" sub="One short verse a day on endurance and freedom. Shows on Home with your why, and at the top of You." value={verseOn} testID="verse-toggle"
-        onChange={(on) => { saveVerseEnabled(on, storage); setVerseFade(on); setVerseOn(on) }} />
       <ToggleRow title="Money kept" sub={moneyOn(profile) ? `${fmtMoney(moneyPerTime(profile))} each time${loadGoal(storage)?.name ? ` · toward ${loadGoal(storage).name}` : ''}` : 'Off. A private running total, if it helps.'}
         value={moneyOn(profile)} testID="money-toggle" onChange={(on) => (on ? setShowMoney(true) : changeProfile({ timeBack: { ...(profile.timeBack || { hoursPerTime: 1 }), moneyPerTime: null } }))} />
       {moneyOn(profile) ? <Row title="Money kept settings" sub="Amount and goal" testID="money-row" onPress={() => setShowMoney(true)} /> : null}
@@ -98,10 +96,12 @@ function RemindersSection({ c, storage, device, followUpOn, setFollowUpOn, remin
   )
 }
 
-function AppearanceSection({ c, theme, onTheme, appLock, appLockNote, changeAppLock }) {
+function AppearanceSection({ c, storage, theme, onTheme, verseOn, setVerseOn, setVerseFade, appLock, appLockNote, changeAppLock }) {
   return (
     <>
       <Seg items={THEMES} value={theme} onChange={onTheme} label="Appearance" testID="theme" />
+      <ToggleRow title="Daily verse" sub="One short verse a day on endurance and freedom." value={verseOn} testID="verse-toggle"
+        onChange={(on) => { saveVerseEnabled(on, storage); setVerseFade(on); setVerseOn(on) }} />
       <ToggleRow title="App lock" sub={appLock ? 'Face ID or your passcode when you open Urge Walk. 988 stays one tap away.' : 'Off. Ask for Face ID or your passcode when you open Urge Walk.'}
         value={appLock} testID="app-lock-toggle" onChange={changeAppLock} />
       {appLockNote ? <T size={type.sub} color={c.textSoft} accessibilityRole="alert" testID="app-lock-note">{appLockNote}</T> : null}
