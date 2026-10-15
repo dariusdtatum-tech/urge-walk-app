@@ -21,12 +21,13 @@ import { WalksCard } from './home/WalksCard.jsx'
 import { CheckInCard } from './CheckInSheet.jsx'
 import { MoneyCard } from './home/MoneyCard.jsx'
 import { PatternCard } from './home/PatternCard.jsx'
+import { FirstWeekCard } from './home/FirstWeekCard.jsx'
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
 
 // Home (the PWA's HomeTab): date + Edit, identity line, undo-reset banners, the Ride it out bar, the
 // two-page hero (ring + daily line / clean time + milestone cards), Never zero, Your walks, the calm
 // backup nudge, and one milestone sheet per new milestone.
-export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, onOpenBackup, onCheckIn = () => {} }) {
+export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, onOpenBackup, onCheckIn = () => {}, onFirstWeek = () => {} }) {
   const storage = useStorage()
   const { c } = useTheme()
   const today = todayISO(new Date(now))
@@ -109,6 +110,7 @@ export function HomeScreen({ now, clock = Date.now, onRide, liveWalk, onResume, 
         </View>
       )}
 
+      <FirstWeekCard now={now} onStep={(id) => (id === 'start' ? setSheet({ mode: 'add' }) : onFirstWeek(id))} />
       <CheckInCard today={today} onOpen={onCheckIn} />
       <PatternCard walks={walks} now={now} />
       {hero || walks.length ? <MoneyCard profile={profile} hero={hero} walks={walks} today={today} since={hero ? shortDate(hero.startDate, today) : ''} /> : null}

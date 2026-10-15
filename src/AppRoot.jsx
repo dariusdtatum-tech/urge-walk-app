@@ -135,7 +135,8 @@ function Shell({ clock, theme, onTheme }) {
   useEffect(() => device.onCheckinReminder(() => { if (screenRef.current === 'tabs') setCheckIn(true) }), [device])
   useEffect(() => device.onFollowUp(({ urgeId, action }) => applyFollowUp(urgeId, action)), [device, applyFollowUp])
 
-  const goTo = useCallback((t) => { setFocusWalkId(null); setBackup(false); setTab(t); setNow(clock()); setDataVer((v) => v + 1) }, [clock])
+  const [youOpen, setYouOpen] = useState(null) // a You sheet to open on arrival (first-week path)
+  const goTo = useCallback((t, open = null) => { setYouOpen(open); setFocusWalkId(null); setBackup(false); setTab(t); setNow(clock()); setDataVer((v) => v + 1) }, [clock])
   const backHome = useCallback(() => { setScreen('tabs'); goTo('home') }, [goTo])
   // Launch self-check: at launch and each time the app comes back. Quiet: fixes what it can, shows one calm row in You otherwise.
   const [health, setHealth] = useState([])
@@ -154,6 +155,14 @@ function Shell({ clock, theme, onTheme }) {
   }, [runSelfCheck])
   const exitWalk = useCallback(() => setScreen((s) => (s === 'walk' ? 'tabs' : s)), [])
 
+  // First-week path steps deep-link to the feature.
+  function onFirstWeek(id) {
+    if (id === 'reason' || id === 'contact') goTo('you', id === 'reason' ? 'reasons' : 'contacts')
+    else if (id === 'breathe') { markStress(clock(), storage); breatheId.current = makeId(); setToast(null); setScreen('breathe') }
+    else if (id === 'walk') { startWalkNow(storage, clock(), 5); setToast(null); setScreen('walk') }
+    else if (id === 'checkin') setCheckIn(true)
+    else if (id === 'map') { setTrackView('log'); goTo('track') }
+  }
   function startWalk() {
     startWalkNow(storage, clock())
     markStress(clock(), storage)
@@ -253,7 +262,7 @@ function Shell({ clock, theme, onTheme }) {
   else if (screen === 'ground') body = <GroundScreen clock={clock} onSave={onGroundSaved} onCancel={() => { dropFollowUp(groundId.current); groundId.current = null; backHome() }} />
   else if (screen === 'breathe') body = <BreatheScreen clock={clock} onSave={onBreatheSaved} onCancel={() => { dropFollowUp(breatheId.current); breatheId.current = null; backHome() }} />
   else if (backup) body = <BackupScreen key={dataVer} clock={clock} backLabel={tab === 'you' ? 'You' : 'Home'} onBack={() => { setBackup(false); setDataVer((v) => v + 1) }} />
-  else if (tab === 'home') body = <HomeScreen key={dataVer} now={now} clock={clock} onRide={onRide} liveWalk={!!loadActiveWalk(storage)} onResume={() => setScreen('walk')} onOpenBackup={openBackup} onCheckIn={() => setCheckIn(true)} />
+  else if (tab === 'home') body = <HomeScreen key={dataVer} now={now} clock={clock} onRide={onRide} liveWalk={!!loadActiveWalk(storage)} onResume={() => setScreen('walk')} onOpenBackup={openBackup} onCheckIn={() => setCheckIn(true)} onFirstWeek={onFirstWeek} />
   else if (tab === 'track') {
     body = (
       <TrackScreen key={dataVer} view={trackView} onView={(v) => { setTrackView(v); setFocusWalkId(null) }} now={now} clock={clock} onRide={onRide}
@@ -264,7 +273,7 @@ function Shell({ clock, theme, onTheme }) {
   else {
     body = (
       <YouScreen key={dataVer} now={now} clock={clock} theme={theme} onTheme={onTheme} onOpenBackup={openBackup}
-        onRedo={() => setOnboarding('redo')} onAppLock={setLockOn} health={health}
+        onRedo={() => setOnboarding('redo')} onAppLock={setLockOn} health={health} open={youOpen}
         onErased={() => { onTheme('system'); setToast(null); setScreen('tabs'); setTab('home'); setBackup(false); setOnboarding('new') }} />
     )
   }

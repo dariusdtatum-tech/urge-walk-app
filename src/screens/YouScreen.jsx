@@ -70,7 +70,7 @@ function answers(p) {
 
 // You: help now, trackers + milestones, walk length, time back, your answers + Redo setup,
 // Appearance, Backup & restore, a safe Reset, and the Privacy / Terms / Support links.
-export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup, onRedo, onErased, onAppLock = () => {}, health = [] }) {
+export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup, onRedo, onErased, onAppLock = () => {}, health = [], open = null }) {
   const storage = useStorage()
   const device = useDevice()
   const { c } = useTheme()
@@ -84,8 +84,8 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [answer, setAnswer] = useState(null)
   const [showAnswers, setShowAnswers] = useState(false)
   const [showCrisis, setShowCrisis] = useState(false)
-  const [showContacts, setShowContacts] = useState(false)
-  const [showReasons, setShowReasons] = useState(false)
+  const [showContacts, setShowContacts] = useState(open === 'contacts')
+  const [showReasons, setShowReasons] = useState(open === 'reasons')
   const [showMoney, setShowMoney] = useState(false)
   const [appLock, setAppLock] = useState(() => loadAppLock(storage))
   const [appLockNote, setAppLockNote] = useState('')
