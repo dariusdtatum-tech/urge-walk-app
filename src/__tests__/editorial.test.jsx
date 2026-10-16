@@ -228,3 +228,25 @@ describe('bottom padding audit: every tab screen and You section clears the tab 
     expect(bad).toEqual([])
   })
 })
+
+test('wellness note: quiet line in onboarding and in You → Data and privacy → About, no alarm styling', async () => {
+  const { WELLNESS_NOTE } = require('../lib/wellness.js')
+  expect(WELLNESS_NOTE).toMatch(/self-guided support tool/)
+  expect(WELLNESS_NOTE).toMatch(/not a substitute|isn’t a substitute/)
+  const storage = memoryStorage({})
+  await render(<AppRoot storage={storage} device={stubDevice()} clock={fakeClock()} scheme="light" />)
+  const ob = screen.getByTestId('ob-wellness')
+  expect(ob).toHaveTextContent(WELLNESS_NOTE)
+  const st = StyleSheet.flatten(ob.props.style)
+  expect([palettes.light.muted, palettes.light.textSoft]).toContain(st.color)
+})
+
+test('wellness note in You → Data and privacy → About (dark)', async () => {
+  const { WELLNESS_NOTE } = require('../lib/wellness.js')
+  await renderApp('dark')
+  await tab('You'); await press('you-data')
+  expect(screen.getByText('About')).toBeTruthy()
+  const about = screen.getByTestId('about-wellness')
+  expect(about).toHaveTextContent(WELLNESS_NOTE)
+  expect(StyleSheet.flatten(about.props.style).color).toBe(palettes.dark.textSoft)
+})

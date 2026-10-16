@@ -9,6 +9,7 @@ import {
   emptyProfile, identityLine, IMPORTANCE, improveLabels, labelFor, loadProfile, saveProfile, SUPPORT, supportValid, trackersFromPicks,
 } from '../../lib/profile.js'
 import { loadHabits, makeId, saveHabits } from '../../lib/storage.js'
+import { WELLNESS_NOTE } from '../../lib/wellness.js'
 import { Button } from '../../ui/Button.jsx'
 import { useStorage } from '../../ui/StorageContext.js'
 import { T } from '../../ui/Text.jsx'
@@ -140,6 +141,7 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
         <View style={{ padding: 24, paddingBottom: 24 + insets.bottom, gap: 6 }}>
           <Button label="Begin" onPress={() => setStep(2)} testID="ob-begin" />
           {mode === 'new' ? <Button kind="quiet" label="Restore from a backup" textColor={c.title} onPress={onRestore} testID="ob-restore" /> : null}
+          <T size={13} color={c.muted} style={{ paddingTop: 6 }} testID="ob-wellness">{WELLNESS_NOTE}</T>
         </View>
       </View>
     )

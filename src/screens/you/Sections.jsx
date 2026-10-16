@@ -1,5 +1,6 @@
 // You, split into six sections (Option C). Each is one row on You with a live status line; tapping it
 // opens the section in place, with "‹ You" to go back. State lives in YouScreen and comes in as props.
+import { WELLNESS_NOTE } from '../../lib/wellness.js'
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
 import APP from '../../../app.json'
@@ -185,6 +186,8 @@ function DataSection({ c, storage, device, now, onOpenBackup, setReset, setShowF
           </View>
         ))}
       </View>
+      <SectionLabel>About</SectionLabel>
+      <T size={14} color={c.textSoft} style={{ paddingVertical: 6 }} testID="about-wellness">{WELLNESS_NOTE}</T>
       <Pressable onLongPress={__DEV__ ? () => setDesignCheck(true) : undefined} delayLongPress={3000} testID="app-version"
         accessibilityLabel={`Version ${APP_VERSION}`} style={{ minHeight: 44, justifyContent: 'center', alignSelf: 'flex-start' }}>
         <T size={type.footnote} color={c.muted}>Version {APP_VERSION}</T>
