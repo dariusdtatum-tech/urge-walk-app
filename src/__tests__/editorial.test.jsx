@@ -250,3 +250,16 @@ test('wellness note in You → Data and privacy → About (dark)', async () => {
   expect(about).toHaveTextContent(WELLNESS_NOTE)
   expect(StyleSheet.flatten(about.props.style).color).toBe(palettes.dark.textSoft)
 })
+
+test('fresh install starts empty: onboarding first, nothing seeded, no demo names', async () => {
+  const storage = memoryStorage({})
+  await render(<AppRoot storage={storage} device={stubDevice()} clock={fakeClock()} scheme="light" />)
+  expect(screen.getByTestId('ob-begin')).toBeTruthy()
+  expect(screen.queryByTestId('home')).toBeNull()
+  for (const k of ['urgewalk.v1.habits', 'urgewalk.v1.walks', 'urgewalk.v1.journal', 'urgewalk.v1.reasons', 'urgewalk.v1.contacts', 'urgewalk.v1.profile']) {
+    const v = storage.getItem(k)
+    if (v) expect(JSON.stringify(JSON.parse(v))).not.toMatch(/"(habits|walks|entries|reasons|contacts)":\[\{/)
+  }
+  const all = Array.from({ length: storage.length ?? 0 }, (_, i) => storage.getItem(storage.key(i))).join(' ')
+  expect(all).not.toMatch(/Habit A|Something else|Late-night|demo|sample/i)
+})
