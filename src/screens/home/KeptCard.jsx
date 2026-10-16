@@ -21,7 +21,7 @@ export function KeptCard({ profile, hero, walks, today, onEditMoney = null, flat
     <>
       {kept || onEditMoney ? (
         <Box testID="kept-card" style={{ gap: 8, ...(flat ? { paddingTop: 10 } : null) }}>
-          {!kept ? <T size={13} color={c.muted}>Money kept</T> : null}
+          {!kept && !flat ? <T size={13} color={c.muted}>Money kept</T> : null}
           {kept ? (
             <View testID="kept-money" style={{ gap: 2 }}>
               <T size={13} color={c.muted}>Money kept</T>

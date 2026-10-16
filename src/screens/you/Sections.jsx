@@ -85,6 +85,11 @@ function ProgressSection({ storage, profile, today, walks, changeProfile, setSho
           tb ? { value: tb.hours.toLocaleString(), label: 'hours back, estimated', testID: 'pair-hours' } : { value: String(habits.length), label: habits.length === 1 ? 'tracker' : 'trackers', testID: 'pair-trackers' },
         ]} />
       ) : null}
+      <SectionLabel>Walks</SectionLabel>
+      <RowGroup>
+        <Row title="Walk length" sub={`${lengthLabel(prefs)} · for Walk`} testID="walk-length" chevron={showLengths ? '⌃' : '›'} onPress={() => setShowLengths(!showLengths)} />
+      </RowGroup>
+      {showLengths ? <WalkLengthPicker prefs={prefs} onChange={changePrefs} /> : null}
       <SectionLabel>Trackers</SectionLabel>
       <RowGroup>
         <Row title="Trackers" sub={habits.length === 0 ? 'Add the date you started' : habits.map((h) => h.name).join(' · ')} testID="trackers-row" onPress={() => setSheet({ mode: 'manage' })} />
@@ -98,11 +103,6 @@ function ProgressSection({ storage, profile, today, walks, changeProfile, setSho
       </RowGroup>
       <KeptCard flat profile={profile} hero={hero} walks={walks} today={today} onEditMoney={() => setShowMoney(true)} />
       <TimeBackCard profile={profile} hero={hero} today={today} onChange={changeProfile} />
-      <SectionLabel>Walks</SectionLabel>
-      <RowGroup>
-        <Row title="Walk length" sub={`${lengthLabel(prefs)} · for Walk`} testID="walk-length" chevron={showLengths ? '⌃' : '›'} onPress={() => setShowLengths(!showLengths)} />
-      </RowGroup>
-      {showLengths ? <WalkLengthPicker prefs={prefs} onChange={changePrefs} /> : null}
     </>
   )
 }
@@ -134,7 +134,6 @@ function RemindersSection({ c, storage, device, followUpOn, setFollowUpOn, remin
 function AppearanceSection({ c, storage, theme, onTheme, verseOn, setVerseOn, setVerseFade, appLock, appLockNote, changeAppLock }) {
   return (
     <>
-      <HeroStat value={THEMES.find((t) => t.id === theme)?.label ?? 'System'} label="appearance" sub={appLock ? 'App lock on' : 'App lock off'} testID="appearance-hero" />
       <SectionLabel>Theme</SectionLabel>
       <Seg items={THEMES} value={theme} onChange={onTheme} label="Appearance" testID="theme" />
       <SectionLabel>Home and lock</SectionLabel>

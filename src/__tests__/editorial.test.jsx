@@ -66,7 +66,8 @@ describe.each(['light', 'dark'])('editorial You in %s', (scheme) => {
     await renderApp(scheme)
     await tab('You')
     await press(`you-${id}`)
-    expect(screen.getAllByTestId(/-hero$/).length).toBe(1)
+    // Appearance has no hero: its title says what the screen is, and the theme picker shows the current value
+    expect(screen.queryAllByTestId(/-hero$/).length).toBe(id === 'appearance' ? 0 : 1)
     expect(panels().length).toBeLessThanOrEqual(1)
     expect(boxedRows()).toHaveLength(0)
   })
@@ -170,4 +171,20 @@ test('Track header: Week / Month / All sits in the title row on Log, + New entry
   await press('track-journal')
   expect(within(screen.getByTestId('track-title-row')).getByTestId('journal-new')).toBeTruthy()
   expect(StyleSheet.flatten(screen.getByTestId('journal-new').props.style).minHeight).toBeGreaterThanOrEqual(44)
+})
+
+test('Progress: Walks comes first, above Money kept and Time back; no second Money kept label over Add money estimate; Appearance has a clear title, no System hero', async () => {
+  await renderApp('light')
+  await tab('You')
+  await press('you-progress')
+  const labels = screen.getAllByText(/^(Walks|Trackers|Money kept)$/).map((n) => [].concat(n.props.children).join(''))
+  expect(labels.indexOf('Walks')).toBe(0)
+  expect(labels.filter((l) => l === 'Money kept').length).toBe(2) // the section label and the toggle row title only
+  expect(screen.getByText('Add money estimate')).toBeTruthy()
+  await press('you-back')
+  await press('you-appearance')
+  expect(screen.getByRole('header', { name: 'Appearance and lock' })).toBeTruthy()
+  expect(screen.queryByTestId('appearance-hero')).toBeNull()
+  expect(screen.queryByText('appearance')).toBeNull()
+  expect(screen.getByTestId('theme')).toBeTruthy()
 })
