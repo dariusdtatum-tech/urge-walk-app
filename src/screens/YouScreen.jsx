@@ -224,13 +224,16 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: bottom, gap: 10 }} testID="you">
-        {Section ? (
-          <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -8 }}>
-            <HeaderButton label="‹ You" accessibilityLabel="Back to You" onPress={() => setSection(null)} testID="you-back" />
-          </View>
-        ) : null}
-        <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>{Section ? SECTION_TITLES[section] : 'You'}</T>
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 0, paddingBottom: bottom, gap: 10 }} testID="you" stickyHeaderIndices={[0]}>
+        {/* A solid header that stays put, so scrolled content slides under it instead of being cut mid-letter at the top edge. */}
+        <View testID="you-header" style={{ backgroundColor: c.bg, marginHorizontal: -space.screen, paddingHorizontal: space.screen, paddingTop: space.screen, paddingBottom: 6, borderBottomWidth: Section ? 1 : 0, borderBottomColor: c.hairline }}>
+          {Section ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginLeft: -8 }}>
+              <HeaderButton label="‹ You" accessibilityLabel="Back to You" onPress={() => setSection(null)} testID="you-back" />
+            </View>
+          ) : null}
+          <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>{Section ? SECTION_TITLES[section] : 'You'}</T>
+        </View>
         <Notice text={notice} onDismiss={() => setNotice('')} />
         {!Section && hero ? <HeroStat value={days.toLocaleString()} label={days === 1 ? 'day clean' : 'days clean'} sub={hero.name} testID="you-hero" /> : null}
         {!Section && health.length ? (

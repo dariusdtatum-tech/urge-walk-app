@@ -5,6 +5,9 @@ import { size } from './tokens.js'
 // (Progress's money total, Log's last entry, Journal's footer note) always clears the tab bar and the
 // raised Ride it out button.
 export const bottomSpace = (insetBottom = 0) => size.tabBar + insetBottom + 24
+// The raised Ride it out button sticks up this far above the tab bar. Tab screens stop scrolling above
+// it (AppRoot reserves this strip), so the last rows (Log's dots, Appearance's footer) are never under it.
+export const TAB_OVERHANG = 30
 export function useBottomSpace() {
   return bottomSpace(useSafeAreaInsets().bottom)
 }
