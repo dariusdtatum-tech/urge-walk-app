@@ -397,13 +397,13 @@ describe('daily verse (You, opt-in)', () => {
     expect(screen.queryByTestId('daily-verse')).toBeNull()
     await tab('You')
     expect(screen.queryByTestId('daily-verse')).toBeNull()
-    expect((await youEl(screen, fireEvent, 'verse-toggle')).props.value).toBe(false)
+    expect((await youEl(screen, fireEvent, 'faith-toggle')).props.value).toBe(false)
   })
 
   test('toggle on: card at the top of You with one combined label; never on Home or Ride it out', async () => {
     const { storage } = await renderApp()
     await tab('You')
-    await fireEvent((await youEl(screen, fireEvent, 'verse-toggle')), 'valueChange', true)
+    await fireEvent((await youEl(screen, fireEvent, 'faith-toggle')), 'valueChange', true)
     await fireEvent.press(screen.getByTestId('you-back')) // the card sits at the top of You
     const card = screen.getByTestId('daily-verse')
     const { verseFor, verseLabel, refLine } = require('../lib/verse.js')
@@ -412,7 +412,7 @@ describe('daily verse (You, opt-in)', () => {
     expect(card.props.accessible).toBe(true)
     expect(screen.getByTestId('daily-verse-text')).toHaveTextContent(v.text)
     expect(screen.getByTestId('daily-verse-ref')).toHaveTextContent(refLine(v))
-    expect(JSON.parse(storage.getItem('urgewalk.v1.versePrefs'))).toEqual({ enabled: true })
+    expect(JSON.parse(storage.getItem('urgewalk.v1.optionalContent'))).toEqual({ faith: true })
     await tab('Home')
     expect(screen.queryByTestId('daily-verse')).toBeNull()
     await press('ride-button')
@@ -423,8 +423,24 @@ describe('daily verse (You, opt-in)', () => {
     await renderApp({ storage: memoryStorage({ ...habitsSeed(), ...onboardedProfile(), 'urgewalk.v1.versePrefs': JSON.stringify({ enabled: true }) }) })
     await tab('You')
     expect(screen.getByTestId('daily-verse')).toBeTruthy()
-    await fireEvent((await youEl(screen, fireEvent, 'verse-toggle')), 'valueChange', false)
+    await fireEvent((await youEl(screen, fireEvent, 'faith-toggle')), 'valueChange', false)
     expect(screen.queryByTestId('daily-verse')).toBeNull()
+  })
+
+  test('Faith content switch: own Optional content group, caption, VoiceOver label', async () => {
+    await renderApp()
+    await tab('You')
+    const sw = await youEl(screen, fireEvent, 'faith-toggle')
+    expect(sw.props.accessibilityLabel).toBe('Faith content')
+    expect(screen.getByText('Optional content')).toBeTruthy()
+    expect(screen.getByText('A short daily verse. Off by default.')).toBeTruthy()
+  })
+
+  test('the setting persists: saved on, the card is there after a relaunch', async () => {
+    await renderApp({ storage: memoryStorage({ ...habitsSeed(), ...onboardedProfile(), 'urgewalk.v1.optionalContent': JSON.stringify({ faith: true }) }) })
+    await tab('You')
+    expect(screen.getByTestId('daily-verse')).toBeTruthy()
+    expect((await youEl(screen, fireEvent, 'faith-toggle')).props.value).toBe(true)
   })
 })
 

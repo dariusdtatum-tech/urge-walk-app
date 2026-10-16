@@ -200,7 +200,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
     why: reasonCount ? `${reasonCount} ${reasonCount === 1 ? 'reason' : 'reasons'}` : 'No reasons yet',
     progress: hero ? [`${hero.name} · ${days.toLocaleString()} ${days === 1 ? 'day' : 'days'}`, habits.length > 1 ? `${habits.length} trackers` : null, kept ? `${fmtMoney(kept.total)} kept` : null].filter(Boolean).join(' · ') : 'Add the date you started',
     reminders: `${reminder ? `Check-in ${reminderLabel(reminder)}` : 'Check-in reminder off'} · follow-up ${followUpOn ? 'on' : 'off'}`,
-    appearance: [themeLabel, appLock ? 'App lock on' : null, verseOn ? 'Daily verse on' : null].filter(Boolean).join(' · '),
+    appearance: [themeLabel, appLock ? 'App lock on' : null, verseOn ? 'Faith content on' : null].filter(Boolean).join(' · '),
     data: lastBackupLabel(loadBackupMeta(storage), now),
   }
   const props = {

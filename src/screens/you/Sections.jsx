@@ -146,13 +146,17 @@ function AppearanceSection({ c, storage, theme, onTheme, verseOn, setVerseOn, se
       <HeroStylePicker c={c} storage={storage} />
       <SectionLabel>Home and lock</SectionLabel>
       <RowGroup>
-      <ToggleRow title="Daily verse" sub="One short verse a day on endurance and freedom." value={verseOn} testID="verse-toggle"
-        onChange={(on) => { saveVerseEnabled(on, storage); setVerseFade(on); setVerseOn(on) }} />
       <ToggleRow title="App lock" sub={appLock ? 'Face ID or your passcode when you open Urge Walk. 988 stays one tap away.' : 'Off. Ask for Face ID or your passcode when you open Urge Walk.'}
         value={appLock} testID="app-lock-toggle" onChange={changeAppLock} />
       </RowGroup>
       {appLockNote ? <T size={type.sub} color={c.textSoft} accessibilityRole="alert" testID="app-lock-note">{appLockNote}</T> : null}
       <SwitcherPicker c={c} storage={storage} />
+      {/* One switch for every faith feature. Off by default; onboarding never asks. */}
+      <SectionLabel>Optional content</SectionLabel>
+      <RowGroup>
+        <ToggleRow title="Faith content" sub="A short daily verse. Off by default." value={verseOn} testID="faith-toggle"
+          onChange={(on) => { saveVerseEnabled(on, storage); setVerseFade(on); setVerseOn(on) }} />
+      </RowGroup>
     </>
   )
 }
