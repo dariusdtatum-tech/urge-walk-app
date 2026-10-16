@@ -24,7 +24,7 @@ Urge Walk is a calm recovery and walking app from Evenfaring. It should feel war
 - Plain, short, and kind. Use second person, sentence case, and no exclamation marks.
 - Never shame. Say "Reset is okay, you're still here", not "You failed" or "Streak lost".
 - Banned words: delve, vibe, seamless, elevate, unlock, unleash, empower, journey (as filler), supercharge, game-changer, revolutionize, cutting-edge, leverage, robust, harness, tapestry, embark, "level up", "crush it", and "next-level".
-- Breathe text never mentions walking. No religious, political, or sexual references in the product.
+- Breathe text never mentions walking. No political or sexual references in the product. Religious content appears only in an optional faith feature the user chooses to turn on.
 - 18+ audience: speak to adults, without cute mascots or baby talk.
 
 ## Before you ship
