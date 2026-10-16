@@ -98,6 +98,16 @@ describe('Onboarding: riding out and more of', () => {
     expect(screen.getByTestId('home-title')).toHaveTextContent(/Self-harm urges/)
     expect(screen.getByTestId('hero-days')).toBeTruthy()
   })
+  it('More of title: a hair space keeps the ? clear of the f, and screen readers hear the plain title', async () => {
+    await renderApp({ storage: memoryStorage() })
+    await toStep3()
+    await press('pick-Alcohol')
+    await press('ob-next'); await press('ob-skip'); await press('ob-skip')
+    const t = screen.getByTestId('ob-title')
+    expect(t.props.children).toBe('What do you want more of\u200A?')
+    expect(t.props.accessibilityLabel).toBe('What do you want more of?')
+    expect(screen.getByRole('header', { name: 'What do you want more of?' })).toBeTruthy()
+  })
   it('more of is grouped Body / Mind / Life / Your own, saved, then the Ride it out tip shows once', async () => {
     const { storage } = await renderApp({ storage: memoryStorage() })
     await toStep3()

@@ -191,7 +191,7 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
       body: <DateStep value={draft.startDate} today={today} onChange={(startDate) => set({ startDate })} /> },
     5: { title: 'Before you started, how often?', sub: 'Optional. A rough guess is fine. Helps show the time you’ve gained back.',
       body: <BeforeSteppers value={draft.before} onChange={(before) => set({ before })} /> },
-    7: { cta: `Continue · ${draft.improve.length + (draft.improveOwn.trim() ? 1 : 0)} selected`, title: 'What do you want more of?', sub: 'Choose any that matter. We’ll reflect them back to you.',
+    7: { cta: `Continue · ${draft.improve.length + (draft.improveOwn.trim() ? 1 : 0)} selected`, title: 'What do you want more of\u200A?' /* hair space: Cormorant's f overhangs the ? */, sub: 'Choose any that matter. We’ll reflect them back to you.',
       body: <ImproveStep value={draft.improve} onChange={(improve) => set({ improve })} own={draft.improveOwn} onOwn={(improveOwn) => set({ improveOwn })} /> },
     8: { title: 'How important is this to you right now?', sub: 'Be honest. It only changes how the app shows up for you.',
       body: <ImportanceStep value={draft.importance} onChange={(importance) => set({ importance })} /> },
@@ -220,7 +220,8 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
       </View>
       <ScrollView contentContainerStyle={{ padding: 24, gap: 18 }} keyboardShouldPersistTaps="handled" testID={`ob-step-${step}`}>
         <View style={{ gap: 8 }}>
-          <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>{step === 12 ? 'Look at what you just did.' : sc.title}</T>
+          <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title} testID="ob-title"
+            accessibilityLabel={(step === 12 ? 'Look at what you just did.' : sc.title).replace(/\u200A/g, '')}>{step === 12 ? 'Look at what you just did.' : sc.title}</T>
           {step === 12 ? <T size={type.body} color={c.text}>Every answer is yours to change in You.</T> : sc.sub ? <T size={type.body} color={c.text}>{sc.sub}</T> : null}
         </View>
         {step === 12 ? (
