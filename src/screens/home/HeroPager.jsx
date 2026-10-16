@@ -14,7 +14,7 @@ export const pageAt = (x, width, count = 2) => Math.max(0, Math.min(count - 1, M
 export const ringPages = (profile, hero, today) => (timeBack(profile, hero, today) ? ['days', 'hours', 'timeback'] : ['days', 'hours'])
 export const pagesLabel = (page, count) => `Clean time, page ${page + 1} of ${count}`
 
-export function HeroPager({ hero, days, since, segment, milestones, today, profile, now, heroStyle = 'ring' }) {
+export function HeroPager({ hero, days, since, segment, milestones, today, profile, now, heroStyle = 'ring', scene }) {
   const { c, scheme } = useTheme()
   const [page, setPage] = useState(0)
   const track = useRef(null)
@@ -39,7 +39,7 @@ export function HeroPager({ hero, days, since, segment, milestones, today, profi
   return (
     <View style={{ gap: 12 }} testID="hero">
       {/* The ring is the default; Tide, Stones and Trail are optional styles from You → Appearance. */}
-      {isAltHero(heroStyle) ? <AltHero kind={heroStyle} days={days} since={since} name={hero.name} /> : (<>
+      {isAltHero(heroStyle) ? <AltHero kind={heroStyle} scene={scene} since={since} name={hero.name} /> : (<>
       <View style={{ alignItems: 'center' }}>
         {/* Snap to the page width, lock to one direction so Home's vertical scroll still wins on up/down
             drags, and track the page while scrolling because momentum-end doesn't always fire. */}

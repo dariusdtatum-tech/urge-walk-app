@@ -1,44 +1,44 @@
 // Optional Home hero styles (You → Appearance and lock → Home hero). The ring stays the default; these
-// show the same count another way. Each is a still picture (no motion, so Reduce Motion has nothing to
-// stop), read by VoiceOver as one image with a plain summary. Coastal palette, flat fills; in dark mode
+// keep clean time as the number on top, and draw a scene that grows from effort (scene state in
+// src/lib/scene.js), so a reset never removes anything. VoiceOver reads each as one image with a summary. Coastal palette, flat fills; in dark mode
 // text is cream, sea glass is for fills only.
 import { View } from 'react-native'
 import Svg, { Circle, Ellipse, G, Line, Path, Rect } from 'react-native-svg'
-import { milestoneName, previousMilestone, ringSegment } from '../../lib/milestones.js'
+import { skyTone, tideLevel } from '../../lib/scene.js'
 import { T } from '../../ui/Text.jsx'
 import { MAX_SCALE, type, useTheme } from '../../ui/theme.js'
 
 const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`
 
 // ---- pure helpers (tested) ----
-export function tideSummary(days) {
-  const s = ringSegment(days)
-  return `Tide: ${Math.round(s.progress * 100)}% of the way to ${milestoneName(s.next)}, ${plural(s.remaining, 'day', 'days')} to go`
+// The art reads only the scene's effort counts, so a reset never takes anything away.
+export function tideSummary(scene) {
+  return `Tide: the water has risen with ${plural(scene.ridden, 'urge', 'urges')} ridden out`
 }
 
-export function stonesLayout(days) {
-  const d = Math.max(0, Math.floor(days) || 0)
-  const weeks = Math.floor(d / 7)
-  const cols = 13 // a season per row
-  const total = Math.max(26, Math.ceil((weeks + 1) / cols) * cols)
-  return { weeks, part: (d % 7) / 7, cols, total }
+export function stonesLayout(scene) {
+  const stones = Math.max(0, scene.ridden)
+  const cols = 13
+  const total = Math.max(26, Math.ceil((stones + 1) / cols) * cols)
+  return { stones, cols, total: Math.min(total, 78), shown: Math.min(stones, 78) }
 }
-export function stonesSummary(days) {
-  const { weeks, part } = stonesLayout(days)
-  const left = Math.round((1 - part) * 7)
-  return `Stones: ${plural(weeks, 'stone', 'stones')}, one for each week clean. This week’s stone fills in ${plural(left, 'more day', 'more days')}`
+export function stonesSummary(scene) {
+  return `Stones: ${plural(scene.ridden, 'stone', 'stones')}, one for each urge ridden out`
 }
 
-// The trail shows the last few milestone posts up to the next one, with "you" between the last two.
-export function trailPosts(days, count = 7) {
-  const s = ringSegment(days)
-  const posts = [s.next]
-  while (posts.length < count && posts[0] > 0) posts.unshift(previousMilestone(posts[0]))
-  return { posts, next: s.next, progress: s.progress }
+// One footprint per walk along a section of trail; a post every 5 walks; a new section every 30.
+export const TRAIL_SECTION = 30
+export const TRAIL_POST = 5
+export function trailSteps(scene) {
+  const n = Math.max(0, scene.walks)
+  const section = Math.floor(n / TRAIL_SECTION) + 1
+  const steps = n % TRAIL_SECTION
+  const toPost = TRAIL_POST - (n % TRAIL_POST)
+  return { section, steps, toPost }
 }
-export function trailSummary(days) {
-  const s = ringSegment(days)
-  return `Trail: walking toward the ${milestoneName(s.next)} post, ${plural(s.remaining, 'day', 'days')} away`
+export function trailSummary(scene) {
+  const t = trailSteps(scene)
+  return `Trail: ${plural(scene.walks, 'walk', 'walks')} so far, the next post is ${plural(t.toPost, 'walk', 'walks')} away`
 }
 
 // ---- views ----
@@ -72,15 +72,22 @@ function Panel({ testID, label, left, right, foot, children }) {
   )
 }
 
-function Tide({ days }) {
+// A soft sky band at the top of each scene: time of day, or the gentle evening tone after a reset.
+function Sky({ scene, W, H }) {
   const { c } = useTheme()
-  const s = ringSegment(days)
+  const t = skyTone(scene)
+  return t.opacity ? <Rect x={0} y={0} width={W} height={H} fill={c[t.token]} opacity={t.opacity} /> : null
+}
+
+function Tide({ scene }) {
+  const { c } = useTheme()
   const W = 320, H = 120, horizon = 18
-  const level = H - 10 - s.progress * (H - horizon - 14)
+  const level = H - 10 - tideLevel(scene.growth) * (H - horizon - 14)
   const wave = (y, amp) => `M0 ${y} C ${W * 0.2} ${y - amp}, ${W * 0.35} ${y + amp}, ${W * 0.55} ${y} S ${W * 0.85} ${y - amp}, ${W} ${y} L ${W} ${H} L 0 ${H} Z`
   return (
-    <Panel testID="alt-hero-tide" label={tideSummary(days)} left={`Tide line: ${milestoneName(s.next)}`} right={plural(s.remaining, 'day to go', 'days to go')}>
+    <Panel testID="alt-hero-tide" label={tideSummary(scene)} left="Tide line" right={plural(scene.ridden, 'urge ridden out', 'urges ridden out')}>
       <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
+        <Sky scene={scene} W={W} H={level} />
         <Line x1={0} x2={W} y1={horizon} y2={horizon} stroke={c.text} strokeOpacity={0.6} strokeWidth={1} strokeDasharray="2 5" />
         <Circle cx={W - 28} cy={horizon} r={9} fill={c.title} />
         <Path d={wave(level + 8, 5)} fill={c.ringA} opacity={0.45} />
@@ -90,23 +97,23 @@ function Tide({ days }) {
   )
 }
 
-function Stones({ days }) {
+function Stones({ scene }) {
   const { c } = useTheme()
-  const { weeks, part, cols, total } = stonesLayout(days)
+  const { shown, cols, total } = stonesLayout(scene)
   const gap = 24, W = cols * gap, rows = Math.ceil(total / cols), H = rows * 28
   const tilt = (i) => ((i * 37) % 23) - 11
   const rx = (i) => 8 + ((i * 7) % 4)
   return (
-    <Panel testID="alt-hero-stones" label={stonesSummary(days)} left={`${plural(weeks, 'week', 'weeks')}, one stone each`} foot="This week’s stone fills in a little each day.">
+    <Panel testID="alt-hero-stones" label={stonesSummary(scene)} left={`${plural(scene.ridden, 'stone', 'stones')}, one per urge ridden out`} foot="Each urge you ride out adds a stone.">
       <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
+        <Sky scene={scene} W={W} H={H} />
         {Array.from({ length: total }, (_, i) => {
           const x = (i % cols) * gap + gap / 2, y = Math.floor(i / cols) * 28 + 14
-          const done = i < weeks, now = i === weeks
+          const done = i < shown
           return (
             <G key={i} transform={`rotate(${tilt(i)} ${x} ${y})`}>
               <Ellipse cx={x} cy={y} rx={rx(i)} ry={7.5} fill={done ? c.title : 'none'} opacity={done ? 0.6 + ((i * 13) % 5) / 12 : 1}
-                stroke={done ? 'none' : c.fieldBorder} strokeWidth={1.2} strokeDasharray={now ? undefined : '2 3'} />
-              {now && part > 0 ? <Ellipse cx={x} cy={y} rx={rx(i) * part} ry={7.5 * part} fill={c.ringA} /> : null}
+                stroke={done ? 'none' : c.fieldBorder} strokeWidth={1.2} strokeDasharray={done ? undefined : '2 3'} />
             </G>
           )
         })}
@@ -115,32 +122,43 @@ function Stones({ days }) {
   )
 }
 
+// A fixed winding path; footprints fill it one walk at a time.
 const TRAIL = [[16, 128], [64, 118], [104, 90], [78, 64], [128, 46], [196, 58], [250, 34], [300, 16]]
-function Trail({ days }) {
+function along(f) {
+  const seg = []
+  let total = 0
+  for (let i = 1; i < TRAIL.length; i += 1) { const d = Math.hypot(TRAIL[i][0] - TRAIL[i - 1][0], TRAIL[i][1] - TRAIL[i - 1][1]); seg.push(d); total += d }
+  let at = f * total
+  for (let i = 0; i < seg.length; i += 1) {
+    if (at <= seg[i] || i === seg.length - 1) { const k = Math.min(1, at / seg[i]); const a = TRAIL[i], b = TRAIL[i + 1]; return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k] }
+    at -= seg[i]
+  }
+  return TRAIL[0]
+}
+function Trail({ scene }) {
   const { c } = useTheme()
-  const { posts, next, progress } = trailPosts(days)
+  const { section, steps, toPost } = trailSteps(scene)
   const W = 320, H = 150
-  const pts = TRAIL.slice(TRAIL.length - posts.length)
-  const k = posts.length - 2 // you are between the last two posts
-  const a = pts[k], b = pts[k + 1]
-  const you = [a[0] + (b[0] - a[0]) * progress, a[1] + (b[1] - a[1]) * progress]
-  const line = (p) => 'M ' + p.map((q) => q.join(' ')).join(' L ')
+  const line = 'M ' + TRAIL.map((q) => q.join(' ')).join(' L ')
+  const at = (i) => along(i / TRAIL_SECTION)
+  const you = at(steps)
   return (
-    <Panel testID="alt-hero-trail" label={trailSummary(days)} left="Your trail" right={`Next post: ${milestoneName(next)}`}>
+    <Panel testID="alt-hero-trail" label={trailSummary(scene)} left={section > 1 ? `Your trail, section ${section}` : 'Your trail'} right={`Next post: ${plural(toPost, 'walk', 'walks')}`}>
       <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
+        <Sky scene={scene} W={W} H={H} />
         <Path d={`M0 ${H - 18} C 90 ${H - 38}, 160 ${H}, ${W} ${H - 28} L ${W} ${H} L 0 ${H} Z`} fill={c.ringA} opacity={0.35} />
-        <Path d={line(pts)} stroke={c.fieldBorder} strokeWidth={2} fill="none" strokeDasharray="3 6" strokeLinecap="round" />
-        <Path d={line([...pts.slice(0, k + 1), you])} stroke={c.title} strokeWidth={3} fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        {posts.map((m, i) => {
-          const [x, y] = pts[i]
-          const done = m <= days
+        <Path d={line} stroke={c.fieldBorder} strokeWidth={2} fill="none" strokeDasharray="3 6" strokeLinecap="round" />
+        {Array.from({ length: TRAIL_SECTION / TRAIL_POST }, (_, k) => {
+          const [x, y] = at((k + 1) * TRAIL_POST)
+          const done = steps >= (k + 1) * TRAIL_POST
           return (
-            <G key={m}>
+            <G key={`p${k}`}>
               <Line x1={x} x2={x} y1={y} y2={y - 14} stroke={done ? c.title : c.fieldBorder} strokeWidth={2} />
               <Rect x={x} y={y - 14} width={9} height={6} fill={done ? c.title : 'none'} stroke={done ? 'none' : c.fieldBorder} />
             </G>
           )
         })}
+        {Array.from({ length: steps }, (_, i) => { const [x, y] = at(i + 0.5); return <Ellipse key={i} cx={x + (i % 2 ? 3 : -3)} cy={y} rx={2.2} ry={3.2} fill={c.title} /> })}
         <Circle cx={you[0]} cy={you[1]} r={8} fill={c.ringA} stroke={c.bg} strokeWidth={3} />
       </Svg>
     </Panel>
@@ -148,12 +166,12 @@ function Trail({ days }) {
 }
 
 const VIEWS = { tide: Tide, stones: Stones, trail: Trail }
-export function AltHero({ kind, days, since, name }) {
-  const View2 = VIEWS[kind] ?? Tide
+export function AltHero({ kind, scene, since, name }) {
+  const Art = VIEWS[kind] ?? Tide
   return (
     <View style={{ gap: 14 }} testID={`alt-hero-${kind}-wrap`}>
-      <Count days={days} since={since} name={name} />
-      <View2 days={days} />
+      <Count days={scene.days} since={since} name={name} />
+      <Art scene={scene} />
     </View>
   )
 }

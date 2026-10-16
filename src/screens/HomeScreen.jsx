@@ -20,6 +20,7 @@ import { FirstWeekCard } from './home/FirstWeekCard.jsx'
 import { DrawerPeek, drawerWidth, TrackerDrawer, TrackerSheet } from './home/TrackerDrawer.jsx'
 import { loadSwitcher } from '../lib/switcher.js'
 import { loadHeroStyle } from '../lib/heroStyle.js'
+import { sceneState } from '../lib/scene.js'
 import { loadWalks } from '../lib/walkStorage.js'
 import { MoneyCard, UrgeMapCard, WeekCard, WhyCard } from './home/HomeCards.jsx'
 import { useHomeReason } from './Reasons.jsx'
@@ -178,7 +179,7 @@ export function HomeScreen({ now, clock = Date.now, onOpenTrack = () => {}, onRi
       ) : null}
 
       {hero ? (
-        <HeroPager hero={hero} days={days} since={since} segment={segment} milestones={milestones} today={today} profile={profile} now={now} heroStyle={heroStyle} />
+        <HeroPager hero={hero} days={days} since={since} segment={segment} milestones={milestones} today={today} profile={profile} now={now} heroStyle={heroStyle} scene={sceneState({ days, walks, hero, now })} />
       ) : (
         <View style={{ alignItems: 'center', gap: 12, paddingVertical: 24 }} testID="home-empty">
           <T accessibilityRole="header" font="serif" size={28} color={c.title}>Every day counts</T>

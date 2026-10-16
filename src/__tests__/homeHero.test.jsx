@@ -3,7 +3,7 @@
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import { AppRoot } from '../AppRoot.jsx'
 import { HERO_PREFS_KEY } from '../lib/heroStyle.js'
-import { stonesLayout, stonesSummary, tideSummary, trailPosts, trailSummary } from '../screens/home/AltHeroes.jsx'
+import { stonesLayout, stonesSummary, tideSummary, trailSteps, trailSummary } from '../screens/home/AltHeroes.jsx'
 import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice } from './helpers.js'
 
 const renderApp = async (extra = {}, scheme = 'light') => {
@@ -23,7 +23,7 @@ describe('home hero', () => {
     expect(screen.getByTestId('ms-next')).toBeTruthy()
   })
 
-  for (const [kind, summary] of [['tide', /^Tide: \d+% of the way to .+, \d+ days to go$/], ['stones', /^Stones: 23 stones, one for each week clean/], ['trail', /^Trail: walking toward the .+ post, \d+ days away$/]]) {
+  for (const [kind, summary] of [['tide', /^Tide: the water has risen with \d+ urges? ridden out$/], ['stones', /^Stones: \d+ stones?, one for each urge ridden out$/], ['trail', /^Trail: \d+ walks? so far, the next post is \d+ walks? away$/]]) {
     it.each(['light', 'dark'])(`renders the ${kind} hero (%s) with a spoken summary, the day count and the milestone pair`, async (scheme) => {
       {
         await renderApp(pref(kind), scheme)
@@ -57,15 +57,14 @@ describe('home hero', () => {
     expect(screen.getByTestId('alt-hero-stones')).toBeTruthy()
   })
 
-  it('pure helpers stay sensible from day 0 past several years', () => {
-    expect(tideSummary(0)).toMatch(/to 7 days, 7 days to go$/)
-    expect(stonesLayout(0)).toMatchObject({ weeks: 0, total: 26 })
-    expect(stonesLayout(400).total % 13).toBe(0)
-    expect(stonesSummary(7)).toMatch(/^Stones: 1 stone,/)
-    expect(trailPosts(0).posts).toEqual([0, 7])
-    expect(trailPosts(163).posts).toEqual([0, 7, 30, 60, 90, 180])
-    expect(trailPosts(1200).posts.length).toBe(7)
-    expect(trailPosts(1200).next).toBe(1460)
-    expect(trailSummary(1)).toMatch(/7 days post, 6 days away$/)
+  it('pure helpers grow only with effort', () => {
+    const sc = (walks, ridden) => ({ days: 0, walks, ridden, growth: ridden })
+    expect(tideSummary(sc(0, 1))).toBe('Tide: the water has risen with 1 urge ridden out')
+    expect(stonesLayout(sc(0, 0))).toMatchObject({ shown: 0, total: 26 })
+    expect(stonesLayout(sc(0, 500))).toMatchObject({ shown: 78, total: 78 })
+    expect(stonesSummary(sc(0, 7))).toBe('Stones: 7 stones, one for each urge ridden out')
+    expect(trailSteps(sc(0, 0))).toEqual({ section: 1, steps: 0, toPost: 5 })
+    expect(trailSteps(sc(33, 40))).toEqual({ section: 2, steps: 3, toPost: 2 })
+    expect(trailSummary(sc(1, 1))).toBe('Trail: 1 walk so far, the next post is 4 walks away')
   })
 })
