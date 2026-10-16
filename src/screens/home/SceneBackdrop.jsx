@@ -9,7 +9,8 @@ import { useStorage } from '../../ui/StorageContext.js'
 import { useTheme } from '../../ui/theme.js'
 
 export const BACKDROP_H = 200
-export const BACKDROP_RISE = 70 // how far the water rises with a full breath, in points
+export const BACKDROP_RISE = 70
+export const STONES_H = 20 // pebble strip height; its top stays below the Cancel text
 // Light: pale sea glass at 60%; dark: sea glass at 15%. Text over the band (navy / cream titles and the
 // soft text color) keeps at least 7:1; session screens don't put the muted color or accent links on it.
 export const backdropOpacity = (scheme) => (scheme === 'dark' ? 0.15 : 0.6)
@@ -42,8 +43,9 @@ export function SceneBackdrop({ rise = 0.5 }) {
         </Svg>
       </Animated.View>
       {style === 'stones' ? (
-        <Svg width="100%" height={40} viewBox={`0 0 ${W} 40`} style={{ position: 'absolute', bottom: 8 }}>
-          {[40, 90, 150, 215, 270, 330].map((x, i) => <Ellipse key={x} cx={x} cy={22 - (i % 2) * 4} rx={16 - (i % 3) * 2} ry={10} fill={stone} />)}
+        // Low along the very bottom edge, under the Cancel text rather than behind it.
+        <Svg testID="backdrop-pebbles" width="100%" height={STONES_H} viewBox={`0 0 ${W} ${STONES_H}`} style={{ position: 'absolute', bottom: -6 }}>
+          {[40, 90, 150, 215, 270, 330].map((x, i) => <Ellipse key={x} cx={x} cy={12 - (i % 2) * 2} rx={13 - (i % 3) * 2} ry={6} fill={stone} />)}
         </Svg>
       ) : null}
     </View>

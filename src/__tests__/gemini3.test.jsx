@@ -79,3 +79,16 @@ describe('scenes on Home: sound pill inside the card, one VoiceOver label', () =
     expect(screen.getAllByTestId('sound-button')).toHaveLength(1)
   })
 })
+
+describe('scene polish', () => {
+  const fs = require('fs')
+  const src = fs.readFileSync(require('path').join(__dirname, '../screens/home/AltHeroes.jsx'), 'utf8')
+  it('has no dashed lines, knob dot or flags left in the scenes', () => {
+    expect(src).not.toMatch(/strokeDasharray/)
+    expect(src).not.toMatch(/cx=\{W - 28\}/)
+  })
+  it('keeps the backdrop pebbles low and small', () => {
+    const { STONES_H } = require('../screens/home/SceneBackdrop')
+    expect(STONES_H).toBeLessThanOrEqual(20)
+  })
+})

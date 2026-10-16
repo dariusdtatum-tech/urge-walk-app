@@ -4,7 +4,7 @@
 // text is cream, sea glass is for fills only.
 import { createContext, useContext } from 'react'
 import { View } from 'react-native'
-import Svg, { Circle, Ellipse, G, Line, Path, Rect } from 'react-native-svg'
+import Svg, { Circle, Ellipse, G, Path, Rect } from 'react-native-svg'
 import { skyTone, tideLevel } from '../../lib/scene.js'
 import { T } from '../../ui/Text.jsx'
 import { Drift } from './SceneMotion.jsx'
@@ -90,22 +90,24 @@ function Sky({ scene, W, H }) {
 }
 
 function Tide({ scene, action }) {
-  const { c } = useTheme()
+  const { c, scheme } = useTheme()
   const W = 320, H = 120, horizon = 18
   const level = H - 10 - tideLevel(scene.growth) * (H - horizon - 14)
-  const wave = (y, amp) => `M0 ${y} C ${W * 0.2} ${y - amp}, ${W * 0.35} ${y + amp}, ${W * 0.55} ${y} S ${W * 0.85} ${y - amp}, ${W} ${y} L ${W} ${H} L 0 ${H} Z`
+  const crest = (y, amp) => `M0 ${y} C ${W * 0.2} ${y - amp}, ${W * 0.35} ${y + amp}, ${W * 0.55} ${y} S ${W * 0.85} ${y - amp}, ${W} ${y}`
+  const wave = (y, amp) => `${crest(y, amp)} L ${W} ${H} L 0 ${H} Z`
   return (
     <Panel action={action} testID="alt-hero-tide" label={tideSummary(scene)} left="Tide line" right={plural(scene.ridden, 'urge ridden out', 'urges ridden out')}>
       <View style={{ height: H, overflow: 'hidden' }}>
         <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
           <Sky scene={scene} W={W} H={level} />
-          <Line x1={0} x2={W} y1={horizon} y2={horizon} stroke={c.text} strokeOpacity={0.6} strokeWidth={1} strokeDasharray="2 5" />
-          <Circle cx={W - 28} cy={horizon} r={9} fill={c.title} />
         </Svg>
         <Drift testID="tide-drift">
           <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
             <Path d={wave(level + 8, 5)} fill={c.ringA} opacity={0.45} />
             <Path d={wave(level, 7)} fill={c.ringA} />
+            {/* Wave-crest hairlines just above the water: the high-water mark, nothing to drag. */}
+            <Path d={crest(level - 7, 5)} stroke={scheme === 'dark' ? c.text : c.accent} strokeWidth={1} fill="none" />
+            <Path d={crest(level - 15, 4)} stroke={scheme === 'dark' ? c.text : c.accent} strokeWidth={1} strokeOpacity={0.55} fill="none" />
           </Svg>
         </Drift>
       </View>
@@ -119,6 +121,8 @@ function Stones({ scene, action }) {
   const gap = 24, W = cols * gap, rows = Math.ceil(total / cols), H = rows * 28
   const tilt = (i) => ((i * 37) % 23) - 11
   const rx = (i) => 8 + ((i * 7) % 4)
+  // Earned stones in a few calm tones; stones still to come are flat, borderless sand dimples.
+  const tones = [c.title, c.textSoft, c.muted, c.ringA]
   return (
     <Panel action={action} testID="alt-hero-stones" label={stonesSummary(scene)} left={`${plural(scene.ridden, 'stone', 'stones')}, one per urge ridden out`} foot="Each urge you ride out adds a stone.">
       <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
@@ -128,8 +132,7 @@ function Stones({ scene, action }) {
           const done = i < shown
           return (
             <G key={i} transform={`rotate(${tilt(i)} ${x} ${y})`}>
-              <Ellipse cx={x} cy={y} rx={rx(i)} ry={7.5} fill={done ? c.title : 'none'} opacity={done ? 0.6 + ((i * 13) % 5) / 12 : 1}
-                stroke={done ? 'none' : c.fieldBorder} strokeWidth={1.2} strokeDasharray={done ? undefined : '2 3'} />
+              <Ellipse cx={x} cy={y} rx={rx(i)} ry={7.5} fill={done ? tones[(i * 7) % tones.length] : c.sand} />
             </G>
           )
         })}
@@ -138,26 +141,44 @@ function Stones({ scene, action }) {
   )
 }
 
-// A fixed winding path; footprints fill it one walk at a time.
-const TRAIL = [[16, 128], [64, 118], [104, 90], [78, 64], [128, 46], [196, 58], [250, 34], [300, 16]]
-function along(f) {
-  const seg = []
-  let total = 0
-  for (let i = 1; i < TRAIL.length; i += 1) { const d = Math.hypot(TRAIL[i][0] - TRAIL[i - 1][0], TRAIL[i][1] - TRAIL[i - 1][1]); seg.push(d); total += d }
-  let at = f * total
-  for (let i = 0; i < seg.length; i += 1) {
-    if (at <= seg[i] || i === seg.length - 1) { const k = Math.min(1, at / seg[i]); const a = TRAIL[i], b = TRAIL[i + 1]; return [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k] }
-    at -= seg[i]
+// A smooth winding footpath (Catmull-Rom through a few points, sampled finely); footprints fill it one walk at a time.
+const KNOTS = [[16, 128], [70, 116], [104, 92], [96, 66], [140, 48], [200, 56], [252, 36], [304, 18]]
+const TRAIL = (() => {
+  const out = []
+  const P = [KNOTS[0], ...KNOTS, KNOTS.at(-1)]
+  for (let i = 1; i < P.length - 2; i += 1) {
+    const [p0, p1, p2, p3] = [P[i - 1], P[i], P[i + 1], P[i + 2]]
+    for (let t = 0; t < 1; t += 0.1) {
+      const t2 = t * t, t3 = t2 * t
+      out.push([0, 1].map((k) => 0.5 * (2 * p1[k] + (-p0[k] + p2[k]) * t + (2 * p0[k] - 5 * p1[k] + 4 * p2[k] - p3[k]) * t2 + (-p0[k] + 3 * p1[k] - 3 * p2[k] + p3[k]) * t3)))
+    }
   }
-  return TRAIL[0]
+  out.push(KNOTS.at(-1))
+  return out
+})()
+const SEG = TRAIL.slice(1).map((q, i) => Math.hypot(q[0] - TRAIL[i][0], q[1] - TRAIL[i][1]))
+const LEN = SEG.reduce((a, b) => a + b, 0)
+// The point a fraction f along the path, and the path up to it.
+function along(f) {
+  let at = Math.max(0, Math.min(1, f)) * LEN
+  for (let i = 0; i < SEG.length; i += 1) {
+    if (at <= SEG[i] || i === SEG.length - 1) { const k = Math.min(1, at / SEG[i]); const a = TRAIL[i], b = TRAIL[i + 1]; return { pt: [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k], upto: i } }
+    at -= SEG[i]
+  }
+  return { pt: TRAIL[0], upto: 0 }
 }
+const pathOf = (pts) => 'M ' + pts.map((q) => q.map((v) => v.toFixed(1)).join(' ')).join(' L ')
+
 function Trail({ scene, action }) {
-  const { c } = useTheme()
+  const { c, scheme } = useTheme()
   const { section, steps, toPost } = trailSteps(scene)
   const W = 320, H = 150
-  const line = 'M ' + TRAIL.map((q) => q.join(' ')).join(' L ')
-  const at = (i) => along(i / TRAIL_SECTION)
-  const you = at(steps)
+  const at = (i) => along(i / TRAIL_SECTION).pt
+  const here = along(steps / TRAIL_SECTION)
+  const you = here.pt
+  const walked = pathOf([...TRAIL.slice(0, here.upto + 1), you])
+  const walkedColor = scheme === 'dark' ? c.ringA : c.title
+  const post = scheme === 'dark' ? c.text : c.title
   return (
     <Panel action={action} testID="alt-hero-trail" label={trailSummary(scene)} left={section > 1 ? `Your trail, section ${section}` : 'Your trail'} right={`Next post: ${plural(toPost, 'walk', 'walks')}`}>
       <View style={{ height: H, overflow: 'hidden' }}>
@@ -168,18 +189,17 @@ function Trail({ scene, action }) {
       </Drift>
       <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} style={{ position: 'absolute' }}>
         <Sky scene={scene} W={W} H={H} />
-        <Path d={line} stroke={c.fieldBorder} strokeWidth={2} fill="none" strokeDasharray="3 6" strokeLinecap="round" />
+        <Path d={pathOf(TRAIL)} stroke={c.fieldBorder} strokeWidth={1} fill="none" strokeLinecap="round" />
+        {steps > 0 ? <Path d={walked} stroke={walkedColor} strokeWidth={2} fill="none" strokeLinecap="round" strokeLinejoin="round" /> : null}
         {Array.from({ length: TRAIL_SECTION / TRAIL_POST }, (_, k) => {
           const [x, y] = at((k + 1) * TRAIL_POST)
           const done = steps >= (k + 1) * TRAIL_POST
           return (
-            <G key={`p${k}`}>
-              <Line x1={x} x2={x} y1={y} y2={y - 14} stroke={done ? c.title : c.fieldBorder} strokeWidth={2} />
-              <Rect x={x} y={y - 14} width={9} height={6} fill={done ? c.title : 'none'} stroke={done ? 'none' : c.fieldBorder} />
-            </G>
+            // A simple wooden trail post: a rounded timber tick beside the path.
+            <Rect key={`p${k}`} x={x + 5} y={y - 13} width={2.5} height={11} rx={1.25} fill={done ? post : c.fieldBorder} />
           )
         })}
-        {Array.from({ length: steps }, (_, i) => { const [x, y] = at(i + 0.5); return <Ellipse key={i} cx={x + (i % 2 ? 3 : -3)} cy={y} rx={2.2} ry={3.2} fill={c.title} /> })}
+        {Array.from({ length: steps }, (_, i) => { const [x, y] = at(i + 0.5); return <Ellipse key={i} cx={x + (i % 2 ? 3 : -3)} cy={y} rx={2.2} ry={3.2} fill={walkedColor} /> })}
         <Circle cx={you[0]} cy={you[1]} r={8} fill={c.ringA} stroke={c.bg} strokeWidth={3} />
       </Svg>
       </View>
