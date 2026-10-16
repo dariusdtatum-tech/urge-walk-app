@@ -36,6 +36,10 @@ import { RideSheet } from './screens/RideSheet.jsx'
 import { WalkScreen } from './screens/WalkScreen.jsx'
 import { YouScreen } from './screens/YouScreen.jsx'
 import { DeviceContext, noopDevice, useDevice } from './ui/DeviceContext.js'
+import { AmbientContext } from './ui/AmbientContext.js'
+import { createAmbient, resolveSound, timerMs } from './lib/ambient.js'
+import { loadScenePrefs } from './lib/scenePrefs.js'
+import { loadHeroStyle } from './lib/heroStyle.js'
 import { StorageContext } from './ui/StorageContext.js'
 import { RideCoachmark, TabBar } from './ui/TabBar.jsx'
 import { T } from './ui/Text.jsx'
@@ -72,6 +76,27 @@ function Shell({ clock, theme, onTheme }) {
   const [appState, setAppState] = useState('active')
   const [lockError, setLockError] = useState('')
   const lastAppState = useRef('active')
+  // Coastal sound: off by default. When on, it plays during Walk, Breathe and Ground, keeps going while a
+  // walk runs, and stops when the phone locks unless a walk is running.
+  const [ambient] = useState(() => createAmbient({ makePlayer: device.makeAmbientPlayer }))
+  const sessionSound = useRef(false) // true when a session started the sound (Home's button is separate)
+  useEffect(() => {
+    const walk = loadActiveWalk(storage)
+    const walkRunning = !!walk && walk.endedAt == null
+    const session = screen === 'walk' || screen === 'breathe' || screen === 'ground'
+    if (session) {
+      const prefs = loadScenePrefs(storage)
+      if (!prefs.sound || ambient.state.status !== 'idle') return
+      const minutes = screen === 'walk' ? walk?.plannedMinutes : null
+      const duckAt = screen === 'walk' && walk?.plannedMinutes ? walk.startedAt + (walk.pausedMs || 0) + walk.plannedMinutes * 60000 : null
+      sessionSound.current = ambient.play(resolveSound(prefs.soundId, loadHeroStyle(storage)), { ms: timerMs(prefs.timer, minutes), duckAt })
+    } else if (!walkRunning && sessionSound.current) {
+      sessionSound.current = false
+      ambient.stop()
+    }
+  }, [screen, ambient, storage])
+  useEffect(() => { const w = loadActiveWalk(storage); ambient.onAppState(appState, !!w && w.endedAt == null) }, [appState, ambient, storage])
+  useEffect(() => () => ambient.stop({ fade: false }), [ambient])
   const unlockApp = useCallback(async () => {
     const r = await device.authenticateApp()
     if (r?.ok) { setLocked(false); setLockError('') } else setLockError(LOCK_ERRORS[r?.reason] ?? LOCK_ERRORS.failed)
@@ -283,6 +308,7 @@ function Shell({ clock, theme, onTheme }) {
   const showTabs = screen === 'tabs' && !(tab === 'track' && trackView === 'journal' && journalEditing && !backup)
 
   return (
+    <AmbientContext.Provider value={ambient}>
     <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: topInset(insets.top) }}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
       <View style={{ flex: 1 }}><ScreenBoundary key={`${screen}-${tab}-${backup}`} onHome={() => { setBackup(false); backHome() }}>{body}</ScreenBoundary></View>
@@ -316,6 +342,7 @@ function Shell({ clock, theme, onTheme }) {
       {followUpFor ? <FollowUpSheet onAnswer={(a) => applyFollowUp(followUpFor, a)} onClose={() => setFollowUpFor(null)} /> : null}
       {lock.cover ? <LockCover locked={locked} unlockable={lock.unlockable} error={lockError} onUnlock={unlockApp} /> : null}
     </View>
+    </AmbientContext.Provider>
   )
 }
 

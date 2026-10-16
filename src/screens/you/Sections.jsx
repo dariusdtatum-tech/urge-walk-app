@@ -1,7 +1,11 @@
 // You, split into six sections (Option C). Each is one row on You with a live status line; tapping it
 // opens the section in place, with "‹ You" to go back. State lives in YouScreen and comes in as props.
 import { HERO_STYLES, loadHeroStyle, saveHeroStyle } from '../../lib/heroStyle.js'
-import { loadScenePrefs, saveScenePrefs } from '../../lib/scenePrefs.js'
+import { loadScenePrefs, saveScenePrefs, SOUND_IDS, TIMERS } from '../../lib/scenePrefs.js'
+import { PAIRED, resolveSound, SOUNDS } from '../../lib/ambient.js'
+import { useAmbient } from '../../ui/AmbientContext.js'
+
+const SOUND_SHORT = { tide: 'Tide', shore: 'Waves', wind: 'Wind', rain: 'Rain' }
 import { WELLNESS_NOTE } from '../../lib/wellness.js'
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
@@ -157,6 +161,7 @@ function AppearanceSection({ c, storage, theme, onTheme, verseOn, setVerseOn, se
 function HeroStylePicker({ c, storage }) {
   const [style, setStyle] = useState(() => loadHeroStyle(storage))
   const [prefs, setPrefs] = useState(() => loadScenePrefs(storage))
+  const ambient = useAmbient()
   return (
     <View style={{ gap: 6 }} testID="hero-style-setting">
       <SectionLabel>Home hero</SectionLabel>
@@ -165,7 +170,19 @@ function HeroStylePicker({ c, storage }) {
       <RowGroup>
         <ToggleRow title="Still scenes" sub="Scenes never move. Always still when Reduce Motion is on." value={prefs.still} testID="still-scenes"
           onChange={(on) => setPrefs(saveScenePrefs({ still: on }, storage))} />
+        <ToggleRow title="Play with sound" sub={`${SOUNDS[resolveSound(prefs.soundId, style)].label} during Walk, Breathe and Ground, and from Home. Off by default.`}
+          value={prefs.sound} testID="scene-sound" onChange={(on) => { setPrefs(saveScenePrefs({ sound: on }, storage)); if (!on) ambient?.stop() }} />
       </RowGroup>
+      {prefs.sound ? (
+        <>
+          <SectionLabel>Sound</SectionLabel>
+          <Seg items={[{ id: 'paired', label: 'Paired', a11y: `Paired with your hero: ${SOUNDS[PAIRED[style]].label}` }, ...SOUND_IDS.map((id) => ({ id, label: SOUND_SHORT[id], a11y: SOUNDS[id].label }))]}
+            value={prefs.soundId} onChange={(v) => setPrefs(saveScenePrefs({ soundId: v }, storage))} label="Sound" testID="scene-sound-id" small />
+          <SectionLabel>Sound timer</SectionLabel>
+          <Seg items={TIMERS.map((t) => ({ id: t, label: t === 'walk' ? 'Walk' : `${t} min`, a11y: t === 'walk' ? 'For the walk’s length' : `${t} minutes` }))}
+            value={prefs.timer} onChange={(v) => setPrefs(saveScenePrefs({ timer: v }, storage))} label="Sound timer" testID="scene-timer" small />
+        </>
+      ) : null}
     </View>
   )
 }

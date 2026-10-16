@@ -3,6 +3,7 @@ import { Pressable, ScrollView, View } from 'react-native'
 import { cleanTime, cleanTimeLabel, milestoneCards, timeBack } from '../../lib/homeIdeas.js'
 import { Ring } from '../../ui/Ring.jsx'
 import { AltHero, isAltHero } from './AltHeroes.jsx'
+import { SoundButton } from './SoundButton.jsx'
 import { T } from '../../ui/Text.jsx'
 import { MAX_SCALE, size as sz, type, useTheme } from '../../ui/theme.js'
 
@@ -94,6 +95,7 @@ export function HeroPager({ hero, days, since, segment, milestones, today, profi
       </View>
 
       </>)}
+      <SoundButton heroStyle={heroStyle} />
       {/* Fixed milestone pair: always visible, never inside the ring. */}
       <View style={{ flexDirection: 'row', gap: 10 }} testID="milestone-cards">
         <MsCard testID="ms-last" k="Last milestone" name={cards.last ? cards.last.name : 'Not yet'}

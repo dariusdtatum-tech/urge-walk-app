@@ -15,11 +15,13 @@ import { syncWalkAlert } from './walkAlert.js'
 import { ensureChannel } from './channel.js'
 import { authenticateApp } from './appAuth.js'
 import { notificationStatus } from './notifyStatus.js'
+import { makeAmbientPlayerFactory } from './ambientPlayer.js'
 import { listenCheckin, syncCheckinReminder } from './checkinReminder.js'
 import { cancelFollowUp, listenFollowUp, scheduleFollowUp } from './followUpNotify.js'
 
 const native = Platform.OS === 'ios' || Platform.OS === 'android'
 const voice = makeVoice(Audio, native ? FS : null, Platform)
+const ambientPlayer = makeAmbientPlayerFactory(Audio)
 
 if (native) {
   ensureChannel(Notifications, Platform.OS)
@@ -70,4 +72,6 @@ export const device = {
   saveResetBackup,
   pickBackupFile,
   openURL(url) { Linking.openURL(url).catch(() => {}) },
+  // Coastal ambient loops (off by default; see src/lib/ambient.js).
+  makeAmbientPlayer: ambientPlayer,
 }
