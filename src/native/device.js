@@ -64,7 +64,7 @@ export const device = {
   deleteReasonFile(uri) { if (native) deleteFile(FS, uri) },
   deleteAllReasonFiles() { if (native) deleteAllFiles(FS) },
   // Whole-app lock (Face ID / passcode). Web preview: always unlocks.
-  authenticateApp() { return native ? authenticateApp(LocalAuthentication) : Promise.resolve({ ok: true }) },
+  authenticateApp(prompt) { return native ? authenticateApp(LocalAuthentication, prompt) : Promise.resolve({ ok: true }) },
   unlockReasons() { return native ? unlock(LocalAuthentication) : Promise.resolve(true) },
   shareBackup,
   pickBackupFile,

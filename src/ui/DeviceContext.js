@@ -32,7 +32,7 @@ export const noopDevice = {
   deleteReasonFile: (_uri) => {},
   deleteAllReasonFiles: () => {},
   unlockReasons: () => Promise.resolve(true),
-  authenticateApp: () => Promise.resolve(/** @type {{ ok: boolean, reason?: string }} */ ({ ok: true })),
+  authenticateApp: (/** @type {string=} */ _prompt) => Promise.resolve(/** @type {{ ok: boolean, reason?: string }} */ ({ ok: true })),
 }
 export const DeviceContext = createContext(noopDevice)
 export const useDevice = () => useContext(DeviceContext)

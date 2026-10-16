@@ -525,7 +525,36 @@ describe('optional whole-app lock', () => {
     await youEl(screen, fireEvent, 'app-lock-toggle')
     await act(async () => { fireEvent(screen.getByTestId('app-lock-toggle'), 'valueChange', false) })
     expect(JSON.parse(storage.getItem('urgewalk.v1.appLock')).enabled).toBe(false)
-    expect(device.calls.appAuths).toBe(3)
+    expect(device.calls.appAuths).toBe(4)
+  })
+
+  test('turning it off needs a check too: failure and cancel keep it ON, success turns it off', async () => {
+    let result = { ok: false, reason: 'failed' }
+    const device = stubDevice({ appAuth: () => result })
+    const storage = lockedStorage()
+    await renderApp({ storage, device })
+    await act(async () => {})
+    result = { ok: true }
+    await act(async () => { fireEvent.press(screen.getByTestId('lock-unlock')) })
+    await tab('You')
+    const off = async () => { await youEl(screen, fireEvent, 'app-lock-toggle'); await act(async () => { fireEvent(screen.getByTestId('app-lock-toggle'), 'valueChange', false) }) }
+    const before = device.calls.appAuths
+    result = { ok: false, reason: 'failed' }
+    await off()
+    expect(device.calls.appAuths).toBe(before + 1)
+    expect((await youEl(screen, fireEvent, 'app-lock-toggle')).props.value).toBe(true)
+    expect(JSON.parse(storage.getItem('urgewalk.v1.appLock')).enabled).toBe(true)
+    expect((await youEl(screen, fireEvent, 'app-lock-note'))).toHaveTextContent('That didn’t unlock. You can try again.')
+    result = { ok: false, reason: 'cancelled' }
+    await off()
+    expect((await youEl(screen, fireEvent, 'app-lock-toggle')).props.value).toBe(true)
+    expect(JSON.parse(storage.getItem('urgewalk.v1.appLock')).enabled).toBe(true)
+    expect(screen.queryByTestId('app-lock-note')).toBeNull()
+    result = { ok: true }
+    await off()
+    expect((await youEl(screen, fireEvent, 'app-lock-toggle')).props.value).toBe(false)
+    expect(JSON.parse(storage.getItem('urgewalk.v1.appLock')).enabled).toBe(false)
+    expect(device.calls.appAuths).toBe(before + 3)
   })
 
   test('cold start asks; a failed check keeps the cover with Unlock and 988', async () => {

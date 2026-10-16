@@ -91,13 +91,13 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [designCheck, setDesignCheck] = useState(false)
   const [showFree, setShowFree] = useState(false)
   const [showNotify, setShowNotify] = useState(false)
-  // Turning the lock on needs a successful Face ID / passcode check first; turning it off doesn't.
+  // Both directions need a successful Face ID / passcode check first. Turning it off is gated too, so
+  // someone holding an unlocked phone can't quietly remove the lock. Fail or cancel: nothing changes
+  // (a cancel shows no error).
   async function changeAppLock(on) {
     setAppLockNote('')
-    if (on) {
-      const r = await device.authenticateApp()
-      if (!r?.ok) { setAppLockNote(LOCK_ERRORS[r?.reason] ?? LOCK_ERRORS.failed); return }
-    }
+    const r = await device.authenticateApp(on ? 'Turn on App lock' : 'Turn off App lock')
+    if (!r?.ok) { if (r?.reason !== 'cancelled') setAppLockNote(LOCK_ERRORS[r?.reason] ?? LOCK_ERRORS.failed); return }
     saveAppLock(on, storage); setAppLock(on); onAppLock(on)
   }
   const [verseOn, setVerseOn] = useState(() => loadVerseEnabled(storage))
