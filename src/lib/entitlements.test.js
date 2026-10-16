@@ -8,7 +8,7 @@ const SRC = files('src').filter((f) => /\.(js|jsx)$/.test(f) && !/\.test\./.test
 
 describe('Free forever', () => {
   it('has the promise and the core features', () => {
-    expect(FREE_FOREVER.promise).toBe('Anything on this list stays free. New Premium features are only ever added on top.')
+    expect(FREE_FOREVER.promise).toBe('Everything in Urge Walk is free to use, with no ads and no account.')
     const ids = FREE_FOREVER.features.map((f) => f.id)
     for (const id of ['ride-walk', 'ride-breathe', 'ride-ground', 'log-urge', 'counters', 'urge-map', 'crisis', 'undo', 'backup']) expect(ids).toContain(id)
     expect(new Set(ids).size).toBe(ids.length)
