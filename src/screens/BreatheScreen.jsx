@@ -10,6 +10,7 @@ import { Button } from '../ui/Button.jsx'
 import { CheckIn } from '../ui/CheckIn.jsx'
 import { useDevice } from '../ui/DeviceContext.js'
 import { ReasonCard } from './Reasons.jsx'
+import { SceneBackdrop } from './home/SceneBackdrop.jsx'
 import { useReducedMotion } from '../ui/motion.js'
 import { useGoalLine } from './home/MoneyCard.jsx'
 import { useStorage } from '../ui/StorageContext.js'
@@ -41,6 +42,7 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
   const [offset] = useState(() => Math.floor(Math.random() * BREATHE_LINES.length))
   const still = useReducedMotion() // follows the setting live, like the rest of the app
   const scale = useRef(new Animated.Value(SMALL)).current
+  const tide = useRef(new Animated.Value(0)).current // the scene's water: in with the breath, out with it
   const elapsed = (endedAt ?? now) - startedAt
   const phase = breathPhase(elapsed)
   const left = Math.max(0, Math.ceil((BREATHE_SECONDS * 1000 - elapsed) / 1000))
@@ -60,12 +62,12 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
     if (endedAt != null) return
     if (phase !== 'hold') device.breathTurn()
     if (still || phase === 'hold') return
-    Animated.timing(scale, {
-      toValue: phase === 'in' ? 1 : SMALL,
-      duration: phase === 'in' ? BREATH.inMs : BREATH.outMs,
-      easing: Easing.inOut(Easing.ease),
-      useNativeDriver: true,
-    }).start()
+    const duration = phase === 'in' ? BREATH.inMs : BREATH.outMs
+    const easing = Easing.inOut(Easing.ease)
+    Animated.parallel([
+      Animated.timing(scale, { toValue: phase === 'in' ? 1 : SMALL, duration, easing, useNativeDriver: true }),
+      Animated.timing(tide, { toValue: phase === 'in' ? 1 : 0, duration, easing, useNativeDriver: true }),
+    ]).start()
   }, [phase]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (endedAt != null) {
@@ -81,6 +83,7 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
 
   return (
     <View style={{ flex: 1, padding: space.screen, alignItems: 'center' }} testID="breathe">
+      <SceneBackdrop rise={still ? 0.5 : tide} />
       {endedAt == null && <KeepAwake />}
       <ReasonCard testID="breathe-reason" extra={goalLine} />
       <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: space.section }}>

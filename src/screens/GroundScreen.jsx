@@ -9,6 +9,7 @@ import { T } from '../ui/Text.jsx'
 import Svg, { Ellipse, Path } from 'react-native-svg'
 import { HeaderButton } from '../ui/Sheet.jsx'
 import { radius, space, type, useTheme } from '../ui/theme.js'
+import { SceneBackdrop } from './home/SceneBackdrop.jsx'
 
 // Ground: silent, text-only 5-4-3-2-1. One line at a time; tap to continue. The optional words
 // typed on each sense stay on screen only and are never saved. Then the same check-in as Breathe.
@@ -38,6 +39,7 @@ export function GroundScreen({ onSave, onCancel, clock = Date.now }) {
   const [head, ...restParts] = splitFirstSentence(item.line)
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+      <SceneBackdrop />
       <ScrollView contentContainerStyle={{ flexGrow: 1, padding: space.screen, paddingBottom: sb, gap: space.section }} keyboardShouldPersistTaps="handled" testID="ground">
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title} style={{ flex: 1 }}>{GROUND.title}</T>

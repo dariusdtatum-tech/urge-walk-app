@@ -65,3 +65,28 @@ describe('coastal sound', () => {
     expect(screen.getByTestId('sound-button').props.accessibilityLabel).toBe('Pause soft rain')
   })
 })
+
+const allText = () => screen.getAllByText(/./, { includeHiddenElements: true }).map((n) => [].concat(n.props.children).filter((x) => typeof x === 'string' || typeof x === 'number').join('')).join(' | ')
+describe('Ride it out uses your scene', () => {
+  for (const tool of ['breathe', 'ground', 'walk']) {
+    it(`${tool} shows the dimmed scene behind it, hidden from VoiceOver`, async () => {
+      await renderApp({ [HERO_PREFS_KEY]: JSON.stringify({ style: 'stones' }) })
+      await act(async () => { fireEvent.press(screen.getByTestId('ride-button')) })
+      await act(async () => { fireEvent.press(screen.getByTestId(`ride-${tool}`)) })
+      const b = screen.getByTestId('scene-backdrop', { includeHiddenElements: true })
+      expect(b.props.accessibilityElementsHidden).toBe(true)
+      expect(b.props.pointerEvents).toBe('none')
+      expect([].concat(b.props.style).find((x) => x?.opacity)?.opacity).toBeLessThanOrEqual(0.3)
+      expect(screen.queryByTestId('scene-backdrop')).toBeNull() // not in the accessibility tree
+    })
+  }
+  it('Breathe text never mentions walking', async () => {
+    await renderApp({ [HERO_PREFS_KEY]: JSON.stringify({ style: 'tide' }) })
+    await act(async () => { fireEvent.press(screen.getByTestId('ride-button')) })
+    await act(async () => { fireEvent.press(screen.getByTestId('ride-breathe')) })
+    expect(screen.getByTestId('breathe')).toBeTruthy()
+    expect(allText()).not.toMatch(/walk/i)
+    const { BREATHE_LINES } = require('../lib/encouragement.js')
+    for (const l of BREATHE_LINES) expect(l).not.toMatch(/walk/i)
+  })
+})

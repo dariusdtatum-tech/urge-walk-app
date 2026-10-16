@@ -9,6 +9,7 @@ import { cancelFollowUpFor } from '../lib/followUp.js'
 import { loadProfile } from '../lib/profile.js'
 import { Sheet } from '../ui/Sheet.jsx'
 import { ReachOut } from './ReachOut.jsx'
+import { SceneBackdrop } from './home/SceneBackdrop.jsx'
 import { ReasonCard } from './Reasons.jsx'
 import { useGoalLine } from './home/MoneyCard.jsx'
 import { SAVED_MESSAGES } from '../lib/walkMessages.js'
@@ -104,6 +105,7 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
   const label = paused ? 'Paused' : open ? 'walked so far' : 'left in your walk'
   return (
     <View style={{ flex: 1 }} testID="walk-live">
+      <SceneBackdrop />
       {walking && <KeepAwake />}
       <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 28, paddingBottom: sb, alignItems: 'center', gap: 18, flexGrow: 1 }}>
         <ReasonCard testID="walk-reason" extra={goalLine} />
