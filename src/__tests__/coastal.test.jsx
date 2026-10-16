@@ -99,7 +99,7 @@ describe('Ride it out uses your scene', () => {
       const b = screen.getByTestId('scene-backdrop', { includeHiddenElements: true })
       expect(b.props.accessibilityElementsHidden).toBe(true)
       expect(b.props.pointerEvents).toBe('none')
-      expect([].concat(b.props.style).find((x) => x?.opacity)?.opacity).toBeLessThanOrEqual(0.3)
+      expect([].concat(b.props.style).find((x) => x?.opacity)?.opacity).toBeLessThanOrEqual(0.6)
       expect(screen.queryByTestId('scene-backdrop')).toBeNull() // not in the accessibility tree
     })
   }
@@ -111,5 +111,19 @@ describe('Ride it out uses your scene', () => {
     expect(allText()).not.toMatch(/walk/i)
     const { BREATHE_LINES } = require('../lib/encouragement.js')
     for (const l of BREATHE_LINES) expect(l).not.toMatch(/walk/i)
+  })
+})
+
+describe('scene band contrast', () => {
+  const lum = (h) => { const v = [1, 3, 5].map((k) => parseInt(h.slice(k, k + 2), 16) / 255).map((x) => (x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4)); return 0.2126 * v[0] + 0.7152 * v[1] + 0.0722 * v[2] }
+  const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05) }
+  const mix = (a, b, t) => '#' + [1, 3, 5].map((k) => Math.round(parseInt(a.slice(k, k + 2), 16) * (1 - t) + parseInt(b.slice(k, k + 2), 16) * t).toString(16).padStart(2, '0')).join('')
+  it('text used over the band (title, soft text) keeps AA in light and dark', () => {
+    const { backdropOpacity } = require('../screens/home/SceneBackdrop.jsx')
+    const P = require('../ui/palette.js')
+    for (const [scheme, c, fill] of [['light', P.light, P.light.breathePearlC], ['dark', P.dark, P.dark.ringA]]) {
+      const band = mix(c.bg, fill, backdropOpacity(scheme))
+      for (const k of ['title', 'textSoft', 'text']) expect([scheme, k, ratio(c[k], band) >= 4.5]).toEqual([scheme, k, true])
+    }
   })
 })

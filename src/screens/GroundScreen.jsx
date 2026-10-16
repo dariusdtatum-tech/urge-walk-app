@@ -61,13 +61,13 @@ export function GroundScreen({ onSave, onCancel, clock = Date.now }) {
           <View style={{ gap: 6 }}>
             <Field key={item.id} label={GROUND.notePlaceholder} value={words[item.id] ?? ''} onChangeText={(t) => setWords({ ...words, [item.id]: t })}
               maxLength={80} testID="ground-note" />
-            <T size={type.caption} color={c.muted}>{GROUND.noteHelp}</T>
+            <T size={type.caption} color={c.textSoft}>{GROUND.noteHelp}</T>
           </View>
         ) : null}
         <Button label={i === 0 ? 'Begin 5-senses check-in' : i >= last ? 'Done' : 'Next'} onPress={next} testID="ground-next" />
         <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 12 }}>
           {i > 0 ? <Button kind="secondary" label="Finish early" onPress={() => setEnd({ endedAt: clock(), completed: false })} testID="ground-finish" /> : null}
-          <Button kind="quiet" label="Cancel · nothing saved" textColor={c.muted} onPress={onCancel} testID="ground-cancel" />
+          <Button kind="quiet" label="Cancel · nothing saved" textColor={c.textSoft} onPress={onCancel} testID="ground-cancel" />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

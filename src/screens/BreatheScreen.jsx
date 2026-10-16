@@ -114,7 +114,7 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
       </T>
       <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', gap: 12 }}>
         <Button kind="secondary" label="Finish early" onPress={() => setEndedAt(clock())} testID="breathe-finish" />
-        <Button kind="quiet" label="Cancel · nothing saved" textColor={c.muted} onPress={onCancel} testID="breathe-cancel" />
+        <Button kind="quiet" label="Cancel · nothing saved" textColor={c.textSoft} onPress={onCancel} testID="breathe-cancel" />
       </View>
     </View>
   )

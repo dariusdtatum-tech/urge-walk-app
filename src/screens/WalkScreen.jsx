@@ -135,16 +135,16 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
         <Button label="Finish walk" onPress={() => setConfirmFinish(true)} style={{ alignSelf: 'stretch', minHeight: sz.row }} testID="finish" />
         <View style={{ flexDirection: 'row', gap: 24, alignItems: 'center' }}>
           {paused
-            ? <Button kind="quiet" label="Resume" onPress={() => { const t = clock(); setNow(t); commit(resumeWalk(walk, t)) }} testID="resume" />
-            : <Button kind="quiet" label="Pause" onPress={() => commit(pauseWalk(walk, clock()))} testID="pause" />}
+            ? <Button kind="quiet" label="Resume" textColor={c.title} onPress={() => { const t = clock(); setNow(t); commit(resumeWalk(walk, t)) }} testID="resume" />
+            : <Button kind="quiet" label="Pause" textColor={c.title} onPress={() => commit(pauseWalk(walk, clock()))} testID="pause" />}
           {!open && (
             <Button kind="secondary" label={`+${EXTEND_MINUTES} min`} accessibilityLabel={`Add ${EXTEND_MINUTES} minutes`}
               onPress={() => canExtend(walk) && commit(extendWalk(walk))} testID="extend" />
           )}
         </View>
-        <Button kind="quiet" label={contact ? `Reach out · ${contact.name}` : 'Reach out'} onPress={() => setReach(true)} testID="walk-reach-open" />
+        <Button kind="quiet" label={contact ? `Reach out · ${contact.name}` : 'Reach out'} textColor={c.title} onPress={() => setReach(true)} testID="walk-reach-open" />
         <View style={{ alignSelf: 'stretch', borderTopWidth: 1, borderTopColor: c.border, marginTop: 20, paddingTop: 8, alignItems: 'center' }}>
-          <Button kind="quiet" label="Cancel walk · nothing saved" textColor={c.muted} onPress={() => setConfirmCancel(true)} testID="walk-cancel" />
+          <Button kind="quiet" label="Cancel walk · nothing saved" textColor={c.textSoft} onPress={() => setConfirmCancel(true)} testID="walk-cancel" />
         </View>
       </ScrollView>
       {confirmFinish && (
