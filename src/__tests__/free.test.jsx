@@ -20,6 +20,7 @@ describe('Free forever', () => {
     await fireEvent.press(screen.getByRole('tab', { name: 'You' }))
     await fireEvent.press((await youEl(screen, fireEvent, 'free-row')))
     expect(screen.getByTestId('free-promise')).toHaveTextContent(FREE_FOREVER.promise)
+    expect(screen.getByTestId('free-ride-ground')).toHaveTextContent(/Ride it out: Ground$/) // App Store readiness: Ground is promised free
     for (const f of FREE_FOREVER.features) expect(screen.getByTestId(`free-${f.id}`)).toHaveTextContent(new RegExp(f.label.replace(/[()?]/g, '.')))
     expect(screen.queryByText('Plus')).toBeNull()
   })
