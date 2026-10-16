@@ -37,6 +37,8 @@ export const device = {
   tap() { if (native) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {}) },
   press() { if (native) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {}) },
   breathTurn() { if (native) Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft).catch(() => {}) },
+  // Haptic tide in Breathe: the quiet taps between turns. iOS skips them when System Haptics is off.
+  breathTide() { if (native) Haptics.selectionAsync().catch(() => {}) },
   done() { if (native) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}) },
   syncWalkAlert(walk, now) { return native ? syncWalkAlert(Notifications, walk, now) : Promise.resolve(null) },
   scheduleFollowUp(urgeId) { return native ? scheduleFollowUp(Notifications, urgeId) : Promise.resolve(false) },

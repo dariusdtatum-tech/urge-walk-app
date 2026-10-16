@@ -197,6 +197,15 @@ describe('Breathe', () => {
     expect(screen.getByTestId('breathe-word').props.children).toBe('Breathe out')
     expect(device.calls.breathTurn).toBe(first + 1)
   })
+  it('haptic tide: soft taps between the turns on the way in and out, none on the hold', async () => {
+    const { clock, device } = await open()
+    for (let i = 0; i < 4; i += 1) await at(clock, 1000) // through the in-breath
+    expect(device.calls.breathTide).toBe(3)
+    await at(clock, 2900) // the hold
+    expect(device.calls.breathTide).toBe(3)
+    await at(clock, 1700) // out-breath: first soft tap 1.5 s after the turn
+    expect(device.calls.breathTide).toBe(4)
+  })
   it('its lines are breath-only: never walking or motion words', async () => {
     await open()
     const line = screen.getByTestId('breathe-line').props.children

@@ -7,7 +7,7 @@ import { createContext, useContext } from 'react'
 //  pickBackupFile() -> null (cancelled) | { size, text }
 //  openURL(url) opens a web page, tel: or sms: link outside the app.
 export const noopDevice = {
-  tap() {}, press() {}, breathTurn() {}, done() {},
+  tap() {}, press() {}, breathTurn() {}, breathTide() {}, done() {},
   syncWalkAlert: (_walk, _now) => Promise.resolve(/** @type {number | null} */ (null)),
   shareBackup: (_text, _filename) => Promise.resolve(/** @type {'shared' | 'downloaded'} */ ('shared')),
   saveResetBackup: (_text, _filename) => Promise.resolve(/** @type {{ uri: string | null, shared: 'shared' | 'downloaded' | 'failed' }} */ ({ uri: null, shared: 'shared' })),

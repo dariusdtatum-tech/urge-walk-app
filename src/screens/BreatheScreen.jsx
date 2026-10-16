@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useSessionBottomSpace } from '../ui/layout.js'
 import { Animated, Easing, ScrollView, View } from 'react-native'
 import { useKeepAwake } from 'expo-keep-awake'
-import { BREATH, breathPhase } from '../lib/breathe.js'
+import { BREATH, breathPhase, tideTapBetween } from '../lib/breathe.js'
 import { BREATHE_LINES } from '../lib/encouragement.js'
 import { loadProfile } from '../lib/profile.js'
 import { BREATHE_SECONDS } from '../lib/walkStorage.js'
@@ -52,6 +52,14 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
     const t = setInterval(() => setNow(clock()), 200)
     return () => clearInterval(t)
   }, [endedAt, clock])
+  // Haptic tide: the turns get breathTurn (below); soft taps in between follow the water.
+  const lastTap = useRef(-1)
+  useEffect(() => {
+    if (endedAt != null) return
+    const kind = tideTapBetween(lastTap.current, elapsed)
+    lastTap.current = elapsed
+    if (kind === 'soft') device.breathTide?.()
+  }, [elapsed, endedAt, device])
   useEffect(() => {
     if (endedAt == null && elapsed >= BREATHE_SECONDS * 1000) {
       setEndedAt(startedAt + BREATHE_SECONDS * 1000)
