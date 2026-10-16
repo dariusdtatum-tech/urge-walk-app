@@ -68,3 +68,43 @@ describe('ambient sound', () => {
     a.stop(); a.duck(); a.resume()
   })
 })
+
+describe('headphones-aware sound', () => {
+  beforeEach(() => vi.useFakeTimers({ now: 0 }))
+  afterEach(() => vi.useRealTimers())
+
+  it('a system pause (headphones out) stays paused; only a tap resumes', () => {
+    const { p, make } = fakePlayer()
+    const a = createAmbient({ makePlayer: make, timers })
+    a.play('shore')
+    vi.advanceTimersByTime(3200)
+    p.systemPause()
+    expect(a.state.status).toBe('paused')
+    vi.advanceTimersByTime(60000)
+    expect(p.calls).toEqual(['play:shore']) // nothing played again by itself
+    a.resume()
+    expect(a.state.status).toBe('playing')
+    expect(p.calls).toEqual(['play:shore', 'play:shore'])
+  })
+  it('our own pause or stop is never read as a system pause', () => {
+    const { p, make } = fakePlayer()
+    const a = createAmbient({ makePlayer: make, timers })
+    a.play('wind')
+    a.stop({ fade: false })
+    p.systemPause()
+    expect(a.state.status).toBe('idle')
+  })
+  it('the player wrapper reports a pause it did not ask for, and ignores its own', async () => {
+    const { wrapPlayer } = await import('./ambient.js')
+    let listener = null
+    const raw = { play: vi.fn(), pause: vi.fn(), remove: vi.fn(), addListener: (_e, f) => { listener = f; return { remove: vi.fn() } } }
+    const onSystemPause = vi.fn()
+    const w = wrapPlayer(raw, onSystemPause)
+    w.play(); listener({ playing: true }); listener({ playing: false })
+    expect(onSystemPause).toHaveBeenCalledTimes(1)
+    w.play(); listener({ playing: true }); w.pause(); listener({ playing: false })
+    expect(onSystemPause).toHaveBeenCalledTimes(1)
+    w.play(); listener({ playing: true }); listener({ playing: false, didJustFinish: true })
+    expect(onSystemPause).toHaveBeenCalledTimes(1)
+  })
+})

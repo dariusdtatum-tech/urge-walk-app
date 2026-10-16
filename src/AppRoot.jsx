@@ -37,6 +37,7 @@ import { WalkScreen } from './screens/WalkScreen.jsx'
 import { YouScreen } from './screens/YouScreen.jsx'
 import { DeviceContext, noopDevice, useDevice } from './ui/DeviceContext.js'
 import { AmbientContext } from './ui/AmbientContext.js'
+import { SoundButton } from './screens/home/SoundButton.jsx'
 import { createAmbient, resolveSound, timerMs } from './lib/ambient.js'
 import { loadScenePrefs } from './lib/scenePrefs.js'
 import { loadHeroStyle } from './lib/heroStyle.js'
@@ -311,6 +312,7 @@ function Shell({ clock, theme, onTheme }) {
     <AmbientContext.Provider value={ambient}>
     <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: topInset(insets.top) }}>
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+      {screen !== 'tabs' ? <SoundButton onlyWhenPaused heroStyle={loadHeroStyle(storage)} style={{ position: 'absolute', zIndex: 2, top: topInset(insets.top) + 8, right: 16 }} /> : null}
       <View style={{ flex: 1 }}><ScreenBoundary key={`${screen}-${tab}-${backup}`} onHome={() => { setBackup(false); backHome() }}>{body}</ScreenBoundary></View>
       {toast && screen === 'tabs' && (
         <View testID="toast" accessibilityLiveRegion="polite" style={{ position: 'absolute', left: 16, right: 16, bottom: 100 + insets.bottom, backgroundColor: c.toastBg, borderRadius: 14, padding: 14, flexDirection: 'row', alignItems: 'center', gap: 12 }}>

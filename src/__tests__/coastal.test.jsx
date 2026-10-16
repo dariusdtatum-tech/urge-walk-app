@@ -8,8 +8,9 @@ import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice } fr
 
 function fakeAudio() {
   const log = []
-  const make = jest.fn((id) => ({ play: () => log.push(`play:${id}`), pause: () => log.push('pause'), setVolume: () => {}, remove: () => log.push('remove') }))
-  return { log, make }
+  const ref = {}
+  const make = jest.fn((id, onSystemPause) => (ref.systemPause = onSystemPause, { play: () => log.push(`play:${id}`), pause: () => log.push('pause'), setVolume: () => {}, remove: () => log.push('remove') }))
+  return { log, make, ref }
 }
 const renderApp = async (extra = {}) => {
   const audio = fakeAudio()
@@ -67,6 +68,28 @@ describe('coastal sound', () => {
 })
 
 const allText = () => screen.getAllByText(/./, { includeHiddenElements: true }).map((n) => [].concat(n.props.children).filter((x) => typeof x === 'string' || typeof x === 'number').join('')).join(' | ')
+describe('headphones', () => {
+  it('when the system pauses the sound, Home says so and only a tap resumes it', async () => {
+    const { audio } = await renderApp(prefs({ sound: true }))
+    await act(async () => { fireEvent.press(screen.getByTestId('sound-button')) })
+    await act(async () => { audio.ref.systemPause() })
+    const b = screen.getByTestId('sound-button')
+    expect(b.props.accessibilityLabel).toBe('Sound paused. Tap to resume soft rain')
+    expect(audio.log).toEqual(['play:rain'])
+    await act(async () => { fireEvent.press(b) })
+    expect(audio.log).toEqual(['play:rain', 'play:rain'])
+    expect(screen.getByTestId('sound-button').props.accessibilityLabel).toBe('Pause soft rain')
+  })
+  it('in Breathe a paused sound shows a resume button at the top', async () => {
+    const { audio } = await renderApp(prefs({ sound: true }))
+    await act(async () => { fireEvent.press(screen.getByTestId('ride-button')) })
+    await act(async () => { fireEvent.press(screen.getByTestId('ride-breathe')) })
+    expect(screen.queryByTestId('sound-button')).toBeNull()
+    await act(async () => { audio.ref.systemPause() })
+    expect(screen.getByTestId('sound-button').props.accessibilityLabel).toMatch(/^Sound paused/)
+  })
+})
+
 describe('Ride it out uses your scene', () => {
   for (const tool of ['breathe', 'ground', 'walk']) {
     it(`${tool} shows the dimmed scene behind it, hidden from VoiceOver`, async () => {

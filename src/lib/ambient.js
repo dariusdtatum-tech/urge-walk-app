@@ -115,3 +115,20 @@ export function createAmbient({ makePlayer, timers = realTimers } = {}) {
     },
   }
 }
+
+// iOS pauses the player by itself when headphones are unplugged (or a call comes in). We tell that
+// apart from our own pause, and the controller then waits for a tap instead of resuming.
+export function wrapPlayer(p, onSystemPause) {
+  let wanted = false // we asked it to play
+  let sawPlaying = false
+  const sub = p.addListener?.('playbackStatusUpdate', (s) => {
+    if (s?.playing) sawPlaying = true
+    else if (wanted && sawPlaying && !s?.didJustFinish) { wanted = false; sawPlaying = false; onSystemPause() }
+  })
+  return {
+    play: () => { wanted = true; p.play() },
+    pause: () => { wanted = false; p.pause() },
+    setVolume: (v) => { p.volume = Math.max(0, Math.min(1, v)) },
+    remove: () => { wanted = false; sub?.remove?.(); p.remove() },
+  }
+}

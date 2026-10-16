@@ -1,4 +1,5 @@
 // expo-audio player for the bundled coastal loops (assets/sounds, see docs/SOUNDS.md).
+import { wrapPlayer } from '../lib/ambient.js'
 const FILES = {
   tide: require('../../assets/sounds/steady-tide.m4a'),
   shore: require('../../assets/sounds/shore-waves.m4a'),
@@ -8,7 +9,7 @@ const FILES = {
 
 export function makeAmbientPlayerFactory(Audio) {
   let moded = false
-  return (soundId) => {
+  return (soundId, onSystemPause = () => {}) => {
     const file = FILES[soundId]
     if (!file || !Audio?.createAudioPlayer) return null
     if (!moded) {
@@ -18,11 +19,7 @@ export function makeAmbientPlayerFactory(Audio) {
     }
     const p = Audio.createAudioPlayer(file)
     p.loop = true
-    return {
-      play: () => p.play(),
-      pause: () => p.pause(),
-      setVolume: (v) => { p.volume = Math.max(0, Math.min(1, v)) },
-      remove: () => p.remove(),
-    }
+    return wrapPlayer(p, onSystemPause)
   }
 }
+

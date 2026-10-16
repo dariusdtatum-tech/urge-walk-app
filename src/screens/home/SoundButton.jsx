@@ -16,13 +16,14 @@ export function soundButtonLabel(status, name) {
   return `Play ${name.toLowerCase()}`
 }
 
-export function SoundButton({ heroStyle }) {
+export function SoundButton({ heroStyle, onlyWhenPaused = false, style }) {
   const storage = useStorage()
   const { c } = useTheme()
   const ambient = useAmbient()
   const st = useAmbientState()
   const [prefs] = useState(() => loadScenePrefs(storage))
   if (!prefs.sound || !ambient) return null
+  if (onlyWhenPaused && st.status !== 'paused') return null
   const id = st.soundId ?? resolveSound(prefs.soundId, heroStyle)
   const label = soundButtonLabel(st.status, SOUNDS[id].label)
   const onPress = () => {
@@ -32,7 +33,7 @@ export function SoundButton({ heroStyle }) {
   }
   return (
     <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} testID="sound-button"
-      style={{ minHeight: 44, alignSelf: 'flex-start', justifyContent: 'center', paddingHorizontal: 14, borderRadius: 22, backgroundColor: c.sand }}>
+      style={[{ minHeight: 44, alignSelf: 'flex-start', justifyContent: 'center', paddingHorizontal: 14, borderRadius: 22, backgroundColor: c.sand }, style]}>
       <T font="semibold" size={type.sub} color={c.title}>{label}</T>
     </Pressable>
   )
