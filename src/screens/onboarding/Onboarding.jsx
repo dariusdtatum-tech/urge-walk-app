@@ -14,7 +14,6 @@ import { Button } from '../../ui/Button.jsx'
 import { useStorage } from '../../ui/StorageContext.js'
 import { T } from '../../ui/Text.jsx'
 import { size as sz, type, useTheme } from '../../ui/theme.js'
-import { CrisisSheet } from '../Crisis.jsx'
 import { addContact } from '../../lib/contacts.js'
 import { BeforeSteppers, Check, DateStep, IdentityStep, ImportanceStep, ImproveStep, RidingStep, SupportStep, WhyStep } from './Steps.jsx'
 
@@ -82,7 +81,6 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
   })
   const [step, setStep] = useState(mode === 'redo' ? 2 : 1)
   const [fromRecap, setFromRecap] = useState(false)
-  const [crisis, setCrisis] = useState(false)
   const set = (changes) => setDraft((d) => ({ ...d, ...changes }))
   const newPicks = draft.picks.filter((n) => !draft.existing.some((e) => e.toLowerCase() === n.toLowerCase()))
 
@@ -187,7 +185,7 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
       </View>
     ) },
     3: { title: 'What are you riding out?', sub: 'Pick as many as you like. You can change this any time.', ok: draft.picks.length > 0, cta: draft.picks.length ? `Continue · ${draft.picks.length} selected` : 'Continue',
-      body: <RidingStep picks={draft.picks} onChange={(picks) => set({ picks })} onSelfHarm={() => setCrisis(true)} /> },
+      body: <RidingStep picks={draft.picks} onChange={(picks) => set({ picks })} /> },
     4: { title: 'When did your clean days begin?', sub: dateNote,
       extra: <Button kind="quiet" label="Start today" onPress={() => set({ startDate: today })} testID="ob-start-today" />,
       body: <DateStep value={draft.startDate} today={today} onChange={(startDate) => set({ startDate })} /> },
@@ -250,7 +248,6 @@ export function Onboarding({ mode = 'new', now, onDone, onRestore, onCancel }) {
         )}
         {sc?.extra ?? null}
       </View>
-      {crisis ? <CrisisSheet onClose={() => setCrisis(false)} /> : null}
     </View>
   )
 }

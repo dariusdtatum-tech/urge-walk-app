@@ -4,7 +4,7 @@ import { Pressable, TextInput, View } from 'react-native'
 import Svg, { Circle, Path } from 'react-native-svg'
 import { daysBetween } from '../../lib/cleanTime.js'
 import {
-  communityAvailable, IDENTITY, IMPORTANCE, IMPROVE_GROUPS, MAX_IMPROVE_OWN, SELF_HARM, MAX_TRUSTED_NAME, MAX_WHY, RIDING_GROUPS, SUPPORT, validatePhone,
+  communityAvailable, IDENTITY, IMPORTANCE, IMPROVE_GROUPS, MAX_IMPROVE_OWN, MAX_TRUSTED_NAME, MAX_WHY, RIDING_GROUPS, SUPPORT, validatePhone,
 } from '../../lib/profile.js'
 import { MAX_NAME_LENGTH } from '../../lib/storage.js'
 import { DatePicker } from '../../ui/DatePicker.jsx'
@@ -72,8 +72,7 @@ function GroupLabel({ children }) {
 }
 
 // 03 What are you riding out? Grouped and searchable, with your own entries.
-// Picking "Self-harm urges" calls onSelfHarm straight away (setup opens the crisis resources).
-export function RidingStep({ picks, onChange, onSelfHarm }) {
+export function RidingStep({ picks, onChange }) {
   const { c, fonts } = useTheme()
   const input = useRef(null)
   const [query, setQuery] = useState('')
@@ -81,7 +80,6 @@ export function RidingStep({ picks, onChange, onSelfHarm }) {
   const toggle = (name) => {
     const on = picks.includes(name)
     onChange(on ? picks.filter((p) => p !== name) : [...picks, name])
-    if (!on && name === SELF_HARM) onSelfHarm?.()
   }
   const known = RIDING_GROUPS.flatMap((g) => g.items)
   const custom = picks.filter((p) => !known.includes(p))

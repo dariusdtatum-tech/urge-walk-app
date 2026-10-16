@@ -83,21 +83,20 @@ describe('Onboarding: riding out and more of', () => {
     await press('pick-Kratom')
     expect(screen.getByTestId('ob-next')).toHaveTextContent('Continue · 1 selected')
   })
-  it('picking Self-harm urges opens the crisis resources (988) straight away', async () => {
-    const { device } = await renderApp({ storage: memoryStorage() })
+  it('no self-harm preset anywhere in the riding list or its search; picking things never opens a sheet', async () => {
+    const { RIDING_GROUPS } = require('../lib/profile.js')
+    expect(RIDING_GROUPS.flatMap((g) => g.items).join(' ')).not.toMatch(/self[- ]?harm/i)
+    await renderApp({ storage: memoryStorage() })
     await toStep3()
+    expect(screen.queryByText(/self[- ]?harm/i)).toBeNull()
+    await fireEvent.changeText(screen.getByTestId('riding-search'), 'self')
+    expect(screen.queryByText(/self[- ]?harm/i)).toBeNull()
     expect(screen.queryByTestId('crisis-sheet')).toBeNull()
-    await press('pick-Self-harm urges')
-    expect(screen.getByTestId('crisis-sheet')).toBeTruthy()
-    expect(screen.getByTestId('crisis-988')).toHaveTextContent(/988 Suicide & Crisis Lifeline/)
-    await press('crisis-link-tel:988')
-    expect(device.calls.urls).toEqual(['tel:988'])
-    await press('crisis-sheet-backdrop')
-    expect(screen.queryByTestId('crisis-sheet')).toBeNull()
-    expect(screen.getByTestId('pick-Self-harm urges').props.accessibilityState.checked).toBe(true)
-    // unpicking doesn't reopen it
-    await press('pick-Self-harm urges')
-    expect(screen.queryByTestId('crisis-sheet')).toBeNull()
+  })
+  it('a tracker someone already named "Self-harm urges" still loads, as their own name', async () => {
+    await renderApp({ storage: memoryStorage({ ...onboardedProfile(), 'urgewalk.v1.habits': JSON.stringify({ habits: [{ id: 'h1', name: 'Self-harm urges', startDate: '2030-05-01' }] }) }) })
+    expect(screen.getByTestId('home-title')).toHaveTextContent(/Self-harm urges/)
+    expect(screen.getByTestId('hero-days')).toBeTruthy()
   })
   it('more of is grouped Body / Mind / Life / Your own, saved, then the Ride it out tip shows once', async () => {
     const { storage } = await renderApp({ storage: memoryStorage() })

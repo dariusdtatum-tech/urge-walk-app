@@ -24,11 +24,11 @@ export const COMMUNITY_INVITE_URL = null
 export const communityAvailable = () => typeof COMMUNITY_INVITE_URL === 'string' && /^https:\/\//.test(COMMUNITY_INVITE_URL)
 
 // Grouped, searchable list for "What are you riding out?". Picks become tracker names.
-// Picking SELF_HARM opens the crisis resources (988) straight away.
-export const SELF_HARM = 'Self-harm urges'
+// No self-harm preset (removed Oct 16 2026 at Darius's request: too triggering). A tracker someone
+// already named that way still loads as their own name, under "Your own"; 988 stays in You → Support.
 export const RIDING_GROUPS = [
   { id: 'substances', label: 'Substances', items: ['Alcohol', 'Nicotine / vaping', 'Cannabis', 'Opioids', 'Stimulants', 'Benzos', 'Kratom', 'Caffeine', 'Prescription meds'] },
-  { id: 'behaviors', label: 'Behaviors', items: ['Gambling', 'Sports betting', 'Porn', 'Gaming', 'Social media', 'Shopping', 'Overeating / binge', 'Doomscrolling', SELF_HARM] },
+  { id: 'behaviors', label: 'Behaviors', items: ['Gambling', 'Sports betting', 'Porn', 'Gaming', 'Social media', 'Shopping', 'Overeating / binge', 'Doomscrolling'] },
 ]
 export const MAX_TRACKER_NAME = 40
 

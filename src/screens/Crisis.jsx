@@ -1,4 +1,4 @@
-// Crisis resources: from You → Help now, and straight away when "Self-harm urges" is picked in setup.
+// Crisis resources: from You → Help now.
 import { View } from 'react-native'
 import { Button } from '../ui/Button.jsx'
 import { useDevice } from '../ui/DeviceContext.js'
