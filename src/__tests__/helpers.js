@@ -14,7 +14,7 @@ export function fakeClock(start = T0) {
   clock.advance = (ms) => { t += ms }
   return clock
 }
-export function stubDevice({ share = 'shared', file = null, picked = null, photo = null, voice = null, unlocked = true, appAuth = { ok: true }, notif = { permission: null, scheduled: null } } = {}) {
+export function stubDevice({ resetSave = { uri: 'file:///docs/Backups/b.json', shared: 'shared' }, share = 'shared', file = null, picked = null, photo = null, voice = null, unlocked = true, appAuth = { ok: true }, notif = { permission: null, scheduled: null } } = {}) {
   const calls = { texts: [], reminders: [], followUps: [], followUpCancels: 0, tap: 0, press: 0, breathTurn: 0, done: 0, alerts: [], shared: [], urls: [], picks: 0, played: [], deleted: [], unlocks: 0, wiped: 0, appAuths: 0, settings: 0 }
   let followUpCb = null
   let checkinCb = null
@@ -41,6 +41,7 @@ export function stubDevice({ share = 'shared', file = null, picked = null, photo
     onCheckinReminder(cb) { checkinCb = cb; return () => { checkinCb = null } },
     emitCheckinReminder() { checkinCb?.() },
     shareBackup(text, filename) { calls.shared.push({ text, filename }); return share instanceof Error ? Promise.reject(share) : Promise.resolve(share) },
+    saveResetBackup(text, filename) { calls.resetSaves = (calls.resetSaves ?? 0) + 1; calls.shared.push({ text, filename }); return resetSave instanceof Error ? Promise.reject(resetSave) : Promise.resolve(resetSave) },
     pickBackupFile() { calls.picks += 1; return Promise.resolve(file) },
     openURL(url) { calls.urls.push(url) },
     tap() { calls.tap += 1 }, press() { calls.press += 1 }, breathTurn() { calls.breathTurn += 1 }, done() { calls.done += 1 },

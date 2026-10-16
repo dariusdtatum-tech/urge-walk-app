@@ -3,12 +3,14 @@ import { createContext, useContext } from 'react'
 // Phone capabilities behind one small object. App passes the real device (src/native/device.js);
 // tests pass stubs.
 //  shareBackup(text, filename) -> 'shared' (share sheet closed) | 'downloaded' (web)
+//  saveResetBackup(text, filename) -> { uri, shared: 'shared' | 'downloaded' | 'failed' }; throws if the file isn't written
 //  pickBackupFile() -> null (cancelled) | { size, text }
 //  openURL(url) opens a web page, tel: or sms: link outside the app.
 export const noopDevice = {
   tap() {}, press() {}, breathTurn() {}, done() {},
   syncWalkAlert: (_walk, _now) => Promise.resolve(/** @type {number | null} */ (null)),
   shareBackup: (_text, _filename) => Promise.resolve(/** @type {'shared' | 'downloaded'} */ ('shared')),
+  saveResetBackup: (_text, _filename) => Promise.resolve(/** @type {{ uri: string | null, shared: 'shared' | 'downloaded' | 'failed' }} */ ({ uri: null, shared: 'shared' })),
   pickBackupFile: () => Promise.resolve(/** @type {{ size: number, text: string } | null} */ (null)),
   openURL: (_url) => {},
   // The "how did it go?" follow-up (local notification). onFollowUp(cb) returns an unsubscribe.

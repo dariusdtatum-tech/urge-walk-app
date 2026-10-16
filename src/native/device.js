@@ -10,7 +10,7 @@ import * as FS from 'expo-file-system'
 import { deleteAllFiles, deleteFile, makeVoice, pickPhoto, unlock } from './reasonsMedia.js'
 import { composeText, pickPhoneContact } from './reachOut.js'
 import * as Notifications from 'expo-notifications'
-import { pickBackupFile, shareBackup } from './backupFile.js'
+import { pickBackupFile, saveResetBackup, shareBackup } from './backupFile.js'
 import { syncWalkAlert } from './walkAlert.js'
 import { ensureChannel } from './channel.js'
 import { authenticateApp } from './appAuth.js'
@@ -67,6 +67,7 @@ export const device = {
   authenticateApp(prompt) { return native ? authenticateApp(LocalAuthentication, prompt) : Promise.resolve({ ok: true }) },
   unlockReasons() { return native ? unlock(LocalAuthentication) : Promise.resolve(true) },
   shareBackup,
+  saveResetBackup,
   pickBackupFile,
   openURL(url) { Linking.openURL(url).catch(() => {}) },
 }

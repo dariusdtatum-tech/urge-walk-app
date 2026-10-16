@@ -2,7 +2,7 @@
 // ("Save to Files" on iPhone), and read one back with the document picker. On the web preview the
 // file is downloaded / read through the browser instead.
 import * as DocumentPicker from 'expo-document-picker'
-import { File, Paths } from 'expo-file-system'
+import { Directory, File, Paths } from 'expo-file-system'
 import * as Sharing from 'expo-sharing'
 import { Platform } from 'react-native'
 import { MAX_FILE_BYTES } from '../lib/backup.js'
@@ -35,4 +35,26 @@ export async function pickBackupFile() {
   if (size > MAX_FILE_BYTES) return { size, text: '' }
   const text = isWeb && a.file ? await a.file.text() : await new File(a.uri).text()
   return { size: size || text.length, text }
+}
+
+// Reset's backup. The file is written into Documents/Backups first (that is the backup that counts:
+// it throws if the write fails). Then the share sheet offers a copy for Files or iCloud Drive; if
+// sharing isn't available or fails, the saved file still stands. Web: the browser download.
+/** @returns {Promise<{ uri: string | null, shared: 'shared' | 'downloaded' | 'failed' }>} */
+export async function saveResetBackup(text, filename) {
+  if (isWeb) { await shareBackup(text, filename); return { uri: null, shared: 'downloaded' } }
+  const dir = new Directory(Paths.document, 'Backups')
+  if (!dir.exists) dir.create({ intermediates: true, idempotent: true })
+  const file = new File(dir, filename)
+  if (file.exists) file.delete()
+  file.create()
+  file.write(text)
+  if (!file.exists || !file.size) throw new Error('backup not written')
+  try {
+    if (!(await Sharing.isAvailableAsync())) return { uri: file.uri, shared: 'failed' }
+    await Sharing.shareAsync(file.uri, { mimeType: 'application/json', UTI: 'public.json', dialogTitle: 'Urge Walk backup' })
+    return { uri: file.uri, shared: 'shared' }
+  } catch {
+    return { uri: file.uri, shared: 'failed' }
+  }
 }

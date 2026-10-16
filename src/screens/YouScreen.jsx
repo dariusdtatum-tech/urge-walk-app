@@ -109,7 +109,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [followUpOn, setFollowUpOn] = useState(() => loadFollowUpEnabled(storage))
   const [reminder, setReminder] = useState(() => loadReminder(storage))
   const changeReminder = (r) => { saveReminder(r, storage); setReminder(r); device.syncCheckinReminder(r) }
-  const [reset, setReset] = useState(null) // null | 'confirm' | 'saved?' | 'notSaved'
+  const [reset, setReset] = useState(null) // null | 'confirm' | 'saved?' | 'savedNoShare' | 'notSaved'
   const hero = editor.hero
   const [section, setSection] = useState(open === 'reasons' ? 'why' : open === 'contacts' ? 'support' : SECTION_ORDER.includes(open) ? open : initialSection)
   const earned = hero ? earnedList(milestones, hero.id).length : 0
@@ -123,13 +123,15 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   }
   function changePrefs(next) { setPrefs(next); saveWalkPrefs(next, storage) }
 
-  // Reset: save a backup file first. The share sheet can't tell us whether the file was really saved,
-  // so we ask, and nothing is erased unless the person says so.
+  // Reset: save a backup file first. The file is written into Urge Walk's own Documents folder
+  // (that's the success that counts), then the share sheet offers a copy for Files or iCloud. iOS can't
+  // tell us whether that share was saved or dismissed, so we always ask once more, and nothing is
+  // erased unless the person says so. If the file can't be written, nothing is erased.
   async function startReset() {
     const t = clock()
     try {
-      const outcome = await device.shareBackup(JSON.stringify(buildBackup(storage, t), null, 2), backupFilename(t))
-      if (outcome) setReset('saved?')
+      const r = await device.saveResetBackup(JSON.stringify(buildBackup(storage, t), null, 2), backupFilename(t))
+      setReset(r?.shared === 'failed' ? 'savedNoShare' : 'saved?')
     } catch {
       setReset('notSaved')
     }
@@ -141,26 +143,19 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
     onErased()
   }
 
-  let overlay = null
-  if (reset === 'confirm') {
-    overlay = (
-      <Confirm title="Reset Urge Walk?" confirmLabel="Save backup and reset" cancelLabel="Keep my data"
-        message="First we’ll save a backup file. Then everything Urge Walk keeps on this phone is erased and setup starts again. If the backup isn’t saved, nothing is erased."
-        onCancel={() => setReset(null)} onConfirm={() => { setReset(null); startReset() }} />
-    )
-  } else if (reset === 'saved?') {
-    overlay = (
-      <Confirm title="Did the backup file save?" confirmLabel="Yes, erase everything" cancelLabel="Keep my data"
-        message="Only erase if you saved the file (for example in Files or iCloud Drive). Your counts, walks and journal can only come back from that file."
-        onCancel={() => { setReset(null); setNotice('Nothing was erased.') }} onConfirm={eraseAll} />
-    )
-  } else if (reset === 'notSaved') {
-    overlay = (
-      <Confirm title="Backup not saved" confirmLabel="Erase without backup" cancelLabel="Keep my data"
-        message="The backup file wasn’t saved, so nothing has been erased. You can erase without a backup, but your counts, walks and journal can’t be brought back."
-        onCancel={() => { setReset(null); setNotice('Nothing was erased.') }} onConfirm={eraseAll} />
-    )
+  const keep = () => { setReset(null); setNotice('Nothing was erased.') }
+  const RESET_STEPS = {
+    confirm: { title: 'Reset Urge Walk?', confirmLabel: 'Save backup and reset', cancelLabel: 'Keep my data', onCancel: () => setReset(null), onConfirm: startReset,
+      message: 'First we’ll save a backup file. Then everything Urge Walk keeps on this phone is erased and setup starts again. If the backup isn’t saved, nothing is erased.' },
+    'saved?': { title: 'Backup saved', confirmLabel: 'Erase and start again', cancelLabel: 'Keep my data', onCancel: keep, onConfirm: eraseAll,
+      message: 'A backup file is saved in Urge Walk on this phone. If you also saved a copy to Files or iCloud Drive, that copy is safest. Erase everything and start setup again?' },
+    savedNoShare: { title: 'Backup saved', confirmLabel: 'Erase and start again', cancelLabel: 'Keep my data', onCancel: keep, onConfirm: eraseAll,
+      message: 'A backup file is saved in Urge Walk on this phone, but the share sheet didn’t open, so there’s no copy in Files yet. Erase everything and start setup again?' },
+    notSaved: { title: 'Backup not saved', confirmLabel: 'Erase without backup', cancelLabel: 'Keep my data', onCancel: keep, onConfirm: eraseAll,
+      message: 'The backup file couldn’t be saved, so nothing has been erased. You can erase without a backup, but your counts, walks and journal can’t be brought back.' },
   }
+  // key: each step is its own Confirm, so a closing card is never reused for the next one.
+  const overlay = reset && RESET_STEPS[reset] ? <Confirm key={reset} {...RESET_STEPS[reset]} /> : null
 
   const days = hero ? cleanDays(hero, today) : 0
   const themeLabel = THEMES.find((t) => t.id === theme)?.label ?? 'System'

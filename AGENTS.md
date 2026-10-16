@@ -46,6 +46,7 @@ Docs: https://docs.expo.dev/eas/index.md
   - Wellness note (`src/lib/wellness.js`): a quiet line in onboarding and under About in You → Data and privacy. Calm wording, muted or soft text, never danger colors.
   - A fresh install starts empty. Never seed demo data in app code; render scripts seed their own. Sample data plan: /workspace/handoff/app-review-sample-data.md.
   - Bottom padding: tab screens use `useBottomSpace()`; sheets use `sheetBottomSpace`; Walk, Breathe and Ground use `useSessionBottomSpace()` (`src/ui/layout.js`). No ScrollView hard-codes a paddingBottom number (tested).
+- Confirm (`src/ui/Confirm.jsx`): a press hides the Modal (visible=false) and runs its action on onDismiss, with a 400ms fallback timer. Never present a share sheet or another Modal from inside a Confirm handler some other way, and give step-by-step Confirms a `key` so a closing card isn't reused. Reset: the backup is written to Documents/Backups first (`saveResetBackup`); sharing is optional; nothing is erased until the person taps Erase and start again.
 - App lock: turning it ON and turning it OFF both need a successful Face ID / passcode check (expo-local-authentication, device passcode fallback). A failed or cancelled check changes nothing; a cancel shows no error. Tested in `phase1.test.jsx` and `appAuth.test.js`.
 - You → Progress order: hero, Walks (Walk length), Trackers, Money kept, Time back. Appearance and lock has no hero; the theme picker shows the current value.
 - Gemini review 2 (Oct 15 2026), also enforced by tests:
