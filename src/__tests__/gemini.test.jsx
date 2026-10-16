@@ -145,3 +145,22 @@ describe('Onboarding welcome', () => {
   })
 })
 
+describe('fuller Home cards', () => {
+  test('weekNumbers: every urge kind counts as ridden out; walks and their minutes; only the last 7 days', () => {
+    const { weekNumbers } = require('../screens/home/HomeCards.jsx')
+    const at = (d) => new Date(T0 - d * 86400000).toISOString()
+    const walks = [
+      { startedAt: at(0), kind: 'walk', actualSeconds: 600 }, { startedAt: at(2), kind: 'walk', actualSeconds: 300 },
+      { startedAt: at(1), kind: 'breathe', actualSeconds: 60 }, { startedAt: at(3), kind: 'logged' }, { startedAt: at(9), kind: 'walk', actualSeconds: 900 },
+    ]
+    expect(weekNumbers(walks, '2030-05-14')).toEqual({ ridden: 4, walked: 2, minutes: 15 })
+  })
+  test('Urge Map preview: 7 dots, one line, and See Track opens Track', async () => {
+    await renderApp()
+    expect(screen.getByTestId('urgemap-strip').props.accessibilityLabel.split(',').length).toBe(7)
+    expect(screen.getByTestId('urgemap-line')).toHaveTextContent('Nothing logged this week yet.')
+    expect(StyleSheet.flatten(screen.getByTestId('urgemap-see-track').props.style).minHeight).toBe(44)
+    await act(async () => { fireEvent.press(screen.getByTestId('urgemap-see-track')) })
+    expect(screen.getByTestId('track-insights')).toBeTruthy()
+  })
+})

@@ -194,39 +194,27 @@ describe('tracker title and drawer', () => {
   })
 })
 
-describe('slim Home: title, ring + one milestone row, one sand panel, the hold hint', () => {
-  it('only the panel (why + check-in) under the milestone row; This week, Urge Map and Money kept live in Track and You', async () => {
+describe('fuller Home: title, ring + milestones, at most five cards, the hold hint', () => {
+  it('cards come in HOME_CARDS order and never more than five; Money kept shows once it is set up', async () => {
     const walks = { 'urgewalk.v1.walks': JSON.stringify({ version: 1, walks: [walk(0), walk(1), walk(1, 'no'), walk(2), walk(3)] }) }
     const seed = { ...habitsSeed(), ...onboardedProfile({ timeBack: { hoursPerTime: 1, moneyPerTime: 10 }, before: { daysPerWeek: 7, timesPerDay: 1 } }), ...walks,
       'urgewalk.v1.backupMeta': JSON.stringify({ lastBackupAt: iso(T0 - 30 * DAY) }), 'urgewalk.v1.firstWeek': JSON.stringify({ done: true }) }
     await renderApp(seed)
     expect(HOME_ITEMS).toEqual(['home-title', 'hero', 'home-cards', 'hold-hint'])
     for (const id of HOME_ITEMS) expect([id, Boolean(screen.queryByTestId(id))]).toEqual([id, true])
-    const { HOME_PANEL } = require('../screens/home/HomeCards.jsx')
-    expect(HOME_PANEL).toEqual(['why-card', 'checkin-card'])
-    expect(screen.getByTestId('home-cards').children.map((k) => k.props?.testID)).toEqual(['home-panel'])
-    expect(within(screen.getByTestId('home-panel')).getByTestId('checkin-card')).toBeTruthy()
-    expect(screen.queryByTestId('why-card')).toBeNull() // no reason → just the check-in
-    for (const id of ['week-card', 'urgemap-card', 'money-card', 'milestone-cards', 'pattern-card', 'walks-card', 'never-zero', 'backup-nudge', 'home-edit', 'home-reach']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
-    expect(screen.getByTestId('milestone-row')).toBeTruthy()
+    const { HOME_CARDS, MAX_HOME_CARDS } = require('../screens/home/HomeCards.jsx')
+    expect(HOME_CARDS).toEqual(['why-card', 'checkin-card', 'week-card', 'urgemap-card', 'money-card'])
+    expect(HOME_CARDS.length).toBeLessThanOrEqual(MAX_HOME_CARDS)
+    const shown = screen.getByTestId('home-cards').children.map((k) => k.props?.testID).filter(Boolean)
+    expect(shown.length).toBeLessThanOrEqual(MAX_HOME_CARDS)
+    expect(shown).toEqual(HOME_CARDS.filter((id) => shown.includes(id))) // order holds
+    expect(shown).toEqual(['checkin-card', 'week-card', 'urgemap-card', 'money-card']) // no reason → no why card
+    for (const id of ['pattern-card', 'walks-card', 'never-zero', 'backup-nudge', 'home-edit', 'home-reach']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
     expect(screen.queryByText(/988/)).toBeNull() // 988 is not a Home card
     await tab('Track')
     expect(screen.getByTestId('walks-card')).toBeTruthy()
     expect(screen.getByTestId('never-zero')).toBeTruthy()
     expect(screen.getByTestId('pattern-card')).toBeTruthy()
-  })
-
-  it('with a reason, the one flat sand panel holds Your why over the check-in, split by a hairline', async () => {
-    await renderApp({ ...habitsSeed(), ...reasonsSeed(['First thing']) })
-    const panel = screen.getByTestId('home-panel')
-    const { StyleSheet } = require('react-native')
-    const { palettes } = require('../ui/palette.js')
-    expect(StyleSheet.flatten(panel.props.style)).toMatchObject({ backgroundColor: palettes.light.featured })
-    expect(StyleSheet.flatten(panel.props.style).borderWidth ?? 0).toBe(0)
-    const why = within(panel).getByTestId('why-card')
-    expect(StyleSheet.flatten(why.props.style)).toMatchObject({ borderBottomWidth: 1, borderBottomColor: palettes.light.hairline })
-    expect(within(panel).getByTestId('checkin-card')).toBeTruthy()
-    expect(StyleSheet.flatten(screen.getByTestId('milestone-row').props.style)).toMatchObject({ borderTopWidth: 1, borderColor: palettes.light.hairline })
   })
 
   it('keeps 5 tabs; Ride it out is the raised center tab button only (no second trigger on Home)', async () => {
@@ -241,7 +229,7 @@ describe('Home has no Your why line, quote or Add a habit; money and time live i
     await renderApp({ ...habitsSeed(), ...reasonsSeed(['First thing']), ...onboardedProfile({ why: 'A quiet example why', timeBack: { hoursPerTime: 1, moneyPerTime: 10 }, before: { daysPerWeek: 7, timesPerDay: 1 } }) })
     for (const id of ['why-line', 'why-open', 'why-add-habit', 'daily-line', 'kept-card']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
     expect(screen.queryByText(/Add a reason|Add a habit|A quiet example why|Today ·/i)).toBeNull()
-    expect(screen.queryByTestId('money-card')).toBeNull() // Money kept lives in You → Progress now
+    expect(screen.getByTestId('money-card')).toBeTruthy()
   })
   it('Money kept stays off Home until it is set up', async () => {
     await renderApp({ ...habitsSeed(), ...onboardedProfile({ before: { daysPerWeek: 7, timesPerDay: 1 } }) })
@@ -462,8 +450,8 @@ describe('ring pager swipe, and how it shares Home with the edge swipe', () => {
     expect(screen.queryByTestId('ring-timeback', { includeHiddenElements: true })).toBeNull()
     const pager = screen.getByTestId('hero-pager')
     expect(within(pager).queryByText(/milestone|days to|months|reached/i, { includeHiddenElements: true })).toBeNull()
-    expect(screen.getByTestId('ms-last')).toHaveTextContent(/Last90 days reached/)
-    expect(screen.getByTestId('ms-next')).toHaveTextContent(/Next6 months in 17 days/)
+    expect(screen.getByTestId('ms-last')).toHaveTextContent(/Last milestone90 daysreached/)
+    expect(screen.getByTestId('ms-next')).toHaveTextContent(/Next6 monthsin 17 days/)
     expect(screen.queryByTestId('ring-label')).toBeNull() // the old "X days to …" line is gone
   })
 
@@ -525,7 +513,7 @@ describe('your reason on Home', () => {
     await renderApp({ ...habitsSeed(), ...R([txt('a', 'Older words', '2030-01-01T00:00:00.000Z'), txt('b', 'Newest words', '2030-04-01T00:00:00.000Z'), txt('c', 'Middle words', '2030-02-01T00:00:00.000Z')]) })
     expect(screen.getByTestId('home-reason-text')).toHaveTextContent('“Newest words”')
     expect(screen.queryByText(/Today/)).toBeNull()
-    expect(within(screen.getByTestId('home-panel')).getByTestId('why-card')).toBeTruthy() // first in the one panel
+    expect(screen.getByTestId('home-cards').children[0].props.testID).toBe('why-card')
     expect(within(screen.getByTestId('hero-ring')).queryByText(/days to|milestone/)).toBeNull()
   })
   it('the same reason on another day', async () => {

@@ -1,5 +1,6 @@
 // You, split into six sections (Option C). Each is one row on You with a live status line; tapping it
 // opens the section in place, with "‹ You" to go back. State lives in YouScreen and comes in as props.
+import { HERO_STYLES, loadHeroStyle, saveHeroStyle } from '../../lib/heroStyle.js'
 import { WELLNESS_NOTE } from '../../lib/wellness.js'
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
@@ -137,6 +138,7 @@ function AppearanceSection({ c, storage, theme, onTheme, verseOn, setVerseOn, se
     <>
       <SectionLabel>Theme</SectionLabel>
       <Seg items={THEMES} value={theme} onChange={onTheme} label="Appearance" testID="theme" />
+      <HeroStylePicker c={c} storage={storage} />
       <SectionLabel>Home and lock</SectionLabel>
       <RowGroup>
       <ToggleRow title="Daily verse" sub="One short verse a day on endurance and freedom." value={verseOn} testID="verse-toggle"
@@ -147,6 +149,18 @@ function AppearanceSection({ c, storage, theme, onTheme, verseOn, setVerseOn, se
       {appLockNote ? <T size={type.sub} color={c.textSoft} accessibilityRole="alert" testID="app-lock-note">{appLockNote}</T> : null}
       <SwitcherPicker c={c} storage={storage} />
     </>
+  )
+}
+
+// Home hero: the ring is the default; Tide, Stones and Trail are optional styles. Saved on this phone only.
+function HeroStylePicker({ c, storage }) {
+  const [style, setStyle] = useState(() => loadHeroStyle(storage))
+  return (
+    <View style={{ gap: 6 }} testID="hero-style-setting">
+      <SectionLabel>Home hero</SectionLabel>
+      <Seg items={HERO_STYLES} value={style} onChange={(v) => setStyle(saveHeroStyle(v, storage))} label="Home hero" testID="hero-style" small />
+      <T size={type.sub} color={c.textSoft}>Ring is the default. Tide, Stones and Trail show the same count another way.</T>
+    </View>
   )
 }
 

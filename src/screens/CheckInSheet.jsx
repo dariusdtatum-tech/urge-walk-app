@@ -72,8 +72,7 @@ export function CheckInSheet({ now, clock = Date.now, onClose, onRide, extra = n
 }
 
 // Home: a small card until today's check-in is done, then one quiet line. Missed days show nothing.
-// flat (slim Home): no box of its own; it sits in the Home sand panel under Your why.
-export function CheckInCard({ today, onOpen, flat = false }) {
+export function CheckInCard({ today, onOpen }) {
   const storage = useStorage()
   const { c } = useTheme()
   const entry = checkinFor(storage, today)
@@ -81,19 +80,18 @@ export function CheckInCard({ today, onOpen, flat = false }) {
     const label = MOODS.find((m) => m.id === entry.mood)?.label
     return (
       <Pressable onPress={onOpen} accessibilityRole="button" testID="checkin-done" style={{ minHeight: 44, justifyContent: 'center' }}>
-        <T size={14} color={flat ? c.mutedSand : c.muted} style={{ textAlign: flat ? 'left' : 'center' }}>Checked in today · {label}{entry.word ? ` · ${entry.word}` : ''}{entry.committed ? ' · committed' : ''}</T>
+        <T size={14} color={c.muted} style={{ textAlign: 'center' }}>Checked in today · {label}{entry.word ? ` · ${entry.word}` : ''}{entry.committed ? ' · committed' : ''}</T>
       </Pressable>
     )
   }
   return (
     <Pressable onPress={onOpen} accessibilityRole="button" testID="checkin-card"
-      style={flat ? { minHeight: sz.row, flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 6 }
-        : { minHeight: sz.row, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: c.card, borderWidth: 1, borderColor: c.border }}>
+      style={{ minHeight: sz.row, flexDirection: 'row', alignItems: 'center', gap: 12, padding: 14, borderRadius: 16, backgroundColor: c.card, borderWidth: 1, borderColor: c.border }}>
       <View style={{ flex: 1, gap: 2 }}>
         <T font="semibold" size={type.body} color={c.title}>Daily check-in</T>
         <T size={14} color={c.textSoft}>How are you today? About 30 seconds.</T>
       </View>
-      <T size={20} color={flat ? c.mutedSand : c.muted} accessibilityElementsHidden importantForAccessibility="no">›</T>
+      <T size={20} color={c.muted} accessibilityElementsHidden importantForAccessibility="no">›</T>
     </Pressable>
   )
 }
