@@ -32,3 +32,15 @@ describe('layout: tab bar and top edge', () => {
     expect(StyleSheet.flatten(screen.getByTestId('you-header').props.style).backgroundColor).toBeTruthy()
   })
 })
+
+describe('Reset app row', () => {
+  it.each(['light', 'dark'])('is navy / cream, never red (%s)', async (scheme) => {
+    const P = require('../ui/palette.js')
+    await renderApp({}, scheme)
+    await tab('You'); await press('you-data')
+    const title = screen.getByText('Reset app')
+    const color = StyleSheet.flatten(title.props.style).color
+    expect(color).toBe(P[scheme].title)
+    expect(['#b23a2e', '#f2a297']).not.toContain(color)
+  })
+})

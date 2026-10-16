@@ -206,7 +206,7 @@ function DataSection({ c, storage, device, now, onOpenBackup, startReset, resetS
       <SectionLabel>Backup</SectionLabel>
       <RowGroup>
         <Row title="Backup & restore" sub={lastBackupLabel(loadBackupMeta(storage), now)} testID="backup-row" onPress={onOpenBackup} />
-        <Row title="Reset app" sub="Saves a backup file first, then starts fresh" testID="reset-app" danger onPress={() => { startReset() }} />
+        <Row title="Reset app" sub="Saves a backup file first, then starts fresh" testID="reset-app" onPress={() => { startReset() }} />
       </RowGroup>
       {resetStatus ? <T size={14} color={c.textSoft} accessibilityRole="alert" accessibilityLiveRegion="polite" testID="reset-status" style={{ paddingVertical: 6 }}>{resetStatus}</T> : null}
       <SectionLabel>Privacy</SectionLabel>
