@@ -142,7 +142,7 @@ function Stones({ scene, action }) {
 }
 
 // A smooth winding footpath (Catmull-Rom through a few points, sampled finely); footprints fill it one walk at a time.
-const KNOTS = [[16, 128], [70, 116], [104, 92], [96, 66], [140, 48], [200, 56], [252, 36], [304, 18]]
+const KNOTS = [[16, 128], [66, 120], [112, 98], [150, 70], [200, 60], [252, 40], [304, 18]]
 const TRAIL = (() => {
   const out = []
   const P = [KNOTS[0], ...KNOTS, KNOTS.at(-1)]
