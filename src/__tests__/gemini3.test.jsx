@@ -44,3 +44,22 @@ describe('Reset app row', () => {
     expect(['#b23a2e', '#f2a297']).not.toContain(color)
   })
 })
+
+describe('Progress: one source for time back', () => {
+  it('the hours stat, the Time back card and the since date all agree, and the date is in the past', async () => {
+    await renderApp(onboardedProfile({ before: { daysPerWeek: 5, timesPerDay: 2 } }))
+    await tab('You'); await press('you-progress')
+    const card = screen.getByTestId('tb-hours').props.children
+    expect(screen.getByTestId('pair-hours')).toHaveTextContent(new RegExp(`^${card}`))
+    const formula = [].concat(screen.getByTestId('tb-formula').props.children).join('')
+    const since = formula.match(/^Since (.+?), based on/)[1]
+    expect(screen.getByText(new RegExp(`since ${since}$`))).toBeTruthy()
+    expect(since).not.toMatch(/20[3-9]\d/) // never a future year
+  })
+  it('a start date in the future gives no estimate rather than a wrong one', () => {
+    const { timeBack } = require('../lib/homeIdeas.js')
+    const profile = { before: { daysPerWeek: 7, timesPerDay: 2 } }
+    expect(timeBack(profile, { startDate: '2030-01-10' }, '2030-01-01')).toBeNull()
+    expect(timeBack(profile, { startDate: '2029-12-01' }, '2030-01-01').hours).toBeGreaterThan(0)
+  })
+})

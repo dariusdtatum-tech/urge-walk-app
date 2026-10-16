@@ -248,6 +248,7 @@ export function timeBack(profile, habit, today = todayISO()) {
   const dpw = profile?.before?.daysPerWeek
   const tpd = profile?.before?.timesPerDay
   if (!habit || dpw == null || tpd == null || dpw === 0) return null
+  if (daysBetween(habit.startDate, today) < 0) return null // a start date in the future: no estimate yet
   const hoursPer = profile.timeBack?.hoursPerTime ?? DEFAULT_HOURS_PER_TIME
   const weeks = Math.max(0, daysBetween(habit.startDate, today)) / 7
   const times = weeks * dpw * tpd

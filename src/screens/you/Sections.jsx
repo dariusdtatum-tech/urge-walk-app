@@ -109,7 +109,7 @@ function ProgressSection({ storage, profile, today, walks, changeProfile, setSho
         {moneyOn(profile) ? <Row title="Money kept settings" sub="Amount and goal" testID="money-row" onPress={() => setShowMoney(true)} /> : null}
       </RowGroup>
       <KeptCard flat profile={profile} hero={hero} walks={walks} today={today} onEditMoney={() => setShowMoney(true)} />
-      <TimeBackCard profile={profile} hero={hero} today={today} onChange={changeProfile} />
+      <TimeBackCard tb={tb} since={hero ? shortDate(hero.startDate, today) : ''} onChange={changeProfile} profile={profile} />
     </>
   )
 }
@@ -263,10 +263,10 @@ const HOUR_STEPS = [0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4, 5, 6, 8, 10, 12]
 
 // Time back: an estimate from the setup answers. Hidden when days a week / times a day were skipped.
 // Money is off until the person adds a $ per time.
-function TimeBackCard({ profile, hero, today, onChange }) {
+// tb and since come from ProgressSection, the same values as the hero and the hours stat (one source).
+function TimeBackCard({ tb, since, profile, onChange }) {
   const { c } = useTheme()
   const [adjust, setAdjust] = useState(null) // null | 'hours' | 'money'
-  const tb = timeBack(profile, hero, today)
   if (!tb) return null
   const save = (v) => {
     const cur = profile.timeBack || { hoursPerTime: DEFAULT_HOURS_PER_TIME, moneyPerTime: null }
@@ -284,7 +284,7 @@ function TimeBackCard({ profile, hero, today, onChange }) {
       <T size={type.body} color={c.mutedSand}>about <T font="semibold" size={type.screenTitle} color={c.title} testID="tb-hours" style={{ fontVariant: ['lining-nums', 'tabular-nums'] }}>{tb.hours.toLocaleString()}</T> <T size={type.body} color={c.text}>hours</T></T>
       {tb.money != null ? <T size={type.body} color={c.mutedSand}>and about <T font="serif" size={type.rideSheetTitle} color={c.title} testID="tb-money" style={{ fontVariant: ['lining-nums'] }}>${tb.money.toLocaleString()}</T> <T size={type.body} color={c.text}>kept</T></T> : null}
       <T size={13} color={c.mutedSand} testID="tb-formula">
-        Since {shortDate(hero.startDate, today)}, based on what you told us: {plural(tb.daysPerWeek, 'day', 'days')} a week,{' '}
+        Since {since}, based on what you told us: {plural(tb.daysPerWeek, 'day', 'days')} a week,{' '}
         {tb.timesPerDay === 7 ? '7+ times' : plural(tb.timesPerDay, 'time', 'times')} a day, about {fmtHours(tb.hoursPerTime)} each
         {tb.moneyPerTime != null ? ` and $${tb.moneyPerTime} each time` : ''}.
       </T>
