@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ScrollView, View } from 'react-native'
+import { Pressable, ScrollView, View } from 'react-native'
 import { THEMES } from '../lib/appearance.js'
 import { backupFilename, buildBackup, clearAllData, lastBackupLabel, loadBackupMeta } from '../lib/backup.js'
 import { todayISO } from '../lib/cleanTime.js'
@@ -20,7 +20,7 @@ import { HeaderButton, Sheet } from '../ui/Sheet.jsx'
 import { useStorage } from '../ui/StorageContext.js'
 import { useBottomSpace } from '../ui/layout.js'
 import { T } from '../ui/Text.jsx'
-import { space, type, useTheme } from '../ui/theme.js'
+import { radius, space, type, useTheme } from '../ui/theme.js'
 import { MilestonesList } from './home/Milestones.jsx'
 import { BeforeSteppers, IdentityStep, ImportanceStep, ImproveStep, SupportStep, WhyStep } from './onboarding/Steps.jsx'
 import { ResetToast, useTrackerEditor } from './Trackers.jsx'
@@ -42,7 +42,20 @@ import { loadWalks } from '../lib/walkStorage.js'
 import { fmtMoney, moneyKept } from '../lib/money.js'
 import { loadContacts } from '../lib/contacts.js'
 
+import { CommunityScreen } from './CommunityScreen.jsx'
 export { CRISIS }
+
+// v1.0: Community is not a tab yet. This card opens its preview (house rules, "tell me when it opens").
+function CommunityCard({ onPress }) {
+  const { c } = useTheme()
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel="Community, coming soon. A quiet 18+ space, not open yet." testID="you-community-card"
+      style={({ pressed }) => ({ marginTop: 14, minHeight: 44, backgroundColor: c.sand, borderRadius: radius.card, padding: space.card, gap: 4, opacity: pressed ? 0.8 : 1 })}>
+      <T font="semibold" size={type.rowTitle} color={c.title}>Community, coming soon</T>
+      <T size={type.sub} color={c.textSoft}>A quiet 18+ space for adults riding out urges. No feed, no likes. Not open yet.</T>
+    </Pressable>
+  )
+}
 export { LEGAL_LINKS } from './you/Sections.jsx'
 // You's six rows in three labelled groups (same order as SECTION_ORDER), plus Your plan.
 const YOU_GROUPS = [
@@ -76,6 +89,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const bottom = useBottomSpace()
   const today = todayISO(new Date(now))
   const [milestones, setMilestones] = useState(() => loadMilestones(storage))
+  const [showCommunity, setShowCommunity] = useState(false)
   const editor = useTrackerEditor({ today, now: clock, onOpenBackup, onMilestones: (next) => { saveMilestones(next, storage); setMilestones(next) } })
   const { habits, notice, setNotice, sheet, setSheet } = editor
   const [prefs, setPrefs] = useState(() => loadWalkPrefs(storage))
@@ -197,6 +211,17 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   }
   const Section = section ? SECTIONS[section] : null
 
+  if (showCommunity) {
+    return (
+      <View style={{ flex: 1 }} testID="you-community">
+        <View style={{ flexDirection: 'row', alignItems: 'center', paddingHorizontal: space.screen - 8 }}>
+          <HeaderButton label="‹ You" accessibilityLabel="Back to You" onPress={() => setShowCommunity(false)} testID="community-back" />
+        </View>
+        <CommunityScreen now={now} clock={clock} />
+      </View>
+    )
+  }
+
   return (
     <View style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: bottom, gap: 10 }} testID="you">
@@ -230,6 +255,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
                 </RowGroup>
               </View>
             ))}
+            <CommunityCard onPress={() => setShowCommunity(true)} />
           </>
         )}
       </ScrollView>

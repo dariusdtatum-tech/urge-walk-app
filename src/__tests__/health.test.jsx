@@ -40,7 +40,7 @@ describe('error boundary', () => {
   it('a crashing screen shows a calm fallback; Ride it out still works; Go home recovers', async () => {
     jest.spyOn(console, 'error').mockImplementation(() => {})
     await renderApp(memoryStorage({ ...habitsSeed(), ...onboardedProfile() }), stubDevice())
-    await fireEvent.press(screen.getByRole('tab', { name: 'Community' }))
+    await fireEvent.press(screen.getByRole('tab', { name: 'You' })); await fireEvent.press(screen.getByTestId('you-community-card'))
     expect(screen.getByTestId('screen-error')).toHaveTextContent(/Something went wrong on this screen\.Your data is safe\.|Something went wrong on this screen\. ?Your data is safe\./)
     expect(screen.getByTestId('ride-button')).toBeTruthy()
     await fireEvent.press(screen.getByTestId('screen-error-home'))

@@ -21,7 +21,7 @@ async function toStep3() {
 beforeEach(() => { jest.useFakeTimers(); jest.setSystemTime(T0) })
 afterEach(() => { jest.useRealTimers() })
 
-describe('tabs: Home · Track (Log | Journal) · Ride it out · Community · You', () => {
+describe('tabs: Home · Track (Log | Journal) · Ride it out · You', () => {
   it('Track switches between Log and Journal', async () => {
     await renderApp()
     await fireEvent.press(screen.getByRole('tab', { name: 'Track' }))
@@ -47,10 +47,13 @@ describe('tabs: Home · Track (Log | Journal) · Ride it out · Community · You
   })
 })
 
-describe('Community (before launch)', () => {
-  it('Coming soon, 18+ rules, a local notify switch and today’s line. No feed, no network', async () => {
+describe('Community (before launch): not a tab in v1.0, a card in You', () => {
+  it('no Community tab; the You card opens Coming soon, 18+ rules, a local notify switch and today’s line. No feed, no network', async () => {
     const { storage, device } = await renderApp()
-    await fireEvent.press(screen.getByRole('tab', { name: 'Community' }))
+    expect(screen.queryByRole('tab', { name: 'Community' })).toBeNull()
+    await fireEvent.press(screen.getByRole('tab', { name: 'You' }))
+    expect(screen.getByTestId('you-community-card')).toHaveTextContent(/Community, coming soon/)
+    await fireEvent.press(screen.getByTestId('you-community-card'))
     expect(screen.getByTestId('community-soon')).toHaveTextContent(/Coming soon/)
     expect(screen.getByTestId('community-18')).toHaveTextContent('18+ only')
     const rules = screen.getByTestId('community-rules')
@@ -63,8 +66,8 @@ describe('Community (before launch)', () => {
     await fireEvent(screen.getByTestId('community-notify'), 'valueChange', true)
     expect(JSON.parse(storage.getItem('urgewalk.v1.communityNotify')).on).toBe(true)
     expect(device.calls.urls).toEqual([])
-    await fireEvent.press(screen.getByRole('tab', { name: 'Home' }))
-    await fireEvent.press(screen.getByRole('tab', { name: 'Community' }))
+    await fireEvent.press(screen.getByTestId('community-back'))
+    await fireEvent.press(screen.getByTestId('you-community-card'))
     expect(screen.getByTestId('community-notify').props.value).toBe(true)
   })
 })

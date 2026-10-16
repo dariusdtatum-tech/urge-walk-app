@@ -219,7 +219,8 @@ describe('fuller Home: title, ring + milestones, at most five cards, the hold hi
 
   it('keeps 5 tabs; Ride it out is the raised center tab button only (no second trigger on Home)', async () => {
     await renderApp()
-    for (const id of ['tab-home', 'tab-track', 'tab-community', 'tab-you', 'ride-button']) expect(screen.getByTestId(id)).toBeTruthy()
+    for (const id of ['tab-home', 'tab-track', 'tab-you', 'ride-button']) expect(screen.getByTestId(id)).toBeTruthy()
+    expect(screen.queryByTestId('tab-community')).toBeNull()
     expect(screen.queryByTestId('ride-bar')).toBeNull()
   })
 })

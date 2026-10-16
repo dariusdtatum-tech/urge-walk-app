@@ -41,9 +41,10 @@ describe('Home', () => {
     expect(screen.getByTestId('hero-days').props.children).toBe('0')
     expect(JSON.parse(storage.getItem('urgewalk.v1.habits')).habits[0].name).toBe('Habit B')
   })
-  it('Home · Track · Ride it out · Community · You, all labelled', async () => {
+  it('Home · Track · Ride it out · You, all labelled (no Community tab in v1.0)', async () => {
     await renderApp()
-    for (const t of ['Home', 'Track', 'Community', 'You']) expect(screen.getByRole('tab', { name: t })).toBeTruthy()
+    for (const t of ['Home', 'Track', 'You']) expect(screen.getByRole('tab', { name: t })).toBeTruthy()
+    expect(screen.queryByRole('tab', { name: 'Community' })).toBeNull()
     expect(screen.getByRole('button', { name: 'Ride it out' })).toBeTruthy()
   })
 })

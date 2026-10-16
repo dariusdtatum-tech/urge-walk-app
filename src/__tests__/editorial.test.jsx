@@ -205,7 +205,7 @@ describe('bottom padding audit: every tab screen and You section clears the tab 
   const pads = (id) => StyleSheet.flatten(screen.getByTestId(id).props.contentContainerStyle).paddingBottom
   test.each([['Home', 'home'], ['Community', 'community'], ['Track', 'log']])('%s', async (name, id) => {
     await renderApp('light')
-    await tab(name)
+    if (name === 'Community') { await tab('You'); await press('you-community-card') } else await tab(name)
     expect(pads(id)).toBe(want)
   })
   test('Track → Journal', async () => {

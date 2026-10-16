@@ -2,18 +2,20 @@ import { useEffect } from 'react'
 import { AccessibilityInfo, Pressable, View } from 'react-native'
 import { CommunityIcon, HomeIcon, LogIcon, WaveIcon, YouIcon } from './Icons.jsx'
 import { T } from './Text.jsx'
+import { SHOW_COMMUNITY_TAB } from '../lib/features.js'
 import { MAX_SCALE, size as sz, useTheme } from './theme.js'
 
 export const LONG_PRESS_MS = 550
-const TABS = [
+const ALL_TABS = [
   { id: 'home', label: 'Home', Icon: HomeIcon },
   { id: 'track', label: 'Track', Icon: LogIcon },
   { id: 'ride' },
   { id: 'community', label: 'Community', Icon: CommunityIcon },
   { id: 'you', label: 'You', Icon: YouIcon },
 ]
+const TABS = ALL_TABS.filter((t) => t.id !== 'community' || SHOW_COMMUNITY_TAB)
 
-// Home · Track · Ride it out · Community · You. Four tabs and the centre "Ride it out" button: tap = choose Walk / Breathe / Ground / Just log it,
+// Home · Track · Ride it out · You (Community comes back with SHOW_COMMUNITY_TAB). The tabs and the centre "Ride it out" button: tap = choose Walk / Breathe / Ground / Just log it,
 // hold = start a walk right away.
 export function TabBar({ active, onTab, onRide, onRideHold, bottomInset = 0 }) {
   const { c } = useTheme()

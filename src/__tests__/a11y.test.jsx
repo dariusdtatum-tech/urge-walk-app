@@ -43,7 +43,7 @@ describe.each(['light', 'dark'])('accessibility audit (%s)', (scheme) => {
   it.each([
     ['Home', async () => {}],
     ['Track', async () => fireEvent.press(screen.getByRole('tab', { name: 'Track' }))],
-    ['Community', async () => fireEvent.press(screen.getByRole('tab', { name: 'Community' }))],
+    ['Community', async () => { await fireEvent.press(screen.getByRole('tab', { name: 'You' })); await fireEvent.press(screen.getByTestId('you-community-card')) }],
     ['You', async () => fireEvent.press(screen.getByRole('tab', { name: 'You' }))],
     ['Ride it out', async () => fireEvent.press(screen.getByTestId('ride-button'))],
     ['Breathe', async () => { await fireEvent.press(screen.getByTestId('ride-button')); await fireEvent.press(screen.getByTestId('ride-breathe')) }],
