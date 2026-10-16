@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useSessionBottomSpace } from '../ui/layout.js'
 import { Animated, Easing, ScrollView, View } from 'react-native'
 import { useKeepAwake } from 'expo-keep-awake'
 import { BREATH, breathPhase } from '../lib/breathe.js'
@@ -32,6 +33,7 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
   const goalLine = useGoalLine(clock())
   const device = useDevice()
   const { c } = useTheme()
+  const sb = useSessionBottomSpace()
   const [startedAt] = useState(clock)
   const [now, setNow] = useState(startedAt)
   const [endedAt, setEndedAt] = useState(null)
@@ -69,7 +71,7 @@ export function BreatheScreen({ onSave, onCancel, clock = Date.now }) {
   if (endedAt != null) {
     const secs = Math.round((endedAt - startedAt) / 1000)
     return (
-      <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 32 }} testID="breathe-done">
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 32, paddingBottom: sb }} testID="breathe-done">
         <CheckIn heading="Nice. That one passed a little." sub={`You breathed for ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}.`}
           onSave={({ result, note, tags }) => onSave({ startedAt, endedAt, result, note, tags })}
           onSkip={() => onSave({ startedAt, endedAt, result: null, note: '' })} />

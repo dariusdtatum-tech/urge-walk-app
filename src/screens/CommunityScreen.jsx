@@ -1,5 +1,6 @@
 // Community, before launch: "Coming soon", the 18+ house rules preview, a "tell me when it opens"
 // switch kept on this phone (no network, no account), and today's line. No feed.
+import { useBottomSpace } from '../ui/layout.js'
 import { useState } from 'react'
 import { ScrollView, Switch, View } from 'react-native'
 import { todayISO } from '../lib/cleanTime.js'
@@ -15,11 +16,12 @@ import { Check } from './onboarding/Steps.jsx'
 export function CommunityScreen({ now, clock = Date.now }) {
   const storage = useStorage()
   const { c } = useTheme()
+  const bottom = useBottomSpace()
   const [notify, setNotify] = useState(() => loadCommunityNotify(storage))
   const [line] = useState(() => dailyLine(loadProfile(storage), todayISO(new Date(now))))
   const toggle = (on) => { saveCommunityNotify(on, storage, clock()); setNotify(on) }
   return (
-    <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="community">
+    <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: bottom, gap: space.section }} testID="community">
       <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Community</T>
       <Card testID="community-soon">
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>

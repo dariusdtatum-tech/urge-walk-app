@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useSessionBottomSpace } from '../ui/layout.js'
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, View } from 'react-native'
 import { GROUND, GROUND_LINES, groundProgress } from '../lib/ground.js'
 import { Button } from '../ui/Button.jsx'
@@ -13,6 +14,7 @@ import { radius, space, type, useTheme } from '../ui/theme.js'
 // typed on each sense stay on screen only and are never saved. Then the same check-in as Breathe.
 export function GroundScreen({ onSave, onCancel, clock = Date.now }) {
   const { c } = useTheme()
+  const sb = useSessionBottomSpace()
   const [startedAt] = useState(clock)
   const [i, setI] = useState(0)
   const [words, setWords] = useState({})
@@ -23,7 +25,7 @@ export function GroundScreen({ onSave, onCancel, clock = Date.now }) {
     const secs = Math.round((end.endedAt - startedAt) / 1000)
     const save = (result, note = '', tags = []) => onSave({ startedAt, endedAt: end.endedAt, result, note, tags, completed: end.completed })
     return (
-      <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 32 }} testID="ground-done">
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 32, paddingBottom: sb }} testID="ground-done">
         <CheckIn heading="Nice. You stayed with it." sub={`You grounded for ${Math.floor(secs / 60)}:${String(secs % 60).padStart(2, '0')}.`}
           onSave={({ result, note, tags }) => save(result, note, tags)} onSkip={() => save(null)} />
       </ScrollView>
@@ -36,7 +38,7 @@ export function GroundScreen({ onSave, onCancel, clock = Date.now }) {
   const [head, ...restParts] = splitFirstSentence(item.line)
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: space.screen, gap: space.section }} keyboardShouldPersistTaps="handled" testID="ground">
+      <ScrollView contentContainerStyle={{ flexGrow: 1, padding: space.screen, paddingBottom: sb, gap: space.section }} keyboardShouldPersistTaps="handled" testID="ground">
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title} style={{ flex: 1 }}>{GROUND.title}</T>
           <SenseDots done={sense} />

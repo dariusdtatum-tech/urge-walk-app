@@ -1,4 +1,5 @@
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, useWindowDimensions, View } from 'react-native'
+import { sheetBottomSpace } from './layout.js'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { useReducedMotion } from './motion.js'
 import { T } from './Text.jsx'
@@ -18,7 +19,7 @@ export function Sheet({ onClose, title, testID, children, overlay = null, right 
           onPress={onClose} accessibilityLabel="Close" accessibilityRole="button" testID={testID ? `${testID}-backdrop` : undefined} />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View testID={testID} accessibilityViewIsModal style={{ backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: Math.round(height - Math.max(insets.top, 24) - 16) }}>
-            <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 36 + insets.bottom, gap: 14 }} keyboardShouldPersistTaps="handled">
+            <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: sheetBottomSpace(insets.bottom), gap: 14 }} keyboardShouldPersistTaps="handled">
               <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: c.grab }} />
               {title ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>

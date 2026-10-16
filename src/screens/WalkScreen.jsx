@@ -1,4 +1,5 @@
 import { loadNotifyPrefs } from '../lib/notifyBudget.js'
+import { useSessionBottomSpace } from '../ui/layout.js'
 import { useEffect, useState } from 'react'
 import { AppState, ScrollView, View } from 'react-native'
 import { useKeepAwake } from 'expo-keep-awake'
@@ -38,6 +39,7 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
   const goalLine = useGoalLine(clock())
   const device = useDevice()
   const { c } = useTheme()
+  const sb = useSessionBottomSpace()
   const [walk, setWalk] = useState(() => loadActiveWalk(storage))
   const [now, setNow] = useState(clock)
   const [tip, setTip] = useState(longPressTip)
@@ -90,7 +92,7 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
       onSaved(SAVED_MESSAGES[skipped || !result ? 'skip' : result], record)
     }
     return (
-      <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 32 }} testID="walk-finish">
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 32, paddingBottom: sb }} testID="walk-finish">
         <CheckIn heading={heading} sub={`You walked for ${walked}.`} onSave={(v) => save(v)} onSkip={() => save({}, true)} />
       </ScrollView>
     )
@@ -103,7 +105,7 @@ export function WalkScreen({ onSaved, onExit, longPressTip = false, clock = Date
   return (
     <View style={{ flex: 1 }} testID="walk-live">
       {walking && <KeepAwake />}
-      <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 28, alignItems: 'center', gap: 18, flexGrow: 1 }}>
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingTop: 28, paddingBottom: sb, alignItems: 'center', gap: 18, flexGrow: 1 }}>
         <ReasonCard testID="walk-reason" extra={goalLine} />
         {tip && (
           <View testID="longpress-tip" accessibilityRole="alert" style={{ alignSelf: 'stretch', backgroundColor: c.sand, borderRadius: 16, padding: 14, gap: 10 }}>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { sheetBottomSpace } from '../ui/layout.js'
 import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, useWindowDimensions, View } from 'react-native'
 import { HeaderButton } from '../ui/Sheet.jsx'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -50,7 +51,7 @@ export function RideSheet({ visible, onWalk, onBreathe, onGround, onLog, onClose
           onPress={close} accessibilityLabel="Close" accessibilityRole="button" testID="ride-backdrop" />
         <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View testID="ride-sheet" accessibilityViewIsModal style={{ backgroundColor: c.surface, borderTopLeftRadius: 24, borderTopRightRadius: 24, maxHeight: sheetMaxHeight(win.height, insets.top) }}>
-            <ScrollView contentContainerStyle={{ padding: space.sheet, paddingBottom: 34 + insets.bottom, gap: space.section }} keyboardShouldPersistTaps="handled">
+            <ScrollView contentContainerStyle={{ padding: space.sheet, paddingBottom: sheetBottomSpace(insets.bottom), gap: space.section }} keyboardShouldPersistTaps="handled">
               <View style={{ alignSelf: 'center', width: 40, height: 5, borderRadius: 3, backgroundColor: c.grab }} />
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
                 <T accessibilityRole="header" font="serif" size={type.rideSheetTitle} color={c.title} style={{ flex: 1 }}>Ride it out</T>

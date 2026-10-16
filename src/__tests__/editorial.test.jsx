@@ -198,3 +198,33 @@ test('Progress Money kept: no caption over the total under the heading; the tota
   expect(total.props.accessibilityLabel).toMatch(/^Money kept, \$[\d,]+/)
   expect(within(screen.getByTestId('kept-money')).queryByText('Money kept')).toBeNull()
 })
+
+describe('bottom padding audit: every tab screen and You section clears the tab bar and the raised button', () => {
+  const { bottomSpace } = require('../ui/layout.js')
+  const want = bottomSpace(0) // tab bar + safe area (0 in tests) + 24
+  const pads = (id) => StyleSheet.flatten(screen.getByTestId(id).props.contentContainerStyle).paddingBottom
+  test.each([['Home', 'home'], ['Community', 'community'], ['Track', 'log']])('%s', async (name, id) => {
+    await renderApp('light')
+    await tab(name)
+    expect(pads(id)).toBe(want)
+  })
+  test('Track → Journal', async () => {
+    await renderApp('light')
+    await tab('Track'); await press('track-journal')
+    expect(pads('journal')).toBe(want)
+  })
+  test.each(SECTION_ORDER)('You → %s', async (id) => {
+    await renderApp('light')
+    await tab('You')
+    expect(pads('you')).toBe(want)
+    await press(`you-${id}`)
+    expect(pads('you')).toBe(want)
+  })
+  test('no ScrollView in src hard-codes its bottom padding; they use the layout helpers', () => {
+    const fs = require('fs'); const path = require('path')
+    const walk = (d) => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]))
+    const bad = walk(path.join(__dirname, '..')).filter((f) => f.endsWith('.jsx') && !f.includes('test'))
+      .flatMap((f) => fs.readFileSync(f, 'utf8').split('\n').filter((l) => /<ScrollView[^>]*contentContainerStyle=\{\{[^}]*paddingBottom: \d/.test(l)).map((l) => `${path.basename(f)}: ${l.trim().slice(0, 80)}`))
+    expect(bad).toEqual([])
+  })
+})

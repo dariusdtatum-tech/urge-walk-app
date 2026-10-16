@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { sheetBottomSpace } from '../ui/layout.js'
 import { Modal, ScrollView, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Card, Chart, EmptyState, PrimaryButton, QuietLink, Row, Tag, ToggleRow } from '../ui/kit.jsx'
@@ -47,7 +48,7 @@ export function DesignCheck({ onClose }) {
           <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title} style={{ flex: 1 }}>Design Check</T>
           <HeaderButton label="Done" onPress={onClose} testID="design-done" />
         </View>
-        <ScrollView contentContainerStyle={{ paddingBottom: 40 + insets.bottom, gap: space.section }}>
+        <ScrollView contentContainerStyle={{ paddingBottom: sheetBottomSpace(insets.bottom), gap: space.section }}>
           <View style={{ paddingHorizontal: space.screen, gap: space.cardGap }}>
             <T size={type.footnote} color={c.muted}>Developer builds only. First Light isn’t built yet.</T>
             <ToggleRow title="Largest text" value={big} onChange={setBig} testID="design-big" />

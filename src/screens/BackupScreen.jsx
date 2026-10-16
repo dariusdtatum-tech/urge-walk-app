@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useBottomSpace } from '../ui/layout.js'
 import { ScrollView, View } from 'react-native'
 import {
   applyBackup, backupFilename, buildBackup, getUndoInfo, loadBackupMeta, MAX_FILE_BYTES, recordBackup, summaryText, undoImport, validateBackup,
@@ -20,6 +21,7 @@ export function BackupScreen({ onBack, backLabel = 'Home', onRestored, clock = D
   const storage = useStorage()
   const device = useDevice()
   const { c } = useTheme()
+  const bottom = useBottomSpace()
   const [meta, setMeta] = useState(() => loadBackupMeta(storage))
   const [undoInfo, setUndoInfo] = useState(() => getUndoInfo(storage))
   const [message, setMessage] = useState(null) // { kind: 'ok' | 'error', text }
@@ -76,7 +78,7 @@ export function BackupScreen({ onBack, backLabel = 'Home', onRestored, clock = D
 
   return (
     <View style={{ flex: 1 }}>
-      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="backup">
+      <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: bottom, gap: space.section }} testID="backup">
         <Button kind="quiet" label={`‹ ${backLabel}`} onPress={onBack} testID="backup-back" style={{ alignSelf: 'flex-start', paddingHorizontal: 4 }} />
         <T accessibilityRole="header" font="serif" size={type.screenTitle} color={c.title}>Backup</T>
         <T size={15} color={c.text}>Your backup file holds everything in the app, including your private journal. Keep it somewhere safe, like iCloud Drive or the Files app, and don’t share it.</T>

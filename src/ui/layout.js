@@ -8,3 +8,10 @@ export const bottomSpace = (insetBottom = 0) => size.tabBar + insetBottom + 24
 export function useBottomSpace() {
   return bottomSpace(useSafeAreaInsets().bottom)
 }
+
+// Sheets and full-screen sessions (Walk, Breathe, Ground) have no tab bar: the bottom safe area + a
+// little room. Sheets get 36 so the last button never meets the home indicator.
+export const sheetBottomSpace = (insetBottom = 0) => insetBottom + 36
+export const sessionBottomSpace = (insetBottom = 0) => insetBottom + 24
+export function useSheetBottomSpace() { return sheetBottomSpace(useSafeAreaInsets().bottom) }
+export function useSessionBottomSpace() { return sessionBottomSpace(useSafeAreaInsets().bottom) }

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useBottomSpace } from '../ui/layout.js'
 import { AccessibilityInfo, Animated, findNodeHandle, PanResponder, Pressable, ScrollView, useWindowDimensions, View } from 'react-native'
 import { bannerDismissed, dismissBanner } from '../lib/calm.js'
 import { todayISO } from '../lib/cleanTime.js'
@@ -44,6 +45,7 @@ export const HOME_ITEMS = ['home-title', 'hero', 'home-cards', 'hold-hint']
 export function HomeScreen({ now, clock = Date.now, onOpenTrack = () => {}, onRide, liveWalk, onResume, onOpenBackup, onCheckIn = () => {}, onFirstWeek = () => {}, onOpenYou = () => {} }) {
   const storage = useStorage()
   const { c } = useTheme()
+  const bottom = useBottomSpace()
   const today = todayISO(new Date(now))
   const [profile] = useState(() => loadProfile(storage))
   const reason = useHomeReason(profile)
@@ -132,7 +134,7 @@ export function HomeScreen({ now, clock = Date.now, onOpenTrack = () => {}, onRi
 
   return (
     <View style={{ flex: 1 }}>
-    <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: 140, gap: space.section }} testID="home">
+    <ScrollView contentContainerStyle={{ padding: space.screen, paddingBottom: bottom, gap: space.section }} testID="home">
       <View style={{ gap: 2 }}>
         <T font="medium" size={15} color={c.muted}>{dateLine}</T>
         <Pressable ref={titleRef} onPress={openSwitcher} testID="home-title" accessibilityRole="button"

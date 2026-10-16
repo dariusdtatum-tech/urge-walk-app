@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { sheetBottomSpace } from '../ui/layout.js'
 import { KeyboardAvoidingView, Platform, Pressable, ScrollView, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { todayISO } from '../lib/cleanTime.js'
@@ -158,7 +159,7 @@ function JournalEditor({ draft, entries, restored, onChange, onDone, onDiscard, 
           <T accessibilityRole="header" font="semibold" size={type.body} color={c.title} style={{ flex: 1, textAlign: 'center' }}>{isEdit ? 'Edit entry' : 'New entry'}</T>
           <Button label="Done" onPress={onDone} testID="editor-done" />
         </View>
-        <ScrollView contentContainerStyle={{ padding: space.screen, gap: 14, paddingBottom: 40 + insets.bottom }} keyboardShouldPersistTaps="handled">
+        <ScrollView contentContainerStyle={{ padding: space.screen, gap: 14, paddingBottom: sheetBottomSpace(insets.bottom) }} keyboardShouldPersistTaps="handled">
           <T size={13} color={c.muted} testID="draft-status" accessibilityLiveRegion="polite">{status}</T>
           <TextInput value={draft.title} onChangeText={(title) => change({ title })} maxLength={MAX_TITLE_LENGTH} placeholder="Title (optional)"
             placeholderTextColor={c.muted} accessibilityLabel="Title" testID="editor-title" maxFontSizeMultiplier={2}
