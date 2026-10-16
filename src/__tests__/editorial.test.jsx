@@ -188,3 +188,13 @@ test('Progress: Walks comes first, above Money kept and Time back; no second Mon
   expect(screen.queryByText('appearance')).toBeNull()
   expect(screen.getByTestId('theme')).toBeTruthy()
 })
+
+test('Progress Money kept: no caption over the total under the heading; the total reads "Money kept, $X" to VoiceOver', async () => {
+  const { within } = require('@testing-library/react-native')
+  await renderApp('light', { ...habitsSeed(), ...onboardedProfile({ timeBack: { hoursPerTime: 1, moneyPerTime: 12 } }) })
+  await tab('You')
+  await press('you-progress')
+  const total = screen.getByTestId('kept-total')
+  expect(total.props.accessibilityLabel).toMatch(/^Money kept, \$[\d,]+/)
+  expect(within(screen.getByTestId('kept-money')).queryByText('Money kept')).toBeNull()
+})

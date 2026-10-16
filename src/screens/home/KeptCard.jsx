@@ -24,8 +24,9 @@ export function KeptCard({ profile, hero, walks, today, onEditMoney = null, flat
           {!kept && !flat ? <T size={13} color={c.muted}>Money kept</T> : null}
           {kept ? (
             <View testID="kept-money" style={{ gap: 2 }}>
-              <T size={13} color={c.muted}>Money kept</T>
-              <T font="serif" size={28} color={c.title} style={{ fontVariant: ['lining-nums'] }}>{fmtMoney(kept.total)}</T>
+              {!flat ? <T size={13} color={c.muted}>Money kept</T> : null}
+              <T font="serif" size={28} color={c.title} style={{ fontVariant: ['lining-nums'] }} testID="kept-total"
+                accessibilityLabel={`Money kept, ${fmtMoney(kept.total)}`}>{fmtMoney(kept.total)}</T>
               <T size={13} color={c.muted}>
                 {kept.basis === 'estimate' ? `An estimate at ${fmtMoney(kept.perTime)} each time.` : `${kept.passed} ${kept.passed === 1 ? 'urge' : 'urges'} that passed × ${fmtMoney(kept.perTime)}.`}
               </T>
