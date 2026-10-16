@@ -2,11 +2,13 @@
 // keep clean time as the number on top, and draw a scene that grows from effort (scene state in
 // src/lib/scene.js), so a reset never removes anything. VoiceOver reads each as one image with a summary. Coastal palette, flat fills; in dark mode
 // text is cream, sea glass is for fills only.
+import { createContext, useContext } from 'react'
 import { View } from 'react-native'
 import Svg, { Circle, Ellipse, G, Line, Path, Rect } from 'react-native-svg'
 import { skyTone, tideLevel } from '../../lib/scene.js'
 import { T } from '../../ui/Text.jsx'
 import { Drift } from './SceneMotion.jsx'
+import { SoundButton } from './SoundButton.jsx'
 import { MAX_SCALE, type, useTheme } from '../../ui/theme.js'
 
 const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`
@@ -43,10 +45,13 @@ export function trailSummary(scene) {
 }
 
 // ---- views ----
+const SceneIntro = createContext('')
+export const countIntro = (name, days, since) => `${name}: ${plural(days, 'day', 'days')} clean, ${since}.`
 function Count({ days, since, name }) {
   const { c } = useTheme()
   return (
-    <View accessible accessibilityLabel={`${name}. ${plural(days, 'day', 'days')} clean. ${since}`} testID="alt-hero-count">
+    // VoiceOver hears the count as part of the scene card's one label (below), so the header is hidden.
+    <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants" testID="alt-hero-count">
       <T font="bold" size={type.ringName} max={MAX_SCALE.ringSmall} color={c.text} numberOfLines={1} style={{ letterSpacing: 2, textTransform: 'uppercase' }}>{name}</T>
       <View style={{ flexDirection: 'row', alignItems: 'baseline', gap: 8 }}>
         <T font="serif" size={64} max={MAX_SCALE.ring} color={c.title} testID="hero-days" style={{ lineHeight: 70, fontVariant: ['lining-nums'] }}>{days.toLocaleString()}</T>
@@ -58,17 +63,21 @@ function Count({ days, since, name }) {
 }
 
 // A card with a caption row above the picture, so labels never sit on top of the drawing.
-function Panel({ testID, label, left, right, foot, children }) {
+function Panel({ testID, label, left, right, foot, action, children }) {
   const { c } = useTheme()
+  const intro = useContext(SceneIntro)
   return (
-    <View testID={testID} accessible accessibilityRole="image" accessibilityLabel={label}
-      style={{ backgroundColor: c.surface, borderRadius: 20, borderWidth: 1, borderColor: c.border, padding: 14, gap: 8, overflow: 'hidden' }}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
-        <T size={13} color={c.text} style={{ flexShrink: 1 }}>{left}</T>
-        {right ? <T size={13} color={c.text} style={{ flexShrink: 1, textAlign: 'right' }}>{right}</T> : null}
+    <View style={{ backgroundColor: c.surface, borderRadius: 20, borderWidth: 1, borderColor: c.border, padding: 14, gap: 8, overflow: 'hidden' }}>
+      {/* One VoiceOver element for the whole card: the count, then the scene. The art itself is hidden. */}
+      <View testID={testID} accessible accessibilityRole="image" accessibilityLabel={`${intro} ${label}`} style={{ gap: 8 }}>
+        <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 12 }}>
+          <T size={13} color={c.text} style={{ flexShrink: 1 }}>{left}</T>
+          {right ? <T size={13} color={c.text} style={{ flexShrink: 1, textAlign: 'right' }}>{right}</T> : null}
+        </View>
+        <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">{children}</View>
+        {foot ? <T size={13} color={c.textSoft}>{foot}</T> : null}
       </View>
-      {children}
-      {foot ? <T size={13} color={c.textSoft}>{foot}</T> : null}
+      {action}
     </View>
   )
 }
@@ -80,13 +89,13 @@ function Sky({ scene, W, H }) {
   return t.opacity ? <Rect x={0} y={0} width={W} height={H} fill={c[t.token]} opacity={t.opacity} /> : null
 }
 
-function Tide({ scene }) {
+function Tide({ scene, action }) {
   const { c } = useTheme()
   const W = 320, H = 120, horizon = 18
   const level = H - 10 - tideLevel(scene.growth) * (H - horizon - 14)
   const wave = (y, amp) => `M0 ${y} C ${W * 0.2} ${y - amp}, ${W * 0.35} ${y + amp}, ${W * 0.55} ${y} S ${W * 0.85} ${y - amp}, ${W} ${y} L ${W} ${H} L 0 ${H} Z`
   return (
-    <Panel testID="alt-hero-tide" label={tideSummary(scene)} left="Tide line" right={plural(scene.ridden, 'urge ridden out', 'urges ridden out')}>
+    <Panel action={action} testID="alt-hero-tide" label={tideSummary(scene)} left="Tide line" right={plural(scene.ridden, 'urge ridden out', 'urges ridden out')}>
       <View style={{ height: H, overflow: 'hidden' }}>
         <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
           <Sky scene={scene} W={W} H={level} />
@@ -104,14 +113,14 @@ function Tide({ scene }) {
   )
 }
 
-function Stones({ scene }) {
+function Stones({ scene, action }) {
   const { c } = useTheme()
   const { shown, cols, total } = stonesLayout(scene)
   const gap = 24, W = cols * gap, rows = Math.ceil(total / cols), H = rows * 28
   const tilt = (i) => ((i * 37) % 23) - 11
   const rx = (i) => 8 + ((i * 7) % 4)
   return (
-    <Panel testID="alt-hero-stones" label={stonesSummary(scene)} left={`${plural(scene.ridden, 'stone', 'stones')}, one per urge ridden out`} foot="Each urge you ride out adds a stone.">
+    <Panel action={action} testID="alt-hero-stones" label={stonesSummary(scene)} left={`${plural(scene.ridden, 'stone', 'stones')}, one per urge ridden out`} foot="Each urge you ride out adds a stone.">
       <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
         <Sky scene={scene} W={W} H={H} />
         {Array.from({ length: total }, (_, i) => {
@@ -142,7 +151,7 @@ function along(f) {
   }
   return TRAIL[0]
 }
-function Trail({ scene }) {
+function Trail({ scene, action }) {
   const { c } = useTheme()
   const { section, steps, toPost } = trailSteps(scene)
   const W = 320, H = 150
@@ -150,7 +159,7 @@ function Trail({ scene }) {
   const at = (i) => along(i / TRAIL_SECTION)
   const you = at(steps)
   return (
-    <Panel testID="alt-hero-trail" label={trailSummary(scene)} left={section > 1 ? `Your trail, section ${section}` : 'Your trail'} right={`Next post: ${plural(toPost, 'walk', 'walks')}`}>
+    <Panel action={action} testID="alt-hero-trail" label={trailSummary(scene)} left={section > 1 ? `Your trail, section ${section}` : 'Your trail'} right={`Next post: ${plural(toPost, 'walk', 'walks')}`}>
       <View style={{ height: H, overflow: 'hidden' }}>
       <Drift testID="trail-drift">
         <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
@@ -182,10 +191,12 @@ const VIEWS = { tide: Tide, stones: Stones, trail: Trail }
 export function AltHero({ kind, scene, since, name }) {
   const Art = VIEWS[kind] ?? Tide
   return (
-    <View style={{ gap: 14 }} testID={`alt-hero-${kind}-wrap`}>
-      <Count days={scene.days} since={since} name={name} />
-      <Art scene={scene} />
-    </View>
+    <SceneIntro.Provider value={countIntro(name, scene.days, since)}>
+      <View style={{ gap: 14 }} testID={`alt-hero-${kind}-wrap`}>
+        <Count days={scene.days} since={since} name={name} />
+        <Art scene={scene} action={<SoundButton heroStyle={kind} />} />
+      </View>
+    </SceneIntro.Provider>
   )
 }
 export const isAltHero = (kind) => Boolean(VIEWS[kind])

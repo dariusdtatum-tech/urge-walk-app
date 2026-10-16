@@ -63,3 +63,19 @@ describe('Progress: one source for time back', () => {
     expect(timeBack(profile, { startDate: '2029-12-01' }, '2030-01-01').hours).toBeGreaterThan(0)
   })
 })
+
+describe('scenes on Home: sound pill inside the card, one VoiceOver label', () => {
+  const { HERO_PREFS_KEY } = require('../lib/heroStyle.js')
+  const { SCENE_PREFS_KEY } = require('../lib/scenePrefs.js')
+  it.each(['tide', 'stones', 'trail'])('%s: the Play pill sits in the scene card and stays reachable; the art is hidden', async (kind) => {
+    await renderApp({ [HERO_PREFS_KEY]: JSON.stringify({ style: kind }), [SCENE_PREFS_KEY]: JSON.stringify({ sound: true }) })
+    const card = screen.getByTestId(`alt-hero-${kind}`)
+    const pill = screen.getByTestId('sound-button') // reachable: not inside a hidden or grouped element
+    let n = pill.parent; let inCard = false; let inGroup = false
+    while (n) { if (n.props?.testID === `alt-hero-${kind}-wrap`) inCard = true; if (n === card) inGroup = true; n = n.parent }
+    expect(inCard).toBe(true)
+    expect(inGroup).toBe(false)
+    expect(card.props.accessibilityLabel).toMatch(/^Habit A: 163 days clean, since .+\. (Tide|Stones|Trail): /)
+    expect(screen.getAllByTestId('sound-button')).toHaveLength(1)
+  })
+})

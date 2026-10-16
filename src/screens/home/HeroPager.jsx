@@ -95,7 +95,7 @@ export function HeroPager({ hero, days, since, segment, milestones, today, profi
       </View>
 
       </>)}
-      <SoundButton heroStyle={heroStyle} />
+      {isAltHero(heroStyle) ? null : <SoundButton heroStyle={heroStyle} />}
       {/* Fixed milestone pair: always visible, never inside the ring. */}
       <View style={{ flexDirection: 'row', gap: 10 }} testID="milestone-cards">
         <MsCard testID="ms-last" k="Last milestone" name={cards.last ? cards.last.name : 'Not yet'}

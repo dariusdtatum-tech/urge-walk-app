@@ -32,8 +32,10 @@ describe('home hero', () => {
         const pic = screen.getByTestId(`alt-hero-${kind}`)
         expect(pic.props.accessible).toBe(true)
         expect(pic.props.accessibilityRole).toBe('image')
-        expect(pic.props.accessibilityLabel).toMatch(summary)
-        expect(screen.getByTestId('alt-hero-count').props.accessibilityLabel).toMatch(/^Habit A\. 163 days clean\./)
+        expect(pic.props.accessibilityLabel.replace(/^Habit A: 163 days clean, since [^.]+\. /, '')).toMatch(summary)
+        expect(pic.props.accessibilityLabel).toMatch(/^Habit A: 163 days clean, since /)
+        expect(screen.getByTestId('alt-hero-count', { includeHiddenElements: true }).props.accessibilityElementsHidden).toBe(true)
+        expect(screen.queryByTestId('alt-hero-count')).toBeNull() // hidden from VoiceOver; the card label carries the count
         expect(screen.queryByTestId('hero-ring')).toBeNull()
         expect(screen.getByTestId('ms-next')).toBeTruthy()
         expect(screen.getByTestId('home-cards')).toBeTruthy()
