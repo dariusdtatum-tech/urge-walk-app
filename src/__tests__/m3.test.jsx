@@ -284,63 +284,7 @@ describe('Backup & restore (format 1)', () => {
   })
 })
 
-describe('Reset (safe)', () => {
-  const openReset = async () => { await tab('You'); await fireEvent.press((await youEl(screen, fireEvent, 'reset-app'))) }
-
-  it('Keep my data closes the dialog and erases nothing', async () => {
-    const { storage, device } = await renderApp()
-    await openReset()
-    expect(screen.getByText('Reset Urge Walk?')).toBeTruthy()
-    await fireEvent.press(screen.getByTestId('confirm-cancel'))
-    expect(screen.queryByTestId('confirm')).toBeNull()
-    expect(device.calls.shared).toHaveLength(0)
-    expect(storage.getItem('urgewalk.v1.habits')).not.toBeNull()
-  })
-
-  it('success: the backup file is saved, then Erase and start again wipes everything and opens onboarding', async () => {
-    const { storage, device } = await renderApp()
-    await openReset()
-    await fireEvent.press(screen.getByTestId('confirm-ok')) // Save backup and reset
-    expect(device.calls.resetSaves).toBe(1)
-    expect(JSON.parse(device.calls.shared[0].text).app).toBeTruthy()
-    expect(screen.getByText('Backup saved')).toBeTruthy()
-    await fireEvent.press(screen.getByTestId('confirm-ok')) // Erase and start again
-    expect([...storage._map.keys()].filter((k) => k.startsWith('urgewalk.'))).toEqual([])
-    expect(device.calls.wiped).toBe(1)
-    expect(screen.getByTestId('ob-begin')).toBeTruthy()
-  })
-
-  it('share sheet dismissed after the file is written: Keep my data still erases nothing, calmly', async () => {
-    const { storage } = await renderApp()
-    await openReset()
-    await fireEvent.press(screen.getByTestId('confirm-ok'))
-    await fireEvent.press(screen.getByTestId('confirm-cancel')) // Keep my data
-    expect(screen.queryByTestId('confirm')).toBeNull()
-    expect(screen.getByText('Nothing was erased.')).toBeTruthy()
-    expect(storage.getItem('urgewalk.v1.habits')).not.toBeNull()
-  })
-
-  it('share unavailable but the file was written: says so, still asks before erasing', async () => {
-    await renderApp({ device: stubDevice({ resetSave: { uri: 'file:///b.json', shared: 'failed' } }) })
-    await openReset()
-    await fireEvent.press(screen.getByTestId('confirm-ok'))
-    expect(screen.getByText(/share sheet didn’t open/)).toBeTruthy()
-  })
-
-  it('backup failed: nothing is erased, the message says so, and Keep my data keeps everything', async () => {
-    const { storage, device } = await renderApp({ device: stubDevice({ resetSave: new Error('disk') }) })
-    await openReset()
-    await fireEvent.press(screen.getByTestId('confirm-ok'))
-    expect(screen.getByText('Backup not saved')).toBeTruthy()
-    expect(screen.getByText(/nothing has been erased/)).toBeTruthy()
-    expect(storage.getItem('urgewalk.v1.habits')).not.toBeNull()
-    await fireEvent.press(screen.getByTestId('confirm-cancel'))
-    expect(screen.queryByTestId('confirm')).toBeNull()
-    expect(screen.getByText('Nothing was erased.')).toBeTruthy()
-    expect(storage.getItem('urgewalk.v1.habits')).not.toBeNull()
-    expect(device.calls.wiped).toBe(0)
-  })
-})
+// Reset is covered in reset-lock.test.jsx (native alerts, App lock on).
 
 describe('Onboarding (first run) and the date picker', () => {
   it('walks all 11 screens to the recap and saves on Let’s walk', async () => {

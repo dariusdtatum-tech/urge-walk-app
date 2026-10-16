@@ -162,15 +162,16 @@ function SwitcherPicker({ c, storage }) {
   )
 }
 
-function DataSection({ c, storage, device, now, onOpenBackup, setReset, setShowFree, setDesignCheck }) {
+function DataSection({ c, storage, device, now, onOpenBackup, startReset, resetStatus, setShowFree, setDesignCheck }) {
   return (
     <>
       <HeroStat value="On this phone" label="where your data lives" sub="No ads. No tracking. No account." testID="data-hero" />
       <SectionLabel>Backup</SectionLabel>
       <RowGroup>
         <Row title="Backup & restore" sub={lastBackupLabel(loadBackupMeta(storage), now)} testID="backup-row" onPress={onOpenBackup} />
-        <Row title="Reset app" sub="Saves a backup file first, then starts fresh" testID="reset-app" danger onPress={() => setReset('confirm')} />
+        <Row title="Reset app" sub="Saves a backup file first, then starts fresh" testID="reset-app" danger onPress={() => { startReset() }} />
       </RowGroup>
+      {resetStatus ? <T size={14} color={c.textSoft} accessibilityRole="alert" accessibilityLiveRegion="polite" testID="reset-status" style={{ paddingVertical: 6 }}>{resetStatus}</T> : null}
       <SectionLabel>Privacy</SectionLabel>
       <T size={14} color={c.muted} style={{ paddingVertical: 6 }}>No ads. No tracking. No account. For now, everything stays on this phone.</T>
       <RowGroup>

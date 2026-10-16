@@ -12,13 +12,16 @@ import { T } from '../ui/Text.jsx'
 import { space, type, useTheme } from '../ui/theme.js'
 import { SmallButton } from './ReachOut.jsx'
 
-export function LockCover({ unlockable, error, onUnlock }) {
+// locked: a full-screen native Modal (nothing behind it is reachable). Not locked (the app is only
+// inactive, e.g. the app switcher): a plain view drawn over the app, never a Modal, and it never takes
+// touches, so it can't fight a system sheet or get stuck in front of the app.
+export function LockCover({ locked = true, unlockable, error, onUnlock }) {
   const { c } = useTheme()
   const device = useDevice()
   const insets = useSafeAreaInsets()
   return (
-    <Modal visible transparent={false} animationType="none" onRequestClose={() => {}} statusBarTranslucent>
-      <View testID="lock-cover" style={{ flex: 1, backgroundColor: c.bg, padding: space.screen, paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }}>
+    <Wrap locked={locked}>
+      <View testID="lock-cover" pointerEvents={locked ? 'auto' : 'none'} style={{ flex: 1, backgroundColor: c.bg, padding: space.screen, paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }}>
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 12 }}>
           <View style={{ width: 64, height: 64, borderRadius: 32, backgroundColor: c.sand, alignItems: 'center', justifyContent: 'center' }} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
             <WaveIcon color={c.title} size={28} />
@@ -41,6 +44,11 @@ export function LockCover({ unlockable, error, onUnlock }) {
           <SmallButton label="Call" accessibilityLabel="Call 988" onPress={() => device.openURL('tel:988')} testID="lock-988-call" />
         </Card>
       </View>
-    </Modal>
+    </Wrap>
   )
+}
+
+function Wrap({ locked, children }) {
+  if (locked) return <Modal visible transparent={false} animationType="none" onRequestClose={() => {}} statusBarTranslucent>{children}</Modal>
+  return <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100 }} pointerEvents="none">{children}</View>
 }

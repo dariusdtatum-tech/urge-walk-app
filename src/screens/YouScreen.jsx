@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { ScrollView, View } from 'react-native'
 import { THEMES } from '../lib/appearance.js'
 import { backupFilename, buildBackup, clearAllData, lastBackupLabel, loadBackupMeta } from '../lib/backup.js'
@@ -11,7 +11,8 @@ import { loadReminder, reminderLabel, saveReminder } from '../lib/checkin.js'
 import { loadFollowUpEnabled } from '../lib/followUp.js'
 import { loadWalkPrefs, saveWalkPrefs } from '../lib/walkStorage.js'
 import { Button } from '../ui/Button.jsx'
-import { Confirm } from '../ui/Confirm.jsx'
+import { ask } from '../ui/ask.js'
+import { withSystemSheet } from '../lib/systemSheet.js'
 import { useDevice } from '../ui/DeviceContext.js'
 import { Notice } from '../ui/Row.jsx'
 import { HairlineRow as Row, HeroStat, RowGroup, SectionLabel } from '../ui/kit.jsx'
@@ -96,7 +97,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   // (a cancel shows no error).
   async function changeAppLock(on) {
     setAppLockNote('')
-    const r = await device.authenticateApp(on ? 'Turn on App lock' : 'Turn off App lock')
+    const r = await withSystemSheet(() => device.authenticateApp(on ? 'Turn on App lock' : 'Turn off App lock'))
     if (!r?.ok) { if (r?.reason !== 'cancelled') setAppLockNote(LOCK_ERRORS[r?.reason] ?? LOCK_ERRORS.failed); return }
     saveAppLock(on, storage); setAppLock(on); onAppLock(on)
   }
@@ -109,7 +110,6 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   const [followUpOn, setFollowUpOn] = useState(() => loadFollowUpEnabled(storage))
   const [reminder, setReminder] = useState(() => loadReminder(storage))
   const changeReminder = (r) => { saveReminder(r, storage); setReminder(r); device.syncCheckinReminder(r) }
-  const [reset, setReset] = useState(null) // null | 'confirm' | 'saved?' | 'savedNoShare' | 'notSaved'
   const hero = editor.hero
   const [section, setSection] = useState(open === 'reasons' ? 'why' : open === 'contacts' ? 'support' : SECTION_ORDER.includes(open) ? open : initialSection)
   const earned = hero ? earnedList(milestones, hero.id).length : 0
@@ -123,39 +123,59 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
   }
   function changePrefs(next) { setPrefs(next); saveWalkPrefs(next, storage) }
 
-  // Reset: save a backup file first. The file is written into Urge Walk's own Documents folder
-  // (that's the success that counts), then the share sheet offers a copy for Files or iCloud. iOS can't
-  // tell us whether that share was saved or dismissed, so we always ask once more, and nothing is
-  // erased unless the person says so. If the file can't be written, nothing is erased.
+  // Reset (rebuilt Oct 16 after the iPhone bug). Each step is a native alert, never a custom Modal.
+  // 1. Ask. 2. Write the backup into Urge Walk's Documents folder, then the share sheet offers a copy
+  //    (iOS can't say whether that copy was saved or dismissed). 3. Ask once more; only Erase erases.
+  // No flag can get stuck: every run has its own id, a newer tap or leaving the screen supersedes an
+  // older run, and the status line says what's happening (with the error text if something fails).
+  const resetRun = useRef(0)
+  const [resetStatus, setResetStatus] = useState('')
+  useEffect(() => () => { resetRun.current += 1 }, [])
   async function startReset() {
-    const t = clock()
+    const run = ++resetRun.current
+    const live = () => run === resetRun.current
     try {
-      const r = await device.saveResetBackup(JSON.stringify(buildBackup(storage, t), null, 2), backupFilename(t))
-      setReset(r?.shared === 'failed' ? 'savedNoShare' : 'saved?')
-    } catch {
-      setReset('notSaved')
+      setResetStatus('')
+      const go = await ask({ title: 'Reset Urge Walk?', message: 'First we’ll save a backup file. Then everything Urge Walk keeps on this phone is erased and setup starts again. If the backup isn’t saved, nothing is erased.',
+        cancel: { id: 'keep', text: 'Keep my data' }, confirm: { id: 'go', text: 'Save backup and reset', destructive: true } })
+      if (!live() || go !== 'go') return
+      setResetStatus('Saving a backup…')
+      const t = clock()
+      let saved = null
+      let error = null
+      try {
+        saved = await withSystemSheet(() => device.saveResetBackup(JSON.stringify(buildBackup(storage, t), null, 2), backupFilename(t)))
+      } catch (e) { error = e }
+      if (!live()) return
+      if (error || !saved) {
+        setResetStatus(`Backup not saved. Nothing was erased. (${error?.message ?? 'no file'})`)
+        const a = await ask({ title: 'Backup not saved', message: 'The backup file couldn’t be saved, so nothing has been erased. You can erase without a backup, but your counts, walks and journal can’t be brought back.',
+          cancel: { id: 'keep', text: 'Keep my data' }, confirm: { id: 'erase', text: 'Erase without backup', destructive: true } })
+        if (live() && a === 'erase') eraseAll()
+        return
+      }
+      setResetStatus('')
+      const a = await ask({ title: 'Backup saved',
+        message: saved.shared === 'failed'
+          ? 'A backup file is saved in Urge Walk on this phone, but the share sheet didn’t open, so there’s no copy in Files yet. Erase everything and start setup again?'
+          : 'A backup file is saved in Urge Walk on this phone. If you also saved a copy to Files or iCloud Drive, that copy is safest. Erase everything and start setup again?',
+        cancel: { id: 'keep', text: 'Keep my data' }, confirm: { id: 'erase', text: 'Erase and start again', destructive: true } })
+      if (!live()) return
+      if (a === 'erase') eraseAll()
+      else setNotice('Nothing was erased.')
+    } catch (e) {
+      if (live()) setResetStatus(`Something went wrong, so nothing was erased. (${e?.message ?? e})`)
     }
   }
   function eraseAll() {
-    setReset(null)
+    resetRun.current += 1
+    setResetStatus('')
     clearAllData(storage)
     device.deleteAllReasonFiles()
     onErased()
   }
 
-  const keep = () => { setReset(null); setNotice('Nothing was erased.') }
-  const RESET_STEPS = {
-    confirm: { title: 'Reset Urge Walk?', confirmLabel: 'Save backup and reset', cancelLabel: 'Keep my data', onCancel: () => setReset(null), onConfirm: startReset,
-      message: 'First we’ll save a backup file. Then everything Urge Walk keeps on this phone is erased and setup starts again. If the backup isn’t saved, nothing is erased.' },
-    'saved?': { title: 'Backup saved', confirmLabel: 'Erase and start again', cancelLabel: 'Keep my data', onCancel: keep, onConfirm: eraseAll,
-      message: 'A backup file is saved in Urge Walk on this phone. If you also saved a copy to Files or iCloud Drive, that copy is safest. Erase everything and start setup again?' },
-    savedNoShare: { title: 'Backup saved', confirmLabel: 'Erase and start again', cancelLabel: 'Keep my data', onCancel: keep, onConfirm: eraseAll,
-      message: 'A backup file is saved in Urge Walk on this phone, but the share sheet didn’t open, so there’s no copy in Files yet. Erase everything and start setup again?' },
-    notSaved: { title: 'Backup not saved', confirmLabel: 'Erase without backup', cancelLabel: 'Keep my data', onCancel: keep, onConfirm: eraseAll,
-      message: 'The backup file couldn’t be saved, so nothing has been erased. You can erase without a backup, but your counts, walks and journal can’t be brought back.' },
-  }
-  // key: each step is its own Confirm, so a closing card is never reused for the next one.
-  const overlay = reset && RESET_STEPS[reset] ? <Confirm key={reset} {...RESET_STEPS[reset]} /> : null
+  const overlay = null
 
   const days = hero ? cleanDays(hero, today) : 0
   const themeLabel = THEMES.find((t) => t.id === theme)?.label ?? 'System'
@@ -173,7 +193,7 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
     walks, c, storage, device, today, now, profile, editor, habits, hero, earned, prefs, showLengths, setShowLengths, changePrefs,
     people, contactsVer, reasonCount, appLock, appLockNote, changeAppLock, followUpOn, setFollowUpOn, reminder, changeReminder,
     list, showAnswers, setShowAnswers, setAnswer, onRedo, theme, onTheme, verseOn, setVerseOn, setVerseFade, onOpenBackup,
-    setShowCrisis, setShowContacts, setShowReasons, setShowMoney, setShowNotify, setShowFree, setReset, setDesignCheck, changeProfile, setSheet,
+    setShowCrisis, setShowContacts, setShowReasons, setShowMoney, setShowNotify, setShowFree, startReset, resetStatus, setDesignCheck, changeProfile, setSheet,
   }
   const Section = section ? SECTIONS[section] : null
 

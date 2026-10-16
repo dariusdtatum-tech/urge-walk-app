@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { withSystemSheet } from '../lib/systemSheet.js'
 import { useBottomSpace } from '../ui/layout.js'
 import { ScrollView, View } from 'react-native'
 import {
@@ -32,7 +33,7 @@ export function BackupScreen({ onBack, backLabel = 'Home', onRestored, clock = D
     setMessage(null)
     const now = clock()
     try {
-      const outcome = await device.shareBackup(JSON.stringify(buildBackup(storage, now), null, 2), backupFilename(now))
+      const outcome = await withSystemSheet(() => device.shareBackup(JSON.stringify(buildBackup(storage, now), null, 2), backupFilename(now)))
       recordBackup(now, storage)
       setMeta(loadBackupMeta(storage))
       setMessage({ kind: 'ok', text: outcome === 'downloaded' ? 'Backup file downloaded.' : 'Backup ready. Make sure you saved it somewhere safe.' })
@@ -45,7 +46,7 @@ export function BackupScreen({ onBack, backLabel = 'Home', onRestored, clock = D
     setMessage(null)
     let file
     try {
-      file = await device.pickBackupFile()
+      file = await withSystemSheet(() => device.pickBackupFile())
     } catch {
       setMessage({ kind: 'error', text: 'Couldn’t read that file.' })
       return

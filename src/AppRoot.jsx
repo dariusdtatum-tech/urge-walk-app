@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useStorage as useStorageFromContext } from './ui/StorageContext.js'
 import { AppState, Platform, Pressable, View } from 'react-native'
+import { isSystemSheetOpen } from './lib/systemSheet.js'
 import { SafeAreaProvider, useSafeAreaInsets } from 'react-native-safe-area-context'
 import { StatusBar } from 'expo-status-bar'
 import { loadTheme, saveTheme } from './lib/appearance.js'
@@ -79,6 +80,8 @@ function Shell({ clock, theme, onTheme }) {
   useEffect(() => {
     // Only a real trip to the background re-locks (the Face ID prompt itself makes the app 'inactive').
     const sub = AppState.addEventListener?.('change', (st) => {
+      // Our own share sheet / picker / Face ID makes the app 'inactive': not the app switcher, so no cover.
+      if (st === 'inactive' && isSystemSheetOpen()) return
       const prev = lastAppState.current
       lastAppState.current = st
       setAppState(st)
@@ -231,7 +234,7 @@ function Shell({ clock, theme, onTheme }) {
     return (
       <View style={{ flex: 1, backgroundColor: c.bg, paddingTop: insets.top }}>
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-        {lock.cover ? <LockCover unlockable={lock.unlockable} error={lockError} onUnlock={unlockApp} /> : null}
+        {lock.cover ? <LockCover locked={locked} unlockable={lock.unlockable} error={lockError} onUnlock={unlockApp} /> : null}
         <BackupScreen clock={clock} backLabel="Back" onBack={() => setObBackup(false)}
           onRestored={(text) => {
             setObBackup(false)
@@ -244,7 +247,7 @@ function Shell({ clock, theme, onTheme }) {
     return (
       <View style={{ flex: 1, backgroundColor: c.bg }}>
         <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
-        {lock.cover ? <LockCover unlockable={lock.unlockable} error={lockError} onUnlock={unlockApp} /> : null}
+        {lock.cover ? <LockCover locked={locked} unlockable={lock.unlockable} error={lockError} onUnlock={unlockApp} /> : null}
         <Onboarding key={onboarding} mode={onboarding} now={clock()} onRestore={() => setObBackup(true)}
           onCancel={() => { setOnboarding(null); goTo('you') }}
           onDone={() => {
@@ -311,7 +314,7 @@ function Shell({ clock, theme, onTheme }) {
           onRide={() => { setCheckIn(false); setDataVer((v) => v + 1); onRide() }} />
       ) : null}
       {followUpFor ? <FollowUpSheet onAnswer={(a) => applyFollowUp(followUpFor, a)} onClose={() => setFollowUpFor(null)} /> : null}
-      {lock.cover ? <LockCover unlockable={lock.unlockable} error={lockError} onUnlock={unlockApp} /> : null}
+      {lock.cover ? <LockCover locked={locked} unlockable={lock.unlockable} error={lockError} onUnlock={unlockApp} /> : null}
     </View>
   )
 }
