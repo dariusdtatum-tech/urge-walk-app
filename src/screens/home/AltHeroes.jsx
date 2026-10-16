@@ -6,6 +6,7 @@ import { View } from 'react-native'
 import Svg, { Circle, Ellipse, G, Line, Path, Rect } from 'react-native-svg'
 import { skyTone, tideLevel } from '../../lib/scene.js'
 import { T } from '../../ui/Text.jsx'
+import { Drift } from './SceneMotion.jsx'
 import { MAX_SCALE, type, useTheme } from '../../ui/theme.js'
 
 const plural = (n, one, many) => `${n.toLocaleString()} ${n === 1 ? one : many}`
@@ -86,13 +87,19 @@ function Tide({ scene }) {
   const wave = (y, amp) => `M0 ${y} C ${W * 0.2} ${y - amp}, ${W * 0.35} ${y + amp}, ${W * 0.55} ${y} S ${W * 0.85} ${y - amp}, ${W} ${y} L ${W} ${H} L 0 ${H} Z`
   return (
     <Panel testID="alt-hero-tide" label={tideSummary(scene)} left="Tide line" right={plural(scene.ridden, 'urge ridden out', 'urges ridden out')}>
-      <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
-        <Sky scene={scene} W={W} H={level} />
-        <Line x1={0} x2={W} y1={horizon} y2={horizon} stroke={c.text} strokeOpacity={0.6} strokeWidth={1} strokeDasharray="2 5" />
-        <Circle cx={W - 28} cy={horizon} r={9} fill={c.title} />
-        <Path d={wave(level + 8, 5)} fill={c.ringA} opacity={0.45} />
-        <Path d={wave(level, 7)} fill={c.ringA} />
-      </Svg>
+      <View style={{ height: H, overflow: 'hidden' }}>
+        <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
+          <Sky scene={scene} W={W} H={level} />
+          <Line x1={0} x2={W} y1={horizon} y2={horizon} stroke={c.text} strokeOpacity={0.6} strokeWidth={1} strokeDasharray="2 5" />
+          <Circle cx={W - 28} cy={horizon} r={9} fill={c.title} />
+        </Svg>
+        <Drift testID="tide-drift">
+          <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none">
+            <Path d={wave(level + 8, 5)} fill={c.ringA} opacity={0.45} />
+            <Path d={wave(level, 7)} fill={c.ringA} />
+          </Svg>
+        </Drift>
+      </View>
     </Panel>
   )
 }
@@ -144,9 +151,14 @@ function Trail({ scene }) {
   const you = at(steps)
   return (
     <Panel testID="alt-hero-trail" label={trailSummary(scene)} left={section > 1 ? `Your trail, section ${section}` : 'Your trail'} right={`Next post: ${plural(toPost, 'walk', 'walks')}`}>
-      <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
+      <View style={{ height: H, overflow: 'hidden' }}>
+      <Drift testID="trail-drift">
+        <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`}>
+          <Path d={`M0 ${H - 18} C 90 ${H - 38}, 160 ${H}, ${W} ${H - 28} L ${W} ${H} L 0 ${H} Z`} fill={c.ringA} opacity={0.35} />
+        </Svg>
+      </Drift>
+      <Svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} style={{ position: 'absolute' }}>
         <Sky scene={scene} W={W} H={H} />
-        <Path d={`M0 ${H - 18} C 90 ${H - 38}, 160 ${H}, ${W} ${H - 28} L ${W} ${H} L 0 ${H} Z`} fill={c.ringA} opacity={0.35} />
         <Path d={line} stroke={c.fieldBorder} strokeWidth={2} fill="none" strokeDasharray="3 6" strokeLinecap="round" />
         {Array.from({ length: TRAIL_SECTION / TRAIL_POST }, (_, k) => {
           const [x, y] = at((k + 1) * TRAIL_POST)
@@ -161,6 +173,7 @@ function Trail({ scene }) {
         {Array.from({ length: steps }, (_, i) => { const [x, y] = at(i + 0.5); return <Ellipse key={i} cx={x + (i % 2 ? 3 : -3)} cy={y} rx={2.2} ry={3.2} fill={c.title} /> })}
         <Circle cx={you[0]} cy={you[1]} r={8} fill={c.ringA} stroke={c.bg} strokeWidth={3} />
       </Svg>
+      </View>
     </Panel>
   )
 }

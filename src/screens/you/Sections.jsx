@@ -1,6 +1,7 @@
 // You, split into six sections (Option C). Each is one row on You with a live status line; tapping it
 // opens the section in place, with "‹ You" to go back. State lives in YouScreen and comes in as props.
 import { HERO_STYLES, loadHeroStyle, saveHeroStyle } from '../../lib/heroStyle.js'
+import { loadScenePrefs, saveScenePrefs } from '../../lib/scenePrefs.js'
 import { WELLNESS_NOTE } from '../../lib/wellness.js'
 import { useState } from 'react'
 import { Pressable, View } from 'react-native'
@@ -155,11 +156,16 @@ function AppearanceSection({ c, storage, theme, onTheme, verseOn, setVerseOn, se
 // Home hero: the ring is the default; Tide, Stones and Trail are optional styles. Saved on this phone only.
 function HeroStylePicker({ c, storage }) {
   const [style, setStyle] = useState(() => loadHeroStyle(storage))
+  const [prefs, setPrefs] = useState(() => loadScenePrefs(storage))
   return (
     <View style={{ gap: 6 }} testID="hero-style-setting">
       <SectionLabel>Home hero</SectionLabel>
       <Seg items={HERO_STYLES} value={style} onChange={(v) => setStyle(saveHeroStyle(v, storage))} label="Home hero" testID="hero-style" small />
       <T size={type.sub} color={c.textSoft}>Ring is the default. Tide, Stones and Trail show the same count another way.</T>
+      <RowGroup>
+        <ToggleRow title="Still scenes" sub="Scenes never move. Always still when Reduce Motion is on." value={prefs.still} testID="still-scenes"
+          onChange={(on) => setPrefs(saveScenePrefs({ still: on }, storage))} />
+      </RowGroup>
     </View>
   )
 }

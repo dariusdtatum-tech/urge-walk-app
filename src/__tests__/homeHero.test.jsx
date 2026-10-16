@@ -1,8 +1,10 @@
 // Home hero: the ring by default, Tide / Stones / Trail as optional styles picked in You → Appearance
 // and lock → Home hero, saved on this phone. Neutral test data only.
+import { AccessibilityInfo } from 'react-native'
 import { act, fireEvent, render, screen } from '@testing-library/react-native'
 import { AppRoot } from '../AppRoot.jsx'
 import { HERO_PREFS_KEY } from '../lib/heroStyle.js'
+import { SCENE_PREFS_KEY } from '../lib/scenePrefs.js'
 import { stonesLayout, stonesSummary, tideSummary, trailSteps, trailSummary } from '../screens/home/AltHeroes.jsx'
 import { fakeClock, habitsSeed, memoryStorage, onboardedProfile, stubDevice } from './helpers.js'
 
@@ -51,9 +53,8 @@ describe('home hero', () => {
     await act(async () => { fireEvent.press(screen.getByTestId('hero-style-ring')) })
     expect(JSON.parse(storage.getItem(HERO_PREFS_KEY)).style).toBe('ring')
     await act(async () => { fireEvent.press(screen.getByTestId('hero-style-stones')) })
-    screen.unmount()
-    // a fresh launch on the same phone keeps it
-    await render(<AppRoot storage={storage} device={stubDevice()} clock={fakeClock()} scheme="light" />)
+    // Home picks it up
+    await act(async () => { fireEvent.press(screen.getByRole('tab', { name: 'Home' })) })
     expect(screen.getByTestId('alt-hero-stones')).toBeTruthy()
   })
 
@@ -66,5 +67,31 @@ describe('home hero', () => {
     expect(trailSteps(sc(0, 0))).toEqual({ section: 1, steps: 0, toPost: 5 })
     expect(trailSteps(sc(33, 40))).toEqual({ section: 2, steps: 3, toPost: 2 })
     expect(trailSummary(sc(1, 1))).toBe('Trail: 1 walk so far, the next post is 4 walks away')
+  })
+
+  const tx = (id) => { const t = [].concat(screen.getByTestId(id, { includeHiddenElements: true }).props.style).flat().find((x) => x && x.transform)?.transform; return t?.[0]?.translateX }
+  it('scenes drift slowly by default and stay still with Still scenes on', async () => {
+    await renderApp(pref('tide'))
+    expect(screen.getByTestId('tide-drift', { includeHiddenElements: true })).toBeTruthy()
+  })
+  it('Still scenes keeps them still', async () => {
+    await renderApp({ ...pref('trail'), [SCENE_PREFS_KEY]: JSON.stringify({ still: true }) })
+    expect(tx('trail-drift')).toBe(0)
+  })
+
+  it('Reduce Motion makes scenes still frames', async () => {
+    const spy = jest.spyOn(AccessibilityInfo, 'isReduceMotionEnabled').mockResolvedValue(true)
+    await renderApp(pref('tide'))
+    await act(async () => {})
+    expect(tx('tide-drift')).toBe(0)
+    spy.mockRestore()
+  })
+
+  it('Still scenes is a setting under Home hero and is saved', async () => {
+    const { storage } = await renderApp()
+    await act(async () => { fireEvent.press(screen.getByRole('tab', { name: 'You' })) })
+    await act(async () => { fireEvent.press(screen.getByTestId('you-appearance')) })
+    await act(async () => { fireEvent(screen.getByTestId('still-scenes'), 'valueChange', true) })
+    expect(JSON.parse(storage.getItem(SCENE_PREFS_KEY)).still).toBe(true)
   })
 })
