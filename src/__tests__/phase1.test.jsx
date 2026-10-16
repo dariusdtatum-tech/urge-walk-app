@@ -276,7 +276,8 @@ describe('idea 4: money kept', () => {
     expect(screen.queryByTestId('money-card')).toBeNull() // slim Home: the total lives in You → Progress
     await tab('You')
     expect(screen.getByTestId('you-progress')).toHaveTextContent(/\$12 kept/)
-    expect((await youEl(screen, fireEvent, 'kept-money'))).toHaveTextContent(/Money kept\$12/)
+    await youEl(screen, fireEvent, 'kept-money')
+    expect(screen.getByTestId('kept-total').props.accessibilityLabel).toBe('Money kept, $12')
     expect(screen.getByTestId('kept-goal')).toHaveTextContent(/Car fund · \$200/)
     await fireEvent((await youEl(screen, fireEvent, 'money-toggle')), 'valueChange', false)
     expect(screen.queryByTestId('kept-money')).toBeNull()

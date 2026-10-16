@@ -260,7 +260,7 @@ describe('Home has no Your why line, quote or Add a habit; money and time live i
     await tab('You')
     expect(screen.getByTestId('you-progress')).toHaveTextContent(/Habit A · 163 days · \$\d[\d,]* kept/)
     await press('you-progress')
-    expect(screen.getByTestId('kept-money')).toHaveTextContent(/Money kept\$/)
+    expect(screen.getByTestId('kept-total').props.accessibilityLabel).toMatch(/^Money kept, \$/)
     expect(screen.getByTestId('kept-goal')).toHaveTextContent(/A goal · \$100/)
     expect(screen.getByTestId('time-back')).toBeTruthy()
     expect(screen.getByTestId('money-toggle').props.value).toBe(true)
