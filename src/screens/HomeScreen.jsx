@@ -14,6 +14,8 @@ import { useStorage } from '../ui/StorageContext.js'
 import { T } from '../ui/Text.jsx'
 import { radius, space, type, useTheme } from '../ui/theme.js'
 import { HeroPager } from './home/HeroPager.jsx'
+import { DailyLine } from './home/DailyLine.jsx'
+import { loadDailyLineSource } from '../lib/dailyLine.js'
 import { MilestoneSheet } from './home/Milestones.jsx'
 import { CheckInCard } from './CheckInSheet.jsx'
 import { FirstWeekCard } from './home/FirstWeekCard.jsx'
@@ -188,6 +190,8 @@ export function HomeScreen({ now, clock = Date.now, onOpenTrack = () => {}, onRi
           <Button kind="quiet" label="Restore from a backup" onPress={onOpenBackup} testID="empty-restore" />
         </View>
       )}
+
+      <DailyLine date={new Date(now)} source={loadDailyLineSource(storage)} />
 
       <FirstWeekCard now={now} onStep={(id) => (id === 'start' ? setSheet({ mode: 'add' }) : onFirstWeek(id))} />
       {/* At most five cards, in HOME_CARDS order. */}

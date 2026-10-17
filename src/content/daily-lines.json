@@ -1,0 +1,370 @@
+{
+ "quotes": [
+  {
+   "text": "I went to the woods because I wished to live deliberately.",
+   "by": "Henry David Thoreau"
+  },
+  {
+   "text": "Only that day dawns to which we are awake.",
+   "by": "Henry David Thoreau"
+  },
+  {
+   "text": "Things do not change; we change.",
+   "by": "Henry David Thoreau"
+  },
+  {
+   "text": "Love your life, poor as it is.",
+   "by": "Henry David Thoreau"
+  },
+  {
+   "text": "However mean your life is, meet it and live it.",
+   "by": "Henry David Thoreau"
+  },
+  {
+   "text": "Rise free from care before the dawn, and seek adventures.",
+   "by": "Henry David Thoreau"
+  },
+  {
+   "text": "We must learn to reawaken and keep ourselves awake, not by mechanical aids, but by an infinite expectation of the dawn.",
+   "by": "Henry David Thoreau"
+  },
+  {
+   "text": "Nothing can bring you peace but yourself.",
+   "by": "Ralph Waldo Emerson"
+  },
+  {
+   "text": "Trust thyself: every heart vibrates to that iron string.",
+   "by": "Ralph Waldo Emerson"
+  },
+  {
+   "text": "Insist on yourself; never imitate.",
+   "by": "Ralph Waldo Emerson"
+  },
+  {
+   "text": "The years teach much which the days never know.",
+   "by": "Ralph Waldo Emerson"
+  },
+  {
+   "text": "Write it on your heart that every day is the best day in the year.",
+   "by": "Ralph Waldo Emerson"
+  },
+  {
+   "text": "Hitch your wagon to a star.",
+   "by": "Ralph Waldo Emerson"
+  },
+  {
+   "text": "Look within. Within is the fountain of good, and it will ever bubble up, if thou wilt ever dig.",
+   "by": "Marcus Aurelius"
+  },
+  {
+   "text": "Be like the promontory against which the waves continually break, but it stands firm.",
+   "by": "Marcus Aurelius"
+  },
+  {
+   "text": "Confine thyself to the present.",
+   "by": "Marcus Aurelius"
+  },
+  {
+   "text": "No longer talk at all about the kind of man that a good man ought to be, but be such.",
+   "by": "Marcus Aurelius"
+  },
+  {
+   "text": "In the morning when thou risest unwillingly, let this thought be present: I am rising to the work of a human being.",
+   "by": "Marcus Aurelius"
+  },
+  {
+   "text": "If thou art pained by any external thing, it is not this thing that disturbs thee, but thy own judgement about it.",
+   "by": "Marcus Aurelius"
+  },
+  {
+   "text": "Nowhere either with more quiet or more freedom from trouble does a man retire than into his own soul.",
+   "by": "Marcus Aurelius"
+  },
+  {
+   "text": "Hold every hour in your grasp.",
+   "by": "Seneca"
+  },
+  {
+   "text": "Lay hold of to-day's task, and you will not need to depend so much upon to-morrow's.",
+   "by": "Seneca"
+  },
+  {
+   "text": "We suffer more often in imagination than in reality.",
+   "by": "Seneca"
+  },
+  {
+   "text": "You need a change of soul rather than a change of climate.",
+   "by": "Seneca"
+  },
+  {
+   "text": "When a man does not know what harbour he is making for, no wind is the right wind.",
+   "by": "Seneca"
+  },
+  {
+   "text": "Of things some are in our power, and others are not.",
+   "by": "Epictetus"
+  },
+  {
+   "text": "Men are disturbed not by the things which happen, but by the opinions about the things.",
+   "by": "Epictetus"
+  },
+  {
+   "text": "No great thing is produced suddenly, since not even the grape or the fig is.",
+   "by": "Epictetus"
+  },
+  {
+   "text": "I travel not to go anywhere, but to go. I travel for travel's sake. The great affair is to move.",
+   "by": "Robert Louis Stevenson"
+  },
+  {
+   "text": "Lose no time; be always employ'd in something useful.",
+   "by": "Benjamin Franklin"
+  }
+ ],
+ "poems": [
+  {
+   "lines": [
+    "\"Hope\" is the thing with feathers -",
+    "That perches in the soul -",
+    "And sings the tune without the words -",
+    "And never stops - at all -"
+   ],
+   "by": "Emily Dickinson",
+   "title": "Hope is the thing with feathers"
+  },
+  {
+   "lines": [
+    "I wandered lonely as a cloud",
+    "That floats on high o'er vales and hills,"
+   ],
+   "by": "William Wordsworth",
+   "title": "I wandered lonely as a cloud"
+  },
+  {
+   "lines": [
+    "They flash upon that inward eye",
+    "Which is the bliss of solitude;"
+   ],
+   "by": "William Wordsworth",
+   "title": "I wandered lonely as a cloud"
+  },
+  {
+   "lines": [
+    "While with an eye made quiet by the power",
+    "Of harmony, and the deep power of joy,",
+    "We see into the life of things."
+   ],
+   "by": "William Wordsworth",
+   "title": "Tintern Abbey"
+  },
+  {
+   "lines": [
+    "Come forth into the light of things,",
+    "Let Nature be your teacher."
+   ],
+   "by": "William Wordsworth",
+   "title": "The tables turned"
+  },
+  {
+   "lines": [
+    "My heart leaps up when I behold",
+    "A rainbow in the sky:"
+   ],
+   "by": "William Wordsworth",
+   "title": "My heart leaps up"
+  },
+  {
+   "lines": [
+    "Ne'er saw I, never felt, a calm so deep!"
+   ],
+   "by": "William Wordsworth",
+   "title": "Composed upon Westminster Bridge"
+  },
+  {
+   "lines": [
+    "Afoot and light-hearted I take to the open road,",
+    "Healthy, free, the world before me,",
+    "The long brown path before me leading wherever I choose."
+   ],
+   "by": "Walt Whitman",
+   "title": "Song of the open road"
+  },
+  {
+   "lines": [
+    "Henceforth I ask not good-fortune, I myself am good-fortune,"
+   ],
+   "by": "Walt Whitman",
+   "title": "Song of the open road"
+  },
+  {
+   "lines": [
+    "I believe a leaf of grass is no less than the journey-work of the stars,"
+   ],
+   "by": "Walt Whitman",
+   "title": "Song of myself"
+  },
+  {
+   "lines": [
+    "I exist as I am, that is enough,"
+   ],
+   "by": "Walt Whitman",
+   "title": "Song of myself"
+  },
+  {
+   "lines": [
+    "Look'd up in perfect silence at the stars."
+   ],
+   "by": "Walt Whitman",
+   "title": "When I heard the learn'd astronomer"
+  },
+  {
+   "lines": [
+    "Does the road wind up-hill all the way?",
+    "Yes, to the very end.",
+    "Will the day's journey take the whole long day?",
+    "From morn to night, my friend."
+   ],
+   "by": "Christina Rossetti",
+   "title": "Up-hill"
+  },
+  {
+   "lines": [
+    "My heart is like a singing bird"
+   ],
+   "by": "Christina Rossetti",
+   "title": "A birthday"
+  },
+  {
+   "lines": [
+    "A thing of beauty is a joy for ever:",
+    "Its loveliness increases; it will never",
+    "Pass into nothingness;"
+   ],
+   "by": "John Keats",
+   "title": "Endymion"
+  },
+  {
+   "lines": [
+    "If Winter comes, can Spring be far behind?"
+   ],
+   "by": "Percy Bysshe Shelley",
+   "title": "Ode to the west wind"
+  },
+  {
+   "lines": [
+    "To see a World in a Grain of Sand",
+    "And a Heaven in a Wild Flower,",
+    "Hold Infinity in the palm of your hand",
+    "And Eternity in an hour."
+   ],
+   "by": "William Blake",
+   "title": "Auguries of innocence"
+  },
+  {
+   "lines": [
+    "Two roads diverged in a wood, and I-",
+    "I took the one less traveled by,",
+    "And that has made all the difference."
+   ],
+   "by": "Robert Frost",
+   "title": "The road not taken"
+  },
+  {
+   "lines": [
+    "The woods are lovely, dark and deep,",
+    "But I have promises to keep,",
+    "And miles to go before I sleep,"
+   ],
+   "by": "Robert Frost",
+   "title": "Stopping by woods on a snowy evening"
+  },
+  {
+   "lines": [
+    "To strive, to seek, to find, and not to yield."
+   ],
+   "by": "Alfred, Lord Tennyson",
+   "title": "Ulysses"
+  },
+  {
+   "lines": [
+    "For men may come and men may go,",
+    "But I go on for ever."
+   ],
+   "by": "Alfred, Lord Tennyson",
+   "title": "The brook"
+  },
+  {
+   "lines": [
+    "I am the master of my fate,",
+    "I am the captain of my soul."
+   ],
+   "by": "William Ernest Henley",
+   "title": "Invictus"
+  },
+  {
+   "lines": [
+    "Let us, then, be up and doing,",
+    "With a heart for any fate;",
+    "Still achieving, still pursuing,",
+    "Learn to labor and to wait."
+   ],
+   "by": "Henry Wadsworth Longfellow",
+   "title": "A psalm of life"
+  },
+  {
+   "lines": [
+    "The world is so full of a number of things,",
+    "I'm sure we should all be as happy as kings."
+   ],
+   "by": "Robert Louis Stevenson",
+   "title": "Happy thought"
+  },
+  {
+   "lines": [
+    "And I shall have some peace there, for peace comes dropping slow,"
+   ],
+   "by": "W. B. Yeats",
+   "title": "The lake isle of Innisfree"
+  },
+  {
+   "lines": [
+    "I must go down to the seas again, to the lonely sea and the sky,",
+    "And all I ask is a tall ship and a star to steer her by;"
+   ],
+   "by": "John Masefield",
+   "title": "Sea-fever"
+  },
+  {
+   "lines": [
+    "The year's at the spring",
+    "And day's at the morn;",
+    "Morning's at seven;",
+    "The hill-side's dew-pearled;"
+   ],
+   "by": "Robert Browning",
+   "title": "Pippa passes"
+  },
+  {
+   "lines": [
+    "If you can wait and not be tired by waiting,"
+   ],
+   "by": "Rudyard Kipling",
+   "title": "If-"
+  },
+  {
+   "lines": [
+    "Life has loveliness to sell,",
+    "All beautiful and splendid things,"
+   ],
+   "by": "Sara Teasdale",
+   "title": "Barter"
+  },
+  {
+   "lines": [
+    "I will arise and go now, and go to Innisfree,"
+   ],
+   "by": "W. B. Yeats",
+   "title": "The lake isle of Innisfree"
+  }
+ ]
+}

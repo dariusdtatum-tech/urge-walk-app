@@ -228,7 +228,7 @@ describe('fuller Home: title, ring + milestones, at most five cards, the hold hi
 describe('Home has no Your why line, quote or Add a habit; money and time live in You → Progress', () => {
   it('no old why line, quote or Add a habit; the why card shows the saved reason only (not the setup answer when a saved one exists)', async () => {
     await renderApp({ ...habitsSeed(), ...reasonsSeed(['First thing']), ...onboardedProfile({ why: 'A quiet example why', timeBack: { hoursPerTime: 1, moneyPerTime: 10 }, before: { daysPerWeek: 7, timesPerDay: 1 } }) })
-    for (const id of ['why-line', 'why-open', 'why-add-habit', 'daily-line', 'kept-card']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
+    for (const id of ['why-line', 'why-open', 'why-add-habit', 'kept-card']) expect([id, screen.queryByTestId(id)]).toEqual([id, null])
     expect(screen.queryByText(/Add a reason|Add a habit|A quiet example why|Today ·/i)).toBeNull()
     expect(screen.getByTestId('money-card')).toBeTruthy()
   })

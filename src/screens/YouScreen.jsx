@@ -29,12 +29,10 @@ import { CRISIS, CrisisSheet } from './Crisis.jsx'
 import { ContactsSheet } from './ReachOut.jsx'
 import { ReasonsSheet } from './Reasons.jsx'
 import { LOCK_ERRORS, loadAppLock, saveAppLock } from '../lib/appLock.js'
-import { DailyVerseCard } from './DailyVerse.jsx'
 import { DesignCheck } from './DesignCheck.jsx'
 import { FreeForeverSheet } from './FreeForever.jsx'
 import { NotificationsSheet } from './NotificationsSheet.jsx'
 
-import { loadVerseEnabled } from '../lib/verse.js'
 import { MoneySheet } from './MoneySheet.jsx'
 
 import { loadReasons } from '../lib/reasons.js'
@@ -115,8 +113,6 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
     if (!r?.ok) { if (r?.reason !== 'cancelled') setAppLockNote(LOCK_ERRORS[r?.reason] ?? LOCK_ERRORS.failed); return }
     saveAppLock(on, storage); setAppLock(on); onAppLock(on)
   }
-  const [verseOn, setVerseOn] = useState(() => loadVerseEnabled(storage))
-  const [verseFade, setVerseFade] = useState(false)
   const reasonCount = loadReasons(storage).length
   const [walks] = useState(() => loadWalks(storage).walks)
   const [contactsVer, setContactsVer] = useState(0)
@@ -200,13 +196,13 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
     why: reasonCount ? `${reasonCount} ${reasonCount === 1 ? 'reason' : 'reasons'}` : 'No reasons yet',
     progress: hero ? [`${hero.name} · ${days.toLocaleString()} ${days === 1 ? 'day' : 'days'}`, habits.length > 1 ? `${habits.length} trackers` : null, kept ? `${fmtMoney(kept.total)} kept` : null].filter(Boolean).join(' · ') : 'Add the date you started',
     reminders: `${reminder ? `Check-in ${reminderLabel(reminder)}` : 'Check-in reminder off'} · follow-up ${followUpOn ? 'on' : 'off'}`,
-    appearance: [themeLabel, appLock ? 'App lock on' : null, verseOn ? 'Faith content on' : null].filter(Boolean).join(' · '),
+    appearance: [themeLabel, appLock ? 'App lock on' : null].filter(Boolean).join(' · '),
     data: lastBackupLabel(loadBackupMeta(storage), now),
   }
   const props = {
     walks, c, storage, device, today, now, profile, editor, habits, hero, earned, prefs, showLengths, setShowLengths, changePrefs,
     people, contactsVer, reasonCount, appLock, appLockNote, changeAppLock, followUpOn, setFollowUpOn, reminder, changeReminder,
-    list, showAnswers, setShowAnswers, setAnswer, onRedo, theme, onTheme, verseOn, setVerseOn, setVerseFade, onOpenBackup,
+    list, showAnswers, setShowAnswers, setAnswer, onRedo, theme, onTheme, onOpenBackup,
     setShowCrisis, setShowContacts, setShowReasons, setShowMoney, setShowNotify, setShowFree, startReset, resetStatus, setDesignCheck, changeProfile, setSheet,
   }
   const Section = section ? SECTIONS[section] : null
@@ -248,7 +244,6 @@ export function YouScreen({ now, clock = Date.now, theme, onTheme, onOpenBackup,
         <ResetToast editor={editor} />
         {Section ? <Section {...props} /> : (
           <>
-            {verseOn ? <DailyVerseCard date={new Date(now)} fadeIn={verseFade} /> : null}
             {YOU_GROUPS.map((g) => (
               <View key={g.label} style={{ gap: 0 }}>
                 <SectionLabel>{g.label}</SectionLabel>
