@@ -60,7 +60,7 @@ export const YOU_SECTION_OF = {
   'reasons-row': 'why', 'kept-card': 'progress', 'kept-money': 'progress', 'kept-goal': 'progress', 'money-toggle': 'progress', 'money-row': 'progress', 'time-back': 'progress', 'tb-hours': 'progress', 'tb-money': 'progress', 'tb-money-edit': 'progress', 'switcher-setting': 'appearance', 'switcher-drawer': 'appearance', 'switcher-sheet': 'appearance', 'kept-money-edit': 'progress', 'tb-adjust': 'progress', 'tb-formula': 'progress', 'answers-toggle': 'why', 'redo-setup': 'why',
   'trackers-row': 'progress', 'milestones-row': 'progress', 'walk-length': 'progress',
   'notify-row': 'reminders', 'followup-toggle': 'reminders', 'checkin-reminder': 'reminders', 'checkin-time-more': 'reminders', 'checkin-time-less': 'reminders',
-  'theme-system': 'appearance', 'theme-light': 'appearance', 'theme-dark': 'appearance', 'faith-toggle': 'appearance', 'app-lock-toggle': 'appearance', 'app-lock-note': 'appearance',
+  'theme-system': 'appearance', 'theme-light': 'appearance', 'theme-dark': 'appearance', 'daily-line-source-quotes': 'appearance', 'daily-line-source-poetry': 'appearance', 'daily-line-source-verse': 'appearance', 'daily-line-source-off': 'appearance', 'daily-line-help': 'appearance', 'app-lock-toggle': 'appearance', 'app-lock-note': 'appearance',
   'backup-row': 'data', 'reset-app': 'data', 'free-row': 'data', 'legal-0': 'data', 'legal-1': 'data', 'legal-2': 'data', 'app-version': 'data', 'legal-links': 'data',
 }
 export async function youEl(screen, fireEvent, id) {

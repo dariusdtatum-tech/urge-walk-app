@@ -391,56 +391,44 @@ describe('phase 1 follow-ups', () => {
   })
 })
 
-describe('daily verse (You, opt-in)', () => {
-  test('off by default: no card on You or Home', async () => {
+describe('daily line (Home, one source)', () => {
+  const sel = (el) => el.props.accessibilityState?.selected ?? el.props.accessibilityState?.checked
+  test('default is Quotes: a quote with its author shows on Home', async () => {
     await renderApp()
-    expect(screen.queryByTestId('daily-verse')).toBeNull()
+    expect(screen.getByTestId('daily-line')).toBeTruthy()
+    expect(screen.getByTestId('daily-line-by').props.children).toBeTruthy()
     await tab('You')
-    expect(screen.queryByTestId('daily-verse')).toBeNull()
-    expect((await youEl(screen, fireEvent, 'faith-toggle')).props.value).toBe(false)
+    expect(sel(await youEl(screen, fireEvent, 'daily-line-source-quotes'))).toBe(true)
+    expect(screen.getByTestId('daily-line-help')).toHaveTextContent('Short lines from writers and thinkers.')
   })
 
-  test('toggle on: card at the top of You with one combined label; never on Home or Ride it out', async () => {
+  test('picking Off removes the line from Home; the choice persists', async () => {
     const { storage } = await renderApp()
     await tab('You')
-    await fireEvent((await youEl(screen, fireEvent, 'faith-toggle')), 'valueChange', true)
-    await fireEvent.press(screen.getByTestId('you-back')) // the card sits at the top of You
-    const card = screen.getByTestId('daily-verse')
-    const { verseFor, verseLabel, refLine } = require('../lib/verse.js')
-    const v = verseFor(new Date(T0))
-    expect(card.props.accessibilityLabel).toBe(verseLabel(v))
-    expect(card.props.accessible).toBe(true)
-    expect(screen.getByTestId('daily-verse-text')).toHaveTextContent(v.text)
-    expect(screen.getByTestId('daily-verse-ref')).toHaveTextContent(refLine(v))
-    expect(JSON.parse(storage.getItem('urgewalk.v1.optionalContent'))).toEqual({ faith: true })
+    await fireEvent.press(await youEl(screen, fireEvent, 'daily-line-source-off'))
+    expect(screen.getByTestId('daily-line-help')).toHaveTextContent('No daily line on Home.')
+    expect(JSON.parse(storage.getItem('urgewalk.v1.optionalContent')).dailyLineSource).toBe('off')
     await tab('Home')
-    expect(screen.queryByTestId('daily-verse')).toBeNull()
-    await press('ride-button')
-    expect(screen.queryByTestId('daily-verse')).toBeNull()
+    expect(screen.queryByTestId('daily-line')).toBeNull()
   })
 
-  test('toggle off hides it', async () => {
-    await renderApp({ storage: memoryStorage({ ...habitsSeed(), ...onboardedProfile(), 'urgewalk.v1.versePrefs': JSON.stringify({ enabled: true }) }) })
-    await tab('You')
-    expect(screen.getByTestId('daily-verse')).toBeTruthy()
-    await fireEvent((await youEl(screen, fireEvent, 'faith-toggle')), 'valueChange', false)
-    expect(screen.queryByTestId('daily-verse')).toBeNull()
-  })
-
-  test('Faith content switch: own Optional content group, caption, VoiceOver label', async () => {
+  test('Verse is always offered and picking it shows a verse reference on Home', async () => {
     await renderApp()
     await tab('You')
-    const sw = await youEl(screen, fireEvent, 'faith-toggle')
-    expect(sw.props.accessibilityLabel).toBe('Faith content')
-    expect(screen.getByText('Optional content')).toBeTruthy()
-    expect(screen.getByText('A short daily verse. Off by default.')).toBeTruthy()
+    await fireEvent.press(await youEl(screen, fireEvent, 'daily-line-source-verse'))
+    await tab('Home')
+    const { lineFor } = require('../lib/dailyLine.js')
+    const v = lineFor(new Date(T0), 'verse')
+    expect(screen.getByTestId('daily-line-by')).toHaveTextContent(`${v.by} ${v.tr}`)
+    expect(screen.getByTestId('daily-line').props.accessibilityLabel).toMatch(/, from /)
   })
 
-  test('the setting persists: saved on, the card is there after a relaunch', async () => {
-    await renderApp({ storage: memoryStorage({ ...habitsSeed(), ...onboardedProfile(), 'urgewalk.v1.optionalContent': JSON.stringify({ faith: true }) }) })
+  test('migration: someone who had the Daily verse on starts on Verse; there is no verse card on You', async () => {
+    await renderApp({ storage: memoryStorage({ ...habitsSeed(), ...onboardedProfile(), 'urgewalk.v1.versePrefs': JSON.stringify({ enabled: true }) }) })
+    expect(screen.getByTestId('daily-line').props.accessibilityLabel).toMatch(/, from /)
     await tab('You')
-    expect(screen.getByTestId('daily-verse')).toBeTruthy()
-    expect((await youEl(screen, fireEvent, 'faith-toggle')).props.value).toBe(true)
+    expect(screen.queryByTestId('daily-verse')).toBeNull()
+    expect(sel(await youEl(screen, fireEvent, 'daily-line-source-verse'))).toBe(true)
   })
 })
 

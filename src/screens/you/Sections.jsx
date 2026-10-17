@@ -17,7 +17,7 @@ import { clearPendingFollowUp, saveFollowUpEnabled } from '../../lib/followUp.js
 import { DEFAULT_HOURS_PER_TIME, timeBack } from '../../lib/homeIdeas.js'
 import { cleanDays, shortDate } from '../../lib/homeStats.js'
 import { fmtMoney, loadGoal, moneyOn, moneyPerTime } from '../../lib/money.js'
-import { saveVerseEnabled } from '../../lib/verse.js'
+import { loadDailyLineSource, saveDailyLineSource, SOURCE_HELP } from '../../lib/dailyLine.js'
 import { CUSTOM_MAX, CUSTOM_MIN, WALK_OPTIONS, clampCustomMinutes } from '../../lib/walkTimer.js'
 import { lengthLabel } from '../../lib/walkStorage.js'
 import { MAX_CONTACTS } from '../../lib/contacts.js'
@@ -138,7 +138,8 @@ function RemindersSection({ c, storage, device, followUpOn, setFollowUpOn, remin
   )
 }
 
-function AppearanceSection({ c, storage, theme, onTheme, verseOn, setVerseOn, setVerseFade, appLock, appLockNote, changeAppLock }) {
+function AppearanceSection({ c, storage, theme, onTheme, appLock, appLockNote, changeAppLock }) {
+  const [source, setSource] = useState(() => loadDailyLineSource(storage))
   return (
     <>
       <SectionLabel>Theme</SectionLabel>
@@ -151,12 +152,12 @@ function AppearanceSection({ c, storage, theme, onTheme, verseOn, setVerseOn, se
       </RowGroup>
       {appLockNote ? <T size={type.sub} color={c.textSoft} accessibilityRole="alert" testID="app-lock-note">{appLockNote}</T> : null}
       <SwitcherPicker c={c} storage={storage} />
-      {/* One switch for every faith feature. Off by default; onboarding never asks. */}
-      <SectionLabel>Optional content</SectionLabel>
-      <RowGroup>
-        <ToggleRow title="Faith content" sub="A short daily verse. Off by default." value={verseOn} testID="faith-toggle"
-          onChange={(on) => { saveVerseEnabled(on, storage); setVerseFade(on); setVerseOn(on) }} />
-      </RowGroup>
+      {/* One source at a time. Verse is always offered and picking it is the opt-in; never the default. */}
+      <SectionLabel>Daily line</SectionLabel>
+      <T size={12} color={c.textSoft}>Pick what shows under your tracker on Home.</T>
+      <Seg items={[{ id: 'quotes', label: 'Quotes' }, { id: 'poetry', label: 'Poetry' }, { id: 'verse', label: 'Verse' }, { id: 'off', label: 'Off' }]}
+        value={source} onChange={(v) => setSource(saveDailyLineSource(v, storage))} label="Daily line" testID="daily-line-source" />
+      <T size={12} color={c.textSoft} testID="daily-line-help">{SOURCE_HELP[source]}</T>
     </>
   )
 }
